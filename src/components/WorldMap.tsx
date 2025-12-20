@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import worldMapImage from '@/assets/world-map.png';
 
@@ -6,14 +6,20 @@ interface Country {
   id: string;
   name: string;
   students: number;
-  x: number; // percentage from left (more precise coordinates)
-  y: number; // percentage from top (more precise coordinates)
+  x: number;
+  y: number;
   region: string;
 }
 
+// Region center coordinates for zoom focus
+const regionCenters: Record<string, { x: number; y: number; scale: number }> = {
+  Asia: { x: 75, y: 48, scale: 1.8 },
+  Americas: { x: 25, y: 50, scale: 1.6 },
+  Europe: { x: 49, y: 30, scale: 2.2 },
+  Oceania: { x: 85, y: 72, scale: 2 },
+};
+
 // Student distribution by country (Total: 223 students)
-// 50% Asia (~112), 40% Americas (~89), 5% Europe (~11), 5% Oceania (~11)
-// More precise geographic coordinates based on actual country centroids
 const countries: Country[] = [
   // Asia (50% = 112 students)
   { id: 'KR', name: 'South Korea', students: 45, x: 79.5, y: 38, region: 'Asia' },
@@ -77,57 +83,79 @@ const WorldMap = () => {
     return 'xs';
   };
 
-  const pinSizeClasses = {
+  const pinSizeClasses: Record<string, string> = {
     lg: 'w-6 h-6 md:w-8 md:h-8',
     md: 'w-5 h-5 md:w-6 md:h-6',
     sm: 'w-3 h-3 md:w-4 md:h-4',
     xs: 'w-2.5 h-2.5 md:w-3 md:h-3',
   };
 
-  const pulseSizeClasses = {
+  const pulseSizeClasses: Record<string, string> = {
     lg: 'w-12 h-12 md:w-16 md:h-16',
     md: 'w-10 h-10 md:w-12 md:h-12',
     sm: 'w-6 h-6 md:w-8 md:h-8',
     xs: 'w-5 h-5 md:w-6 md:h-6',
   };
 
+  // Calculate position offset for region focus
+  const calculateRegionOffset = useCallback((region: string | null) => {
+    if (!region || !containerRef.current) {
+      return { x: 0, y: 0, scale: 1 };
+    }
+    
+    const center = regionCenters[region];
+    if (!center) return { x: 0, y: 0, scale: 1 };
+    
+    const containerWidth = containerRef.current.offsetWidth;
+    const containerHeight = containerRef.current.offsetHeight;
+    
+    // Calculate offset to center the region
+    const offsetX = (50 - center.x) * (containerWidth / 100) * center.scale;
+    const offsetY = (50 - center.y) * (containerHeight / 100) * center.scale;
+    
+    return { x: offsetX, y: offsetY, scale: center.scale };
+  }, []);
+
+  // Handle region selection with zoom
+  const handleRegionSelect = useCallback((region: string | null) => {
+    setSelectedRegion(region);
+    
+    if (region) {
+      const offset = calculateRegionOffset(region);
+      setScale(offset.scale);
+      setPosition({ x: offset.x, y: offset.y });
+    } else {
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [calculateRegionOffset]);
+
   // Mobile touch/drag handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isMobile) return;
-    if (e.touches.length === 2) {
-      // Pinch zoom start - handled by wheel event simulation
-    } else if (e.touches.length === 1) {
+    if (e.touches.length === 1) {
       setIsDragging(true);
       setDragStart({ x: e.touches[0].clientX - position.x, y: e.touches[0].clientY - position.y });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isMobile || !isDragging) return;
-    if (e.touches.length === 1) {
+    if (!isDragging) return;
+    if (e.touches.length === 1 && scale > 1) {
       const newX = e.touches[0].clientX - dragStart.x;
       const newY = e.touches[0].clientY - dragStart.y;
-      // Constrain movement
-      const maxOffset = 100 * (scale - 1);
+      const containerWidth = containerRef.current?.offsetWidth || 0;
+      const containerHeight = containerRef.current?.offsetHeight || 0;
+      const maxOffsetX = containerWidth * (scale - 1) / 2;
+      const maxOffsetY = containerHeight * (scale - 1) / 2;
       setPosition({
-        x: Math.max(-maxOffset, Math.min(maxOffset, newX)),
-        y: Math.max(-maxOffset, Math.min(maxOffset, newY)),
+        x: Math.max(-maxOffsetX, Math.min(maxOffsetX, newX)),
+        y: Math.max(-maxOffsetY, Math.min(maxOffsetY, newY)),
       });
     }
   };
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (!isMobile) return;
-    e.preventDefault();
-    const newScale = Math.max(1, Math.min(3, scale - e.deltaY * 0.002));
-    setScale(newScale);
-    if (newScale === 1) {
-      setPosition({ x: 0, y: 0 });
-    }
   };
 
   const handleZoomIn = () => {
@@ -146,6 +174,7 @@ const WorldMap = () => {
   const handleReset = () => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
+    setSelectedRegion(null);
   };
 
   return (
@@ -159,7 +188,7 @@ const WorldMap = () => {
       {/* Region Filter */}
       <div className="flex flex-wrap justify-center gap-2 mb-6">
         <button
-          onClick={() => setSelectedRegion(null)}
+          onClick={() => handleRegionSelect(null)}
           className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all duration-300 rounded-full ${
             selectedRegion === null
               ? 'bg-primary text-primary-foreground'
@@ -171,7 +200,7 @@ const WorldMap = () => {
         {Object.entries(regionTotals).map(([region, count]) => (
           <button
             key={region}
-            onClick={() => setSelectedRegion(region)}
+            onClick={() => handleRegionSelect(region)}
             className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all duration-300 rounded-full ${
               selectedRegion === region
                 ? 'bg-primary text-primary-foreground'
@@ -190,17 +219,21 @@ const WorldMap = () => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onWheel={handleWheel}
       >
         {/* Zoomable/Pannable Container */}
         <motion.div
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full origin-center"
           animate={{
-            scale: isMobile ? scale : 1,
-            x: isMobile ? position.x : 0,
-            y: isMobile ? position.y : 0,
+            scale: scale,
+            x: position.x,
+            y: position.y,
           }}
-          transition={{ type: 'tween', duration: isDragging ? 0 : 0.2 }}
+          transition={{ 
+            type: 'spring', 
+            stiffness: 200, 
+            damping: 30,
+            duration: isDragging ? 0 : 0.5 
+          }}
         >
           {/* World Map Image */}
           <img 
@@ -307,6 +340,7 @@ const WorldMap = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.9 }}
                         className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 md:px-4 md:py-2 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50"
+                        style={{ transform: `translate(-50%, 0) scale(${1 / scale})` }}
                       >
                         <div className="font-semibold text-xs md:text-sm">{country.name}</div>
                         <div className="text-background/70 text-[10px] md:text-xs mt-0.5">
@@ -330,7 +364,6 @@ const WorldMap = () => {
                 <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
               </linearGradient>
             </defs>
-            {/* Curved connection lines between major hubs */}
             {filteredCountries.filter(c => c.students >= 20).map((country, i) => (
               <motion.path
                 key={`line-${country.id}`}
@@ -353,19 +386,22 @@ const WorldMap = () => {
             <button
               onClick={handleZoomIn}
               className="w-10 h-10 bg-background/95 backdrop-blur-sm rounded-full border border-border shadow-lg flex items-center justify-center text-foreground font-bold text-lg active:scale-95 transition-transform"
+              aria-label="Zoom in"
             >
               +
             </button>
             <button
               onClick={handleZoomOut}
               className="w-10 h-10 bg-background/95 backdrop-blur-sm rounded-full border border-border shadow-lg flex items-center justify-center text-foreground font-bold text-lg active:scale-95 transition-transform"
+              aria-label="Zoom out"
             >
               −
             </button>
-            {scale > 1 && (
+            {(scale > 1 || selectedRegion) && (
               <button
                 onClick={handleReset}
                 className="w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center text-xs font-medium active:scale-95 transition-transform"
+                aria-label="Reset view"
               >
                 Reset
               </button>
@@ -389,7 +425,7 @@ const WorldMap = () => {
               <div className="w-2 h-2 rounded-full bg-primary" />
               <span className="text-[9px] md:text-[11px] text-muted-foreground">10-19</span>
             </div>
-            <div className="flex items-center gap-1 hidden md:flex">
+            <div className="hidden md:flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               <span className="text-[11px] text-muted-foreground">&lt;10</span>
             </div>
@@ -407,8 +443,8 @@ const WorldMap = () => {
           <div className="text-[10px] md:text-xs opacity-80">Total Students</div>
         </motion.div>
 
-        {/* Zoom indicator on mobile */}
-        {isMobile && scale > 1 && (
+        {/* Zoom indicator */}
+        {scale > 1 && (
           <div className="absolute top-4 right-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border shadow-lg z-20">
             <span className="text-xs font-medium text-foreground">{Math.round(scale * 100)}%</span>
           </div>
@@ -430,7 +466,12 @@ const WorldMap = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
-            className="bg-secondary/50 rounded-xl p-3 md:p-4 text-center border border-border"
+            onClick={() => handleRegionSelect(region === selectedRegion ? null : region)}
+            className={`bg-secondary/50 rounded-xl p-3 md:p-4 text-center border cursor-pointer transition-all duration-300 ${
+              selectedRegion === region 
+                ? 'border-primary ring-2 ring-primary/20' 
+                : 'border-border hover:border-primary/50'
+            }`}
           >
             <div className="text-xl md:text-2xl font-bold text-primary">{count}</div>
             <div className="text-xs md:text-sm text-muted-foreground">{region}</div>
