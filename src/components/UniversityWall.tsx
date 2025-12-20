@@ -1,64 +1,71 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import universityLogosGrid from '@/assets/university-logos-grid.png';
 
 interface University {
   name: string;
   shortName: string;
   country: string;
-  flag: string;
+  // Position in the logo grid (row, col) - 0-indexed
+  logoPosition: { row: number; col: number };
 }
 
 const universities: University[] = [
-  // USA - Ivy League & Top Schools
-  { name: 'Columbia University', shortName: 'Columbia', country: 'USA', flag: '🇺🇸' },
-  { name: 'University of Pennsylvania', shortName: 'UPenn', country: 'USA', flag: '🇺🇸' },
-  { name: 'Cornell University', shortName: 'Cornell', country: 'USA', flag: '🇺🇸' },
-  { name: 'University of Chicago', shortName: 'UChicago', country: 'USA', flag: '🇺🇸' },
-  { name: 'Northwestern University', shortName: 'Northwestern', country: 'USA', flag: '🇺🇸' },
-  { name: 'Johns Hopkins University', shortName: 'Johns Hopkins', country: 'USA', flag: '🇺🇸' },
-  { name: 'Georgetown University', shortName: 'Georgetown', country: 'USA', flag: '🇺🇸' },
-  { name: 'Vanderbilt University', shortName: 'Vanderbilt', country: 'USA', flag: '🇺🇸' },
-  { name: 'Carnegie Mellon University', shortName: 'CMU', country: 'USA', flag: '🇺🇸' },
-  { name: 'Emory University', shortName: 'Emory', country: 'USA', flag: '🇺🇸' },
-  { name: 'University of Southern California', shortName: 'USC', country: 'USA', flag: '🇺🇸' },
-  { name: 'New York University', shortName: 'NYU', country: 'USA', flag: '🇺🇸' },
-  { name: 'Georgia Institute of Technology', shortName: 'Georgia Tech', country: 'USA', flag: '🇺🇸' },
-  { name: 'University of Michigan', shortName: 'UMich', country: 'USA', flag: '🇺🇸' },
-  { name: 'UC Berkeley', shortName: 'Berkeley', country: 'USA', flag: '🇺🇸' },
-  { name: 'UCLA', shortName: 'UCLA', country: 'USA', flag: '🇺🇸' },
-  { name: 'UC San Diego', shortName: 'UCSD', country: 'USA', flag: '🇺🇸' },
-  { name: 'Northeastern University', shortName: 'Northeastern', country: 'USA', flag: '🇺🇸' },
-  // UK
-  { name: 'University of Oxford', shortName: 'Oxford', country: 'UK', flag: '🇬🇧' },
-  { name: 'Imperial College London', shortName: 'Imperial', country: 'UK', flag: '🇬🇧' },
-  { name: 'University of Cambridge', shortName: 'Cambridge', country: 'UK', flag: '🇬🇧' },
-  { name: 'London School of Economics', shortName: 'LSE', country: 'UK', flag: '🇬🇧' },
-  { name: 'University College London', shortName: 'UCL', country: 'UK', flag: '🇬🇧' },
-  // Canada
-  { name: 'University of Toronto', shortName: 'UofT', country: 'Canada', flag: '🇨🇦' },
-  { name: 'McGill University', shortName: 'McGill', country: 'Canada', flag: '🇨🇦' },
-  { name: 'University of British Columbia', shortName: 'UBC', country: 'Canada', flag: '🇨🇦' },
-  // Japan
-  { name: 'University of Tokyo', shortName: 'UTokyo', country: 'Japan', flag: '🇯🇵' },
-  { name: 'Waseda University', shortName: 'Waseda', country: 'Japan', flag: '🇯🇵' },
-  { name: 'Keio University', shortName: 'Keio', country: 'Japan', flag: '🇯🇵' },
-  // Hong Kong
-  { name: 'University of Hong Kong', shortName: 'HKU', country: 'Hong Kong', flag: '🇭🇰' },
-  { name: 'HKUST', shortName: 'HKUST', country: 'Hong Kong', flag: '🇭🇰' },
-  { name: 'Chinese University of Hong Kong', shortName: 'CUHK', country: 'Hong Kong', flag: '🇭🇰' },
-  // Singapore
-  { name: 'National University of Singapore', shortName: 'NUS', country: 'Singapore', flag: '🇸🇬' },
-  { name: 'Nanyang Technological University', shortName: 'NTU', country: 'Singapore', flag: '🇸🇬' },
-  // Korea
-  { name: 'Seoul National University', shortName: 'SNU', country: 'Korea', flag: '🇰🇷' },
-  { name: 'Korea University', shortName: 'Korea U', country: 'Korea', flag: '🇰🇷' },
-  { name: 'Yonsei University', shortName: 'Yonsei', country: 'Korea', flag: '🇰🇷' },
-  { name: 'Sungkyunkwan University', shortName: 'SKKU', country: 'Korea', flag: '🇰🇷' },
-  { name: 'KAIST', shortName: 'KAIST', country: 'Korea', flag: '🇰🇷' },
+  // USA - Ivy League & Top Schools (Row 0-1)
+  { name: 'Columbia University', shortName: 'Columbia', country: 'USA', logoPosition: { row: 0, col: 0 } },
+  { name: 'University of Pennsylvania', shortName: 'UPenn', country: 'USA', logoPosition: { row: 0, col: 1 } },
+  { name: 'Cornell University', shortName: 'Cornell', country: 'USA', logoPosition: { row: 0, col: 2 } },
+  { name: 'University of Chicago', shortName: 'UChicago', country: 'USA', logoPosition: { row: 0, col: 3 } },
+  { name: 'Northwestern University', shortName: 'Northwestern', country: 'USA', logoPosition: { row: 0, col: 4 } },
+  { name: 'Johns Hopkins University', shortName: 'Johns Hopkins', country: 'USA', logoPosition: { row: 0, col: 5 } },
+  { name: 'Georgetown University', shortName: 'Georgetown', country: 'USA', logoPosition: { row: 0, col: 6 } },
+  { name: 'Vanderbilt University', shortName: 'Vanderbilt', country: 'USA', logoPosition: { row: 0, col: 7 } },
+  { name: 'Carnegie Mellon University', shortName: 'CMU', country: 'USA', logoPosition: { row: 1, col: 0 } },
+  { name: 'Emory University', shortName: 'Emory', country: 'USA', logoPosition: { row: 1, col: 1 } },
+  { name: 'University of Southern California', shortName: 'USC', country: 'USA', logoPosition: { row: 1, col: 2 } },
+  { name: 'New York University', shortName: 'NYU', country: 'USA', logoPosition: { row: 1, col: 3 } },
+  { name: 'Georgia Institute of Technology', shortName: 'Georgia Tech', country: 'USA', logoPosition: { row: 1, col: 4 } },
+  { name: 'University of Michigan', shortName: 'UMich', country: 'USA', logoPosition: { row: 1, col: 5 } },
+  { name: 'UC Berkeley', shortName: 'Berkeley', country: 'USA', logoPosition: { row: 1, col: 6 } },
+  { name: 'UCLA', shortName: 'UCLA', country: 'USA', logoPosition: { row: 1, col: 7 } },
+  { name: 'UC San Diego', shortName: 'UCSD', country: 'USA', logoPosition: { row: 2, col: 0 } },
+  { name: 'Northeastern University', shortName: 'Northeastern', country: 'USA', logoPosition: { row: 2, col: 1 } },
+  // UK (Row 2)
+  { name: 'University of Oxford', shortName: 'Oxford', country: 'UK', logoPosition: { row: 2, col: 2 } },
+  { name: 'Imperial College London', shortName: 'Imperial', country: 'UK', logoPosition: { row: 2, col: 3 } },
+  { name: 'University of Cambridge', shortName: 'Cambridge', country: 'UK', logoPosition: { row: 2, col: 4 } },
+  { name: 'London School of Economics', shortName: 'LSE', country: 'UK', logoPosition: { row: 2, col: 5 } },
+  { name: 'University College London', shortName: 'UCL', country: 'UK', logoPosition: { row: 2, col: 6 } },
+  // Canada (Row 2-3)
+  { name: 'University of Toronto', shortName: 'UofT', country: 'Canada', logoPosition: { row: 2, col: 7 } },
+  { name: 'McGill University', shortName: 'McGill', country: 'Canada', logoPosition: { row: 3, col: 0 } },
+  { name: 'University of British Columbia', shortName: 'UBC', country: 'Canada', logoPosition: { row: 3, col: 1 } },
+  // Japan (Row 3)
+  { name: 'University of Tokyo', shortName: 'UTokyo', country: 'Japan', logoPosition: { row: 3, col: 2 } },
+  { name: 'Waseda University', shortName: 'Waseda', country: 'Japan', logoPosition: { row: 3, col: 3 } },
+  { name: 'Keio University', shortName: 'Keio', country: 'Japan', logoPosition: { row: 3, col: 4 } },
+  // Hong Kong (Row 3)
+  { name: 'University of Hong Kong', shortName: 'HKU', country: 'Hong Kong', logoPosition: { row: 3, col: 5 } },
+  { name: 'HKUST', shortName: 'HKUST', country: 'Hong Kong', logoPosition: { row: 3, col: 6 } },
+  { name: 'Chinese University of Hong Kong', shortName: 'CUHK', country: 'Hong Kong', logoPosition: { row: 3, col: 7 } },
+  // Singapore (Row 4)
+  { name: 'National University of Singapore', shortName: 'NUS', country: 'Singapore', logoPosition: { row: 4, col: 0 } },
+  { name: 'Nanyang Technological University', shortName: 'NTU', country: 'Singapore', logoPosition: { row: 4, col: 1 } },
+  // Korea (Row 4)
+  { name: 'Seoul National University', shortName: 'SNU', country: 'Korea', logoPosition: { row: 4, col: 2 } },
+  { name: 'Korea University', shortName: 'Korea U', country: 'Korea', logoPosition: { row: 4, col: 3 } },
+  { name: 'Yonsei University', shortName: 'Yonsei', country: 'Korea', logoPosition: { row: 4, col: 4 } },
+  { name: 'Sungkyunkwan University', shortName: 'SKKU', country: 'Korea', logoPosition: { row: 4, col: 5 } },
+  { name: 'KAIST', shortName: 'KAIST', country: 'Korea', logoPosition: { row: 4, col: 6 } },
 ];
 
 const countries = ['All', 'USA', 'UK', 'Canada', 'Japan', 'Hong Kong', 'Singapore', 'Korea'];
+
+// Logo grid dimensions
+const GRID_COLS = 8;
+const GRID_ROWS = 5;
+const LOGO_SIZE = 128; // Size of each logo in the sprite
 
 const UniversityWall = () => {
   const [selectedCountry, setSelectedCountry] = useState('All');
@@ -76,6 +83,18 @@ const UniversityWall = () => {
         behavior: 'smooth',
       });
     }
+  };
+
+  const getLogoStyle = (position: { row: number; col: number }) => {
+    // Calculate position in the sprite sheet
+    const x = (position.col / GRID_COLS) * 100;
+    const y = (position.row / GRID_ROWS) * 100;
+    
+    return {
+      backgroundImage: `url(${universityLogosGrid})`,
+      backgroundSize: `${GRID_COLS * 100}% ${GRID_ROWS * 100}%`,
+      backgroundPosition: `${x}% ${y}%`,
+    };
   };
 
   return (
@@ -138,7 +157,7 @@ const UniversityWall = () => {
           >
             <motion.div
               layout
-              className="flex gap-4 px-4"
+              className="flex gap-5 px-4"
               style={{ minWidth: 'max-content' }}
             >
               <AnimatePresence mode="popLayout">
@@ -152,13 +171,16 @@ const UniversityWall = () => {
                     transition={{ duration: 0.3, delay: index * 0.02 }}
                     className="group relative flex-shrink-0"
                   >
-                    <div className="w-40 h-32 bg-gradient-to-br from-secondary/50 to-secondary border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-primary hover:border-primary hover:shadow-lg cursor-pointer rounded-lg group-hover:scale-105">
-                      {/* Flag & Name */}
-                      <span className="text-3xl mb-2">{university.flag}</span>
-                      <span className="text-sm font-semibold text-foreground group-hover:text-primary-foreground transition-colors line-clamp-1">
+                    <div className="w-36 h-44 bg-gradient-to-b from-background to-secondary/30 border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/40 hover:shadow-lg cursor-pointer rounded-lg">
+                      {/* University Logo from Sprite */}
+                      <div 
+                        className="w-16 h-16 mb-3 rounded-full bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
+                        style={getLogoStyle(university.logoPosition)}
+                      />
+                      <span className="text-xs font-semibold text-foreground line-clamp-1">
                         {university.shortName}
                       </span>
-                      <span className="text-[10px] text-muted-foreground group-hover:text-primary-foreground/70 transition-colors mt-1">
+                      <span className="text-[10px] text-muted-foreground mt-1">
                         {university.country}
                       </span>
                     </div>
