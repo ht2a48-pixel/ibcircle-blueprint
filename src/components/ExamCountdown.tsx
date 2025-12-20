@@ -122,7 +122,7 @@ const ExamCountdown = () => {
             </div>
             
             {/* Main countdown display */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mb-10">
+            <div className="flex flex-col items-center justify-center gap-8 mb-10">
               {/* Days */}
               <div className="text-center">
                 <div className="text-6xl md:text-8xl font-medium tracking-tight tabular-nums">
@@ -131,16 +131,24 @@ const ExamCountdown = () => {
                 <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Days Remaining</div>
               </div>
               
-              {/* Divider */}
-              <div className="hidden md:block w-px h-24 bg-primary-foreground/20" />
-              
-              {/* Time - Total Hours */}
+              {/* Time - Hours : Minutes : Seconds */}
               <div className="text-center">
-                <div className="text-4xl md:text-5xl font-light tracking-tight tabular-nums flex items-center gap-1">
-                  <RollingNumber value={String(timeLeft.totalHours).padStart(4, '0')} />
-                  <span className="text-2xl md:text-3xl opacity-50 ml-1">hrs</span>
+                <div className="text-5xl md:text-7xl font-light tracking-tight tabular-nums flex items-center justify-center gap-2">
+                  <div className="flex flex-col items-center">
+                    <RollingNumber value={String(timeLeft.totalHours).padStart(4, '0')} />
+                    <span className="text-xs uppercase tracking-[0.15em] mt-1 opacity-50">Hours</span>
+                  </div>
+                  <span className="opacity-40 text-4xl md:text-5xl">:</span>
+                  <div className="flex flex-col items-center">
+                    <RollingNumber value={formatTime(timeLeft.remainingMinutes)} />
+                    <span className="text-xs uppercase tracking-[0.15em] mt-1 opacity-50">Min</span>
+                  </div>
+                  <span className="opacity-40 text-4xl md:text-5xl">:</span>
+                  <div className="flex flex-col items-center">
+                    <RollingNumber value={formatTime(timeLeft.remainingSeconds)} />
+                    <span className="text-xs uppercase tracking-[0.15em] mt-1 opacity-50">Sec</span>
+                  </div>
                 </div>
-                <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Total Hours Remaining</div>
               </div>
             </div>
 

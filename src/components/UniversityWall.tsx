@@ -4,50 +4,58 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface University {
   name: string;
+  shortName: string;
   country: string;
   flag: string;
-  logo: string;
 }
 
 const universities: University[] = [
-  // USA
-  { name: 'Columbia University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Columbia_coat_of_arms_no_crest.svg/800px-Columbia_coat_of_arms_no_crest.svg.png' },
-  { name: 'University of Pennsylvania', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UPenn_shield_with_banner.svg/800px-UPenn_shield_with_banner.svg.png' },
-  { name: 'Cornell University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Cornell_University_seal.svg/800px-Cornell_University_seal.svg.png' },
-  { name: 'University of Chicago', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/University_of_Chicago_Coat_of_arms.svg/800px-University_of_Chicago_Coat_of_arms.svg.png' },
-  { name: 'Northwestern University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Northwestern_University_seal.svg/800px-Northwestern_University_seal.svg.png' },
-  { name: 'Johns Hopkins University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Formal_Seal_of_Johns_Hopkins_University.svg/800px-Formal_Seal_of_Johns_Hopkins_University.svg.png' },
-  { name: 'Georgetown University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Georgetown_University_Seal.svg/800px-Georgetown_University_Seal.svg.png' },
-  { name: 'Vanderbilt University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Vanderbilt_University_seal.svg/800px-Vanderbilt_University_seal.svg.png' },
-  { name: 'Carnegie Mellon University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Carnegie_Mellon_wordmark.svg/800px-Carnegie_Mellon_wordmark.svg.png' },
-  { name: 'Emory University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Emory_University_Seal.svg/800px-Emory_University_Seal.svg.png' },
-  { name: 'University of Southern California', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Seal_of_the_University_of_Southern_California.svg/800px-Seal_of_the_University_of_Southern_California.svg.png' },
-  { name: 'New York University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/New_York_University_Seal.svg/800px-New_York_University_Seal.svg.png' },
-  { name: 'Georgia Institute of Technology', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Georgia_Tech_seal.svg/800px-Georgia_Tech_seal.svg.png' },
-  { name: 'University of Michigan', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Seal_of_the_University_of_Michigan.svg/800px-Seal_of_the_University_of_Michigan.svg.png' },
-  { name: 'UC Berkeley', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Seal_of_University_of_California%2C_Berkeley.svg/800px-Seal_of_University_of_California%2C_Berkeley.svg.png' },
-  { name: 'UCLA', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/The_University_of_California_UCLA.svg/800px-The_University_of_California_UCLA.svg.png' },
-  { name: 'UC San Diego', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Seal_of_the_University_of_California%2C_San_Diego.svg/800px-Seal_of_the_University_of_California%2C_San_Diego.svg.png' },
-  { name: 'Northeastern University', country: 'USA', flag: '🇺🇸', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Northeastern_University_seal.svg/800px-Northeastern_University_seal.svg.png' },
+  // USA - Ivy League & Top Schools
+  { name: 'Columbia University', shortName: 'Columbia', country: 'USA', flag: '🇺🇸' },
+  { name: 'University of Pennsylvania', shortName: 'UPenn', country: 'USA', flag: '🇺🇸' },
+  { name: 'Cornell University', shortName: 'Cornell', country: 'USA', flag: '🇺🇸' },
+  { name: 'University of Chicago', shortName: 'UChicago', country: 'USA', flag: '🇺🇸' },
+  { name: 'Northwestern University', shortName: 'Northwestern', country: 'USA', flag: '🇺🇸' },
+  { name: 'Johns Hopkins University', shortName: 'Johns Hopkins', country: 'USA', flag: '🇺🇸' },
+  { name: 'Georgetown University', shortName: 'Georgetown', country: 'USA', flag: '🇺🇸' },
+  { name: 'Vanderbilt University', shortName: 'Vanderbilt', country: 'USA', flag: '🇺🇸' },
+  { name: 'Carnegie Mellon University', shortName: 'CMU', country: 'USA', flag: '🇺🇸' },
+  { name: 'Emory University', shortName: 'Emory', country: 'USA', flag: '🇺🇸' },
+  { name: 'University of Southern California', shortName: 'USC', country: 'USA', flag: '🇺🇸' },
+  { name: 'New York University', shortName: 'NYU', country: 'USA', flag: '🇺🇸' },
+  { name: 'Georgia Institute of Technology', shortName: 'Georgia Tech', country: 'USA', flag: '🇺🇸' },
+  { name: 'University of Michigan', shortName: 'UMich', country: 'USA', flag: '🇺🇸' },
+  { name: 'UC Berkeley', shortName: 'Berkeley', country: 'USA', flag: '🇺🇸' },
+  { name: 'UCLA', shortName: 'UCLA', country: 'USA', flag: '🇺🇸' },
+  { name: 'UC San Diego', shortName: 'UCSD', country: 'USA', flag: '🇺🇸' },
+  { name: 'Northeastern University', shortName: 'Northeastern', country: 'USA', flag: '🇺🇸' },
   // UK
-  { name: 'University of Oxford', country: 'UK', flag: '🇬🇧', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Oxford-University-Circlet.svg/800px-Oxford-University-Circlet.svg.png' },
-  { name: 'Imperial College London', country: 'UK', flag: '🇬🇧', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Imperial_College_London_crest.svg/800px-Imperial_College_London_crest.svg.png' },
+  { name: 'University of Oxford', shortName: 'Oxford', country: 'UK', flag: '🇬🇧' },
+  { name: 'Imperial College London', shortName: 'Imperial', country: 'UK', flag: '🇬🇧' },
+  { name: 'University of Cambridge', shortName: 'Cambridge', country: 'UK', flag: '🇬🇧' },
+  { name: 'London School of Economics', shortName: 'LSE', country: 'UK', flag: '🇬🇧' },
+  { name: 'University College London', shortName: 'UCL', country: 'UK', flag: '🇬🇧' },
   // Canada
-  { name: 'University of Toronto', country: 'Canada', flag: '🇨🇦', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Utoronto_coa.svg/800px-Utoronto_coa.svg.png' },
+  { name: 'University of Toronto', shortName: 'UofT', country: 'Canada', flag: '🇨🇦' },
+  { name: 'McGill University', shortName: 'McGill', country: 'Canada', flag: '🇨🇦' },
+  { name: 'University of British Columbia', shortName: 'UBC', country: 'Canada', flag: '🇨🇦' },
   // Japan
-  { name: 'University of Tokyo', country: 'Japan', flag: '🇯🇵', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/University_of_Tokyo_seal.svg/800px-University_of_Tokyo_seal.svg.png' },
-  { name: 'Waseda University', country: 'Japan', flag: '🇯🇵', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Waseda_University_Logo.svg/800px-Waseda_University_Logo.svg.png' },
+  { name: 'University of Tokyo', shortName: 'UTokyo', country: 'Japan', flag: '🇯🇵' },
+  { name: 'Waseda University', shortName: 'Waseda', country: 'Japan', flag: '🇯🇵' },
+  { name: 'Keio University', shortName: 'Keio', country: 'Japan', flag: '🇯🇵' },
   // Hong Kong
-  { name: 'University of Hong Kong', country: 'Hong Kong', flag: '🇭🇰', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/University_of_Hong_Kong_Coat_of_Arms.svg/800px-University_of_Hong_Kong_Coat_of_Arms.svg.png' },
-  { name: 'HKUST', country: 'Hong Kong', flag: '🇭🇰', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/HKUST_Logo.svg/800px-HKUST_Logo.svg.png' },
+  { name: 'University of Hong Kong', shortName: 'HKU', country: 'Hong Kong', flag: '🇭🇰' },
+  { name: 'HKUST', shortName: 'HKUST', country: 'Hong Kong', flag: '🇭🇰' },
+  { name: 'Chinese University of Hong Kong', shortName: 'CUHK', country: 'Hong Kong', flag: '🇭🇰' },
   // Singapore
-  { name: 'National University of Singapore', country: 'Singapore', flag: '🇸🇬', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/National_University_of_Singapore_coat_of_arms.svg/800px-National_University_of_Singapore_coat_of_arms.svg.png' },
-  { name: 'Nanyang Technological University', country: 'Singapore', flag: '🇸🇬', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Nanyang_Technological_University_seal.svg/800px-Nanyang_Technological_University_seal.svg.png' },
+  { name: 'National University of Singapore', shortName: 'NUS', country: 'Singapore', flag: '🇸🇬' },
+  { name: 'Nanyang Technological University', shortName: 'NTU', country: 'Singapore', flag: '🇸🇬' },
   // Korea
-  { name: 'Seoul National University', country: 'Korea', flag: '🇰🇷', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Seoul_National_University_emblem.svg/800px-Seoul_National_University_emblem.svg.png' },
-  { name: 'Korea University', country: 'Korea', flag: '🇰🇷', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Korea_University_Global_Symbol.svg/800px-Korea_University_Global_Symbol.svg.png' },
-  { name: 'Yonsei University', country: 'Korea', flag: '🇰🇷', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Yonsei_University_Seal.svg/800px-Yonsei_University_Seal.svg.png' },
-  { name: 'Sungkyunkwan University', country: 'Korea', flag: '🇰🇷', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Sungkyunkwan_University_seal.svg/800px-Sungkyunkwan_University_seal.svg.png' },
+  { name: 'Seoul National University', shortName: 'SNU', country: 'Korea', flag: '🇰🇷' },
+  { name: 'Korea University', shortName: 'Korea U', country: 'Korea', flag: '🇰🇷' },
+  { name: 'Yonsei University', shortName: 'Yonsei', country: 'Korea', flag: '🇰🇷' },
+  { name: 'Sungkyunkwan University', shortName: 'SKKU', country: 'Korea', flag: '🇰🇷' },
+  { name: 'KAIST', shortName: 'KAIST', country: 'Korea', flag: '🇰🇷' },
 ];
 
 const countries = ['All', 'USA', 'UK', 'Canada', 'Japan', 'Hong Kong', 'Singapore', 'Korea'];
@@ -107,7 +115,7 @@ const UniversityWall = () => {
           ))}
         </motion.div>
 
-        {/* Horizontal Scrollable University Logos */}
+        {/* Horizontal Scrollable University Cards */}
         <div className="relative">
           {/* Navigation Arrows */}
           <button
@@ -130,43 +138,35 @@ const UniversityWall = () => {
           >
             <motion.div
               layout
-              className="flex gap-6 px-4"
+              className="flex gap-4 px-4"
               style={{ minWidth: 'max-content' }}
             >
               <AnimatePresence mode="popLayout">
-                {filteredUniversities.map((university) => (
+                {filteredUniversities.map((university, index) => (
                   <motion.div
                     key={university.name}
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.3, delay: index * 0.02 }}
                     className="group relative flex-shrink-0"
                   >
-                    <div className="w-36 h-44 bg-secondary/30 border border-border p-5 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-secondary hover:shadow-lg hover:border-primary/20 cursor-pointer rounded-lg">
-                      {/* University Logo */}
-                      <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                        <img
-                          src={university.logo}
-                          alt={`${university.name} logo`}
-                          className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <span className="text-4xl hidden">{university.flag}</span>
-                      </div>
-                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2 leading-tight">
-                        {university.name}
+                    <div className="w-40 h-32 bg-gradient-to-br from-secondary/50 to-secondary border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-primary hover:border-primary hover:shadow-lg cursor-pointer rounded-lg group-hover:scale-105">
+                      {/* Flag & Name */}
+                      <span className="text-3xl mb-2">{university.flag}</span>
+                      <span className="text-sm font-semibold text-foreground group-hover:text-primary-foreground transition-colors line-clamp-1">
+                        {university.shortName}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground group-hover:text-primary-foreground/70 transition-colors mt-1">
+                        {university.country}
                       </span>
                     </div>
                     
-                    {/* Hover tooltip */}
-                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
-                      IBCircle Student Acceptance
+                    {/* Hover tooltip with full name */}
+                    <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
+                      {university.name}
+                      <div className="text-[10px] text-background/60 mt-0.5">IBCircle Student Acceptance</div>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
                     </div>
                   </motion.div>
