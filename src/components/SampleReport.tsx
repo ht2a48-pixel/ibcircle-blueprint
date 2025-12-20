@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FileText, TrendingUp, Target, CheckCircle } from 'lucide-react';
+import { FileText, TrendingUp, Target, CheckCircle, AlertTriangle, Lightbulb, ArrowRight } from 'lucide-react';
 
 const SampleReport = () => {
   return (
@@ -110,15 +110,66 @@ const SampleReport = () => {
                 </div>
               </div>
 
-              {/* Next Steps Section */}
-              <div className="p-6 bg-primary/5 rounded-lg border border-primary/10">
-                <h4 className="text-sm font-medium tracking-[0.1em] uppercase text-primary mb-4">
-                  다음 단계 계획
+              {/* Academic Risk Flags */}
+              <div className="mb-10 p-6 bg-destructive/5 rounded-lg border border-destructive/20">
+                <h4 className="text-sm font-medium tracking-[0.1em] uppercase text-destructive mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Academic Risk Flags
                 </h4>
-                <p className="text-foreground leading-relaxed">
-                  다음 수업부터는 IB Economics 평가를 대비한 문제 풀이 심화 훈련으로 넘어가며, 
-                  Paper 1과 Paper 2의 고득점을 위한 답안 구성 능력을 집중적으로 강화할 예정입니다.
-                </p>
+                <ul className="space-y-3 text-foreground">
+                  <li className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 flex-shrink-0" />
+                    <span>Paper 2 Data Response 문항에서 계산 실수가 간헐적으로 발생 — 시간 배분 및 검토 루틴 개선 필요</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-warm mt-2 flex-shrink-0" />
+                    <span>국제 경제(International Economics) 파트 그래프 해석력 보완 권장</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Strategic Recommendations */}
+              <div className="mb-10 p-6 bg-primary/5 rounded-lg border border-primary/20">
+                <h4 className="text-sm font-medium tracking-[0.1em] uppercase text-primary mb-4 flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4" />
+                  Strategic Recommendations
+                </h4>
+                <ul className="space-y-3 text-foreground">
+                  <li className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <span>Paper 1 Part B 에세이 연습 시, 서론에서 정의와 논점을 명확히 제시하는 연습 강화</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <span>IA(Internal Assessment) 주제 선정을 위해 실제 경제 뉴스 기사 스크랩 시작 권장</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <span>시험 직전 2주간 과거 기출문제 집중 풀이 예정 — 오답 정리 노트 병행</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Next Steps Section */}
+              <div className="p-6 bg-accent/30 rounded-lg border border-accent/50">
+                <h4 className="text-sm font-medium tracking-[0.1em] uppercase text-foreground mb-4 flex items-center gap-2">
+                  <ArrowRight className="w-4 h-4" />
+                  Next Step Priorities
+                </h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-background rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1">Priority 1</div>
+                    <p className="text-sm font-medium text-foreground">Paper 1 & 2 문제 풀이 심화 훈련</p>
+                  </div>
+                  <div className="p-4 bg-background rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1">Priority 2</div>
+                    <p className="text-sm font-medium text-foreground">IA 주제 브레인스토밍 및 1차 선정</p>
+                  </div>
+                  <div className="p-4 bg-background rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1">Priority 3</div>
+                    <p className="text-sm font-medium text-foreground">국제 경제 그래프 집중 복습</p>
+                  </div>
+                </div>
               </div>
             </div>
 

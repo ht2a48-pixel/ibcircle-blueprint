@@ -1,7 +1,70 @@
-import { motion } from 'framer-motion';
-import { Users, Calendar, UserCheck } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Calendar, UserCheck, ChevronDown, X } from 'lucide-react';
+
+interface SubjectGroup {
+  id: number;
+  name: string;
+  subjects: string[];
+}
+
+interface CoreElement {
+  name: string;
+  description: string;
+}
+
+const subjectGroups: SubjectGroup[] = [
+  {
+    id: 1,
+    name: 'Studies in Language',
+    subjects: ['Language A: Literature', 'Language A: Language and Literature', 'Literature and Performance'],
+  },
+  {
+    id: 2,
+    name: 'Language Acquisition',
+    subjects: ['Language Ab initio', 'Language B', 'Classical Languages'],
+  },
+  {
+    id: 3,
+    name: 'Individuals & Societies',
+    subjects: ['Business Management', 'Economics', 'Geography', 'History', 'Philosophy', 'Psychology', 'Digital Society', 'Global Politics', 'Social and Cultural Anthropology', 'World Religions'],
+  },
+  {
+    id: 4,
+    name: 'Sciences',
+    subjects: ['Biology', 'Chemistry', 'Physics', 'Computer Science', 'Design Technology', 'Sports, Exercise and Health Science', 'Environmental Systems and Societies (ESS)'],
+  },
+  {
+    id: 5,
+    name: 'Mathematics',
+    subjects: ['Mathematics: Analysis and Approaches', 'Mathematics: Applications and Interpretation'],
+  },
+  {
+    id: 6,
+    name: 'The Arts',
+    subjects: ['Dance', 'Film', 'Music', 'Theatre', 'Visual Arts'],
+  },
+];
+
+const coreElements: CoreElement[] = [
+  {
+    name: 'Extended Essay',
+    description: 'Extended Essay(EE)는 학생이 직접 선택한 주제에 대해 독립적으로 연구하고 작성하는 4,000자 분량의 심층 논문입니다. 연구 기술, 학문적 글쓰기 능력, 비판적 사고력을 개발하며, 대학 수준의 학술 연구를 경험할 수 있는 기회를 제공합니다.',
+  },
+  {
+    name: 'TOK',
+    description: 'Theory of Knowledge(TOK)는 지식의 본질에 대해 탐구하는 과목입니다. "우리는 무엇을 알 수 있는가?", "우리는 어떻게 아는가?"와 같은 질문을 통해 다양한 지식 영역 간의 연결고리를 탐색하고, 비판적 사고와 메타인지 능력을 개발합니다.',
+  },
+  {
+    name: 'CAS',
+    description: 'Creativity, Activity, Service(CAS)는 학생들이 학업 외 활동에 참여하도록 장려하는 프로그램입니다. 창의성(예술, 창작 활동), 활동(신체 활동, 스포츠), 봉사(지역사회 기여)의 세 영역에서 균형 잡힌 경험을 통해 전인적 성장을 도모합니다.',
+  },
+];
 
 const Programs = () => {
+  const [expandedGroup, setExpandedGroup] = useState<number | null>(null);
+  const [expandedCore, setExpandedCore] = useState<string | null>(null);
+
   const features = [
     {
       icon: Users,
@@ -94,36 +157,93 @@ const Programs = () => {
               전략적으로 지도합니다.
             </p>
 
-            {/* Subject groups */}
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                'Studies in Language',
-                'Language Acquisition',
-                'Individuals & Societies',
-                'Sciences',
-                'Mathematics',
-                'The Arts',
-              ].map((subject, index) => (
-                <div
-                  key={subject}
-                  className="px-4 py-3 bg-secondary text-sm font-medium text-secondary-foreground"
-                >
-                  Group {index + 1}: {subject}
+            {/* Subject groups - Clickable */}
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {subjectGroups.map((group) => (
+                <div key={group.id}>
+                  <button
+                    onClick={() => setExpandedGroup(expandedGroup === group.id ? null : group.id)}
+                    className={`w-full px-4 py-3 text-left text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+                      expandedGroup === group.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <span>Group {group.id}: {group.name}</span>
+                    <ChevronDown 
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        expandedGroup === group.id ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {expandedGroup === group.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 py-3 bg-secondary/50 border-x border-b border-border">
+                          <div className="flex flex-wrap gap-2">
+                            {group.subjects.map((subject) => (
+                              <span
+                                key={subject}
+                                className="px-3 py-1.5 bg-background text-xs text-foreground rounded-full border border-border"
+                              >
+                                {subject}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ))}
             </div>
 
-            {/* Core elements */}
-            <div className="mt-6 flex gap-4">
-              {['Extended Essay', 'TOK', 'CAS'].map((core) => (
-                <div
-                  key={core}
-                  className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium"
+            {/* Core elements - Clickable */}
+            <div className="flex flex-wrap gap-3">
+              {coreElements.map((core) => (
+                <button
+                  key={core.name}
+                  onClick={() => setExpandedCore(expandedCore === core.name ? null : core.name)}
+                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    expandedCore === core.name
+                      ? 'bg-warm text-foreground'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  }`}
                 >
-                  {core}
-                </div>
+                  {core.name}
+                </button>
               ))}
             </div>
+
+            {/* Core element description modal */}
+            <AnimatePresence>
+              {expandedCore && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="mt-4 p-5 bg-warm/10 border border-warm/30 rounded-lg relative"
+                >
+                  <button
+                    onClick={() => setExpandedCore(null)}
+                    className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <h4 className="font-medium text-foreground mb-2">{expandedCore}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed pr-6">
+                    {coreElements.find(c => c.name === expandedCore)?.description}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </div>
