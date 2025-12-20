@@ -36,8 +36,21 @@ const RollingNumber = ({ value, className }: { value: string; className?: string
 };
 
 const ExamCountdown = () => {
-  // April 24, 2026 IB exams
-  const examDate = new Date('2026-04-24T09:00:00');
+  // Get next IB exam date (April 24 each year)
+  const getNextExamDate = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const examThisYear = new Date(`${currentYear}-04-24T09:00:00`);
+    
+    // If this year's exam has passed, target next year
+    if (now > examThisYear) {
+      return new Date(`${currentYear + 1}-04-24T09:00:00`);
+    }
+    return examThisYear;
+  };
+  
+  const examDate = getNextExamDate();
+  const examYear = examDate.getFullYear();
 
   const calculateTimeLeft = (targetDate: Date): TimeLeft => {
     const now = new Date();
@@ -85,8 +98,8 @@ const ExamCountdown = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <p className="section-title">IB Exam Readiness Tracker</p>
-          <h2 className="section-heading">2026 IB 시험까지</h2>
+          <p className="section-title">IB Exam Countdown</p>
+          <h2 className="section-heading">{examYear} IB 시험까지</h2>
         </motion.div>
 
         {/* Main countdown card */}
@@ -99,7 +112,7 @@ const ExamCountdown = () => {
         >
           <div className="bg-primary text-primary-foreground p-10 md:p-14 rounded-lg">
             <div className="text-xs font-medium tracking-[0.25em] uppercase mb-8 opacity-70 text-center">
-              APRIL 2026 IB EXAMINATION
+              APRIL {examYear} IB EXAMINATION
             </div>
             
             {/* Main countdown display */}
