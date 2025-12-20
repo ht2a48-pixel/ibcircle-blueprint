@@ -7,7 +7,9 @@ import UniversityWall from '@/components/UniversityWall';
 import Programs from '@/components/Programs';
 import Timeline from '@/components/Timeline';
 import Consulting from '@/components/Consulting';
+import Testimonials from '@/components/Testimonials';
 import Philosophy from '@/components/Philosophy';
+import FAQ from '@/components/FAQ';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
@@ -33,7 +35,9 @@ const Index = () => {
         <Programs />
         <Timeline />
         <Consulting />
+        <Testimonials />
         <Philosophy />
+        <FAQ />
         <Contact />
         <Footer />
       </main>
