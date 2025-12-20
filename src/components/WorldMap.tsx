@@ -12,26 +12,32 @@ interface Country {
 }
 
 // Student distribution by country (Total: 223 students)
+// 50% Asia (~112), 40% Americas (~89), 5% Europe (~11), 5% Oceania (~11)
 const countries: Country[] = [
-  // Asia
-  { id: 'KR', name: 'South Korea', students: 98, x: 83.5, y: 35, region: 'Asia' },
-  { id: 'JP', name: 'Japan', students: 24, x: 88, y: 34, region: 'Asia' },
-  { id: 'CN', name: 'China', students: 32, x: 78, y: 36, region: 'Asia' },
-  { id: 'HK', name: 'Hong Kong', students: 15, x: 78.5, y: 44, region: 'Asia' },
-  { id: 'TW', name: 'Taiwan', students: 8, x: 81, y: 42, region: 'Asia' },
-  { id: 'SG', name: 'Singapore', students: 12, x: 75, y: 58, region: 'Asia' },
-  { id: 'VN', name: 'Vietnam', students: 6, x: 74, y: 48, region: 'Asia' },
-  { id: 'TH', name: 'Thailand', students: 5, x: 72, y: 50, region: 'Asia' },
-  { id: 'ID', name: 'Indonesia', students: 7, x: 76, y: 62, region: 'Asia' },
-  { id: 'IN', name: 'India', students: 4, x: 64, y: 44, region: 'Asia' },
-  // Americas
-  { id: 'US', name: 'United States', students: 5, x: 20, y: 35, region: 'Americas' },
-  { id: 'CA', name: 'Canada', students: 3, x: 18, y: 26, region: 'Americas' },
-  // Europe
-  { id: 'GB', name: 'United Kingdom', students: 2, x: 47.5, y: 25, region: 'Europe' },
-  { id: 'DE', name: 'Germany', students: 1, x: 51, y: 26, region: 'Europe' },
-  // Oceania
-  { id: 'AU', name: 'Australia', students: 1, x: 88, y: 70, region: 'Oceania' },
+  // Asia (50% = 112 students)
+  { id: 'KR', name: 'South Korea', students: 45, x: 83.5, y: 35, region: 'Asia' },
+  { id: 'JP', name: 'Japan', students: 18, x: 88, y: 34, region: 'Asia' },
+  { id: 'CN', name: 'China', students: 22, x: 78, y: 36, region: 'Asia' },
+  { id: 'HK', name: 'Hong Kong', students: 10, x: 78.5, y: 44, region: 'Asia' },
+  { id: 'TW', name: 'Taiwan', students: 5, x: 81, y: 42, region: 'Asia' },
+  { id: 'SG', name: 'Singapore', students: 6, x: 75, y: 58, region: 'Asia' },
+  { id: 'VN', name: 'Vietnam', students: 3, x: 74, y: 48, region: 'Asia' },
+  { id: 'TH', name: 'Thailand', students: 2, x: 72, y: 50, region: 'Asia' },
+  { id: 'ID', name: 'Indonesia', students: 1, x: 76, y: 62, region: 'Asia' },
+  // Americas (40% = 89 students)
+  { id: 'US', name: 'United States', students: 35, x: 20, y: 35, region: 'Americas' },
+  { id: 'CA', name: 'Canada', students: 18, x: 18, y: 26, region: 'Americas' },
+  { id: 'BR', name: 'Brazil', students: 22, x: 32, y: 62, region: 'Americas' },
+  { id: 'CL', name: 'Chile', students: 8, x: 26, y: 72, region: 'Americas' },
+  { id: 'MX', name: 'Mexico', students: 6, x: 16, y: 44, region: 'Americas' },
+  // Europe (5% = 11 students)
+  { id: 'GB', name: 'United Kingdom', students: 4, x: 47.5, y: 25, region: 'Europe' },
+  { id: 'DE', name: 'Germany', students: 3, x: 51, y: 26, region: 'Europe' },
+  { id: 'FR', name: 'France', students: 2, x: 48, y: 29, region: 'Europe' },
+  { id: 'ES', name: 'Spain', students: 2, x: 46, y: 32, region: 'Europe' },
+  // Oceania (5% = 11 students)
+  { id: 'AU', name: 'Australia', students: 8, x: 88, y: 68, region: 'Oceania' },
+  { id: 'NZ', name: 'New Zealand', students: 3, x: 94, y: 75, region: 'Oceania' },
 ];
 
 // Calculate region totals
