@@ -31,7 +31,7 @@ interface University {
   name: string;
   shortName: string;
   country: string;
-  logo: string;
+  logo?: string;
 }
 
 const universities: University[] = [
@@ -42,29 +42,45 @@ const universities: University[] = [
   { name: 'University of Chicago', shortName: 'UChicago', country: 'USA', logo: uchicagoLogo },
   { name: 'Northwestern University', shortName: 'Northwestern', country: 'USA', logo: northwesternLogo },
   { name: 'Johns Hopkins University', shortName: 'Johns Hopkins', country: 'USA', logo: johnshopkinsLogo },
+  { name: 'Georgetown University', shortName: 'Georgetown', country: 'USA' },
+  { name: 'Vanderbilt University', shortName: 'Vanderbilt', country: 'USA' },
   { name: 'Carnegie Mellon University', shortName: 'CMU', country: 'USA', logo: cmuLogo },
   { name: 'New York University', shortName: 'NYU', country: 'USA', logo: nyuLogo },
+  { name: 'Emory University', shortName: 'Emory', country: 'USA' },
+  { name: 'University of Southern California', shortName: 'USC', country: 'USA' },
+  { name: 'Georgia Tech', shortName: 'Georgia Tech', country: 'USA' },
   { name: 'University of Michigan', shortName: 'UMich', country: 'USA', logo: umichLogo },
   { name: 'UC Berkeley', shortName: 'Berkeley', country: 'USA', logo: berkeleyLogo },
   { name: 'UCLA', shortName: 'UCLA', country: 'USA', logo: uclaLogo },
   { name: 'UC San Diego', shortName: 'UCSD', country: 'USA', logo: ucsdLogo },
+  { name: 'Northeastern University', shortName: 'Northeastern', country: 'USA' },
   // UK
   { name: 'University of Oxford', shortName: 'Oxford', country: 'UK', logo: oxfordLogo },
   { name: 'University of Cambridge', shortName: 'Cambridge', country: 'UK', logo: cambridgeLogo },
+  { name: 'Imperial College London', shortName: 'Imperial', country: 'UK' },
+  { name: 'University College London', shortName: 'UCL', country: 'UK' },
   { name: 'London School of Economics', shortName: 'LSE', country: 'UK', logo: lseLogo },
   // Canada
   { name: 'University of Toronto', shortName: 'UofT', country: 'Canada', logo: utorontoLogo },
   { name: 'McGill University', shortName: 'McGill', country: 'Canada', logo: mcgillLogo },
+  { name: 'University of British Columbia', shortName: 'UBC', country: 'Canada' },
   // Japan
   { name: 'University of Tokyo', shortName: 'UTokyo', country: 'Japan', logo: utokyoLogo },
+  { name: 'Waseda University', shortName: 'Waseda', country: 'Japan' },
+  { name: 'Keio University', shortName: 'Keio', country: 'Japan' },
   // Hong Kong
   { name: 'University of Hong Kong', shortName: 'HKU', country: 'Hong Kong', logo: hkuLogo },
+  { name: 'HKUST', shortName: 'HKUST', country: 'Hong Kong' },
+  { name: 'Chinese University of Hong Kong', shortName: 'CUHK', country: 'Hong Kong' },
   // Singapore
   { name: 'National University of Singapore', shortName: 'NUS', country: 'Singapore', logo: nusLogo },
   { name: 'Nanyang Technological University', shortName: 'NTU', country: 'Singapore', logo: ntuLogo },
   // Korea
   { name: 'Seoul National University', shortName: 'SNU', country: 'Korea', logo: snuLogo },
   { name: 'KAIST', shortName: 'KAIST', country: 'Korea', logo: kaistLogo },
+  { name: 'Yonsei University', shortName: 'Yonsei', country: 'Korea' },
+  { name: 'Korea University', shortName: 'Korea U', country: 'Korea' },
+  { name: 'Sungkyunkwan University', shortName: 'SKKU', country: 'Korea' },
 ];
 
 const countries = ['All', 'USA', 'UK', 'Canada', 'Japan', 'Hong Kong', 'Singapore', 'Korea'];
@@ -162,13 +178,19 @@ const UniversityWall = () => {
                     className="group relative flex-shrink-0"
                   >
                     <div className="w-40 h-48 bg-white border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/40 hover:shadow-xl cursor-pointer rounded-lg">
-                      {/* University Logo */}
+                      {/* University Logo or Name Fallback */}
                       <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                        <img 
-                          src={university.logo} 
-                          alt={`${university.name} logo`}
-                          className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
-                        />
+                        {university.logo ? (
+                          <img 
+                            src={university.logo} 
+                            alt={`${university.name} logo`}
+                            className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                          />
+                        ) : (
+                          <span className="text-lg font-bold text-primary text-center leading-tight">
+                            {university.shortName}
+                          </span>
+                        )}
                       </div>
                       <span className="text-sm font-semibold text-foreground line-clamp-1">
                         {university.shortName}
