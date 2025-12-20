@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface University {
   name: string;
@@ -53,10 +54,21 @@ const countries = ['All', 'USA', 'UK', 'Canada', 'Japan', 'Hong Kong', 'Singapor
 
 const UniversityWall = () => {
   const [selectedCountry, setSelectedCountry] = useState('All');
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const filteredUniversities = selectedCountry === 'All'
     ? universities
     : universities.filter(u => u.country === selectedCountry);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 400;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   return (
     <section className="py-24 md:py-32 bg-background">
@@ -68,8 +80,8 @@ const UniversityWall = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <p className="section-title">Global University Acceptances</p>
-          <h2 className="section-heading">전 세계 명문대 합격 현황</h2>
+          <p className="section-title">Global Admissions Footprint</p>
+          <h2 className="section-heading">전 세계 합격 현황</h2>
         </motion.div>
 
         {/* Country Filter */}
@@ -78,13 +90,13 @@ const UniversityWall = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-2 mb-12"
+          className="flex flex-wrap justify-center gap-2 mb-10"
         >
           {countries.map((country) => (
             <button
               key={country}
               onClick={() => setSelectedCountry(country)}
-              className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
+              className={`px-5 py-2 text-sm font-medium transition-all duration-300 rounded-sm ${
                 selectedCountry === country
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-accent'
@@ -95,50 +107,89 @@ const UniversityWall = () => {
           ))}
         </motion.div>
 
-        {/* University Grid with Logos */}
-        <motion.div
-          layout
-          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"
+        {/* Horizontal Scrollable University Logos */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors -translate-x-4"
+          >
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors translate-x-4"
+          >
+            <ChevronRight className="w-5 h-5 text-foreground" />
+          </button>
+
+          {/* Scrollable Container */}
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto hide-scrollbar py-4"
+          >
+            <motion.div
+              layout
+              className="flex gap-6 px-4"
+              style={{ minWidth: 'max-content' }}
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredUniversities.map((university) => (
+                  <motion.div
+                    key={university.name}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    className="group relative flex-shrink-0"
+                  >
+                    <div className="w-36 h-44 bg-secondary/30 border border-border p-5 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-secondary hover:shadow-lg hover:border-primary/20 cursor-pointer rounded-lg">
+                      {/* University Logo */}
+                      <div className="w-20 h-20 mb-3 flex items-center justify-center">
+                        <img
+                          src={university.logo}
+                          alt={`${university.name} logo`}
+                          className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <span className="text-4xl hidden">{university.flag}</span>
+                      </div>
+                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2 leading-tight">
+                        {university.name}
+                      </span>
+                    </div>
+                    
+                    {/* Hover tooltip */}
+                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
+                      IBCircle Student Acceptance
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+
+          {/* Fade edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+        </div>
+
+        {/* University count */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-center text-muted-foreground mt-8 text-sm"
         >
-          <AnimatePresence mode="popLayout">
-            {filteredUniversities.map((university) => (
-              <motion.div
-                key={university.name}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className="group relative"
-              >
-                <div className="aspect-square bg-secondary/50 border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-secondary hover:shadow-lg cursor-pointer">
-                  {/* University Logo */}
-                  <div className="w-16 h-16 mb-3 flex items-center justify-center">
-                    <img
-                      src={university.logo}
-                      alt={`${university.name} logo`}
-                      className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
-                      onError={(e) => {
-                        // Fallback to flag if logo fails to load
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                    <span className="text-3xl hidden">{university.flag}</span>
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
-                    {university.name}
-                  </span>
-                </div>
-                
-                {/* Hover tooltip */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                  IBCircle Student Acceptance
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+          {filteredUniversities.length}개 대학 합격
+        </motion.p>
       </div>
     </section>
   );

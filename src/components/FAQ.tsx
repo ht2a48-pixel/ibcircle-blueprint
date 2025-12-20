@@ -25,10 +25,6 @@ const faqItems: FAQItem[] = [
     answer: "모든 강사진은 전 세계 유수 명문대에 재학 중이거나 졸업한 최상위권 출신입니다. 3년 이상의 IB 강의 경험을 보유하고 있으며, 직접 IB Diploma를 이수한 경험을 바탕으로 실질적인 전략을 제공합니다."
   },
   {
-    question: "온라인 수업도 가능한가요?",
-    answer: "네, 가능합니다. IBCircle은 전 세계 11개국에서 온 학생들을 지도하고 있으며, 온라인과 오프라인 수업 모두 동일한 품질로 제공됩니다."
-  },
-  {
     question: "입시 컨설팅은 어떻게 진행되나요?",
     answer: "입시 컨설팅은 학생의 목표 대학과 전형에 맞춰 맞춤형으로 진행됩니다. 글로벌 명문대 지원(미국, 영국, 아시아), 에세이 전략, 활동 설계, 인터뷰 준비부터 국내 특별전형(3특/12특) 지원 자격 분석 및 전체 일정 관리까지 포함됩니다."
   },
@@ -73,7 +69,7 @@ const FAQ = () => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-secondary/30 border border-border px-6 data-[state=open]:bg-secondary/50 transition-colors"
+                className="bg-secondary/30 border border-border px-6 data-[state=open]:bg-secondary/50 transition-colors rounded-lg"
               >
                 <AccordionTrigger className="text-left text-foreground font-medium py-5 hover:no-underline">
                   {item.question}
