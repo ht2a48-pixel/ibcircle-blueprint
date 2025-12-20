@@ -1,14 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
+import Programs from '@/components/Programs';
+import Consulting from '@/components/Consulting';
+import Philosophy from '@/components/Philosophy';
+import SampleReport from '@/components/SampleReport';
 import ExamCountdown from '@/components/ExamCountdown';
 import Metrics from '@/components/Metrics';
 import UniversityWall from '@/components/UniversityWall';
-import Programs from '@/components/Programs';
 import Timeline from '@/components/Timeline';
-import Consulting from '@/components/Consulting';
-import Testimonials from '@/components/Testimonials';
-import Philosophy from '@/components/Philosophy';
 import FAQ from '@/components/FAQ';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
@@ -28,16 +28,28 @@ const Index = () => {
 
       <main className="min-h-screen bg-background">
         <Header />
+        {/* Main page */}
         <Hero />
-        <ExamCountdown />
-        <Metrics />
-        <UniversityWall />
+        {/* IB Diploma Programme - included in Programs */}
+        {/* Personalized IB Coaching */}
         <Programs />
-        <Timeline />
+        {/* Private Consulting Services */}
         <Consulting />
-        <Testimonials />
+        {/* Our Philosophy */}
         <Philosophy />
+        {/* Progress Report System Preview */}
+        <SampleReport />
+        {/* IB Exam Readiness Tracker */}
+        <ExamCountdown />
+        {/* Statistics + Student location */}
+        <Metrics />
+        {/* Global University Acceptances */}
+        <UniversityWall />
+        {/* Student Strategy Timeline */}
+        <Timeline />
+        {/* Frequently Asked Questions */}
         <FAQ />
+        {/* Consultation & Contact */}
         <Contact />
         <Footer />
       </main>

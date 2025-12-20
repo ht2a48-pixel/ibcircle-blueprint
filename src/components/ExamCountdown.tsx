@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimeLeft {
   days: number;
@@ -10,11 +10,34 @@ interface TimeLeft {
   percentElapsed: number;
 }
 
+// Animated number with rolling effect
+const RollingNumber = ({ value, className }: { value: string; className?: string }) => {
+  return (
+    <span className={`inline-flex overflow-hidden ${className}`}>
+      {value.split('').map((digit, index) => (
+        <AnimatePresence mode="popLayout" key={index}>
+          <motion.span
+            key={`${index}-${digit}`}
+            initial={{ y: -30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 30, opacity: 0 }}
+            transition={{ 
+              duration: 0.3, 
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="inline-block"
+          >
+            {digit}
+          </motion.span>
+        </AnimatePresence>
+      ))}
+    </span>
+  );
+};
+
 const ExamCountdown = () => {
-  // May 2025 IB exams start around May 1st
-  const mayExamDate = new Date('2025-05-01T09:00:00');
-  // November 2025 IB exams start around November 1st
-  const novExamDate = new Date('2025-11-01T09:00:00');
+  // April 24, 2026 IB exams
+  const examDate = new Date('2026-04-24T09:00:00');
 
   const calculateTimeLeft = (targetDate: Date): TimeLeft => {
     const now = new Date();
@@ -40,99 +63,17 @@ const ExamCountdown = () => {
     return { days: 0, hours: 0, minutes: 0, seconds: 0, weeks: 0, percentElapsed: 100 };
   };
 
-  const [mayTimeLeft, setMayTimeLeft] = useState<TimeLeft>(calculateTimeLeft(mayExamDate));
-  const [novTimeLeft, setNovTimeLeft] = useState<TimeLeft>(calculateTimeLeft(novExamDate));
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft(examDate));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setMayTimeLeft(calculateTimeLeft(mayExamDate));
-      setNovTimeLeft(calculateTimeLeft(novExamDate));
+      setTimeLeft(calculateTimeLeft(examDate));
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
   const formatTime = (num: number) => String(num).padStart(2, '0');
-
-  const ExamCard = ({ 
-    title, 
-    timeLeft, 
-    isPrimary = false 
-  }: { 
-    title: string; 
-    timeLeft: TimeLeft; 
-    isPrimary?: boolean;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className={`p-8 md:p-10 ${
-        isPrimary 
-          ? 'bg-primary text-primary-foreground' 
-          : 'bg-secondary border border-border'
-      }`}
-    >
-      <div className="text-xs font-medium tracking-[0.2em] uppercase mb-6 opacity-70">
-        {title}
-      </div>
-      
-      {/* Main countdown */}
-      <div className="flex items-baseline gap-2 mb-6">
-        <span className={`text-5xl md:text-6xl font-medium tracking-tight ${
-          isPrimary ? 'text-primary-foreground' : 'text-foreground'
-        }`}>
-          D–{timeLeft.days}
-        </span>
-        <span className={`text-2xl md:text-3xl font-light tracking-tight ${
-          isPrimary ? 'text-primary-foreground/80' : 'text-muted-foreground'
-        }`}>
-          {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
-        </span>
-      </div>
-
-      {/* Metrics grid */}
-      <div className="grid grid-cols-3 gap-4 pt-6 border-t border-current/10">
-        <div>
-          <div className={`text-2xl font-medium ${
-            isPrimary ? 'text-primary-foreground' : 'text-foreground'
-          }`}>
-            {timeLeft.days}
-          </div>
-          <div className={`text-xs mt-1 ${
-            isPrimary ? 'text-primary-foreground/60' : 'text-muted-foreground'
-          }`}>
-            Days
-          </div>
-        </div>
-        <div>
-          <div className={`text-2xl font-medium ${
-            isPrimary ? 'text-primary-foreground' : 'text-foreground'
-          }`}>
-            {timeLeft.weeks}
-          </div>
-          <div className={`text-xs mt-1 ${
-            isPrimary ? 'text-primary-foreground/60' : 'text-muted-foreground'
-          }`}>
-            Weeks
-          </div>
-        </div>
-        <div>
-          <div className={`text-2xl font-medium ${
-            isPrimary ? 'text-primary-foreground' : 'text-foreground'
-          }`}>
-            {timeLeft.percentElapsed.toFixed(0)}%
-          </div>
-          <div className={`text-xs mt-1 ${
-            isPrimary ? 'text-primary-foreground/60' : 'text-muted-foreground'
-          }`}>
-            Elapsed
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
 
   return (
     <section className="py-24 md:py-32 bg-background">
@@ -145,13 +86,93 @@ const ExamCountdown = () => {
           className="text-center mb-16"
         >
           <p className="section-title">IB Exam Readiness Tracker</p>
-          <h2 className="section-heading">시험까지 남은 시간</h2>
+          <h2 className="section-heading">2026 IB 시험까지</h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <ExamCard title="MAY IB EXAM" timeLeft={mayTimeLeft} isPrimary />
-          <ExamCard title="NOVEMBER IB EXAM" timeLeft={novTimeLeft} />
-        </div>
+        {/* Main countdown card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="bg-primary text-primary-foreground p-10 md:p-14 rounded-lg">
+            <div className="text-xs font-medium tracking-[0.25em] uppercase mb-8 opacity-70 text-center">
+              APRIL 2026 IB EXAMINATION
+            </div>
+            
+            {/* Main countdown display */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mb-10">
+              {/* Days */}
+              <div className="text-center">
+                <div className="text-6xl md:text-8xl font-medium tracking-tight tabular-nums">
+                  D–<RollingNumber value={String(timeLeft.days)} />
+                </div>
+                <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Days Remaining</div>
+              </div>
+              
+              {/* Divider */}
+              <div className="hidden md:block w-px h-24 bg-primary-foreground/20" />
+              
+              {/* Time */}
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-light tracking-tight tabular-nums flex items-center gap-1">
+                  <RollingNumber value={formatTime(timeLeft.hours)} />
+                  <span className="opacity-50">:</span>
+                  <RollingNumber value={formatTime(timeLeft.minutes)} />
+                  <span className="opacity-50">:</span>
+                  <RollingNumber value={formatTime(timeLeft.seconds)} />
+                </div>
+                <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Hours : Minutes : Seconds</div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mb-8">
+              <div className="h-1.5 bg-primary-foreground/10 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${timeLeft.percentElapsed}%` }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                  className="h-full bg-warm rounded-full"
+                />
+              </div>
+              <div className="flex justify-between mt-2 text-xs opacity-60">
+                <span>Preparation Started</span>
+                <span>{timeLeft.percentElapsed.toFixed(1)}% Complete</span>
+              </div>
+            </div>
+
+            {/* Metrics grid */}
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-primary-foreground/10">
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-medium tabular-nums">
+                  {timeLeft.days}
+                </div>
+                <div className="text-xs mt-1 opacity-60 uppercase tracking-wider">
+                  Days
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-medium tabular-nums">
+                  {timeLeft.weeks}
+                </div>
+                <div className="text-xs mt-1 opacity-60 uppercase tracking-wider">
+                  Weeks
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-medium tabular-nums">
+                  {timeLeft.percentElapsed.toFixed(0)}%
+                </div>
+                <div className="text-xs mt-1 opacity-60 uppercase tracking-wider">
+                  Elapsed
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
