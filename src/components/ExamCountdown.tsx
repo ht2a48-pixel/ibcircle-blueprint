@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimeLeft {
   days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
+  totalHours: number;
+  totalMinutes: number;
+  totalSeconds: number;
+  remainingHours: number;
+  remainingMinutes: number;
+  remainingSeconds: number;
   weeks: number;
   percentElapsed: number;
 }
@@ -65,15 +68,18 @@ const ExamCountdown = () => {
 
     if (difference > 0) {
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      const totalHours = Math.floor(difference / (1000 * 60 * 60));
+      const totalMinutes = Math.floor(difference / (1000 * 60));
+      const totalSeconds = Math.floor(difference / 1000);
+      const remainingHours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const remainingMinutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const remainingSeconds = Math.floor((difference % (1000 * 60)) / 1000);
       const weeks = Math.floor(days / 7);
 
-      return { days, hours, minutes, seconds, weeks, percentElapsed };
+      return { days, totalHours, totalMinutes, totalSeconds, remainingHours, remainingMinutes, remainingSeconds, weeks, percentElapsed };
     }
 
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, weeks: 0, percentElapsed: 100 };
+    return { days: 0, totalHours: 0, totalMinutes: 0, totalSeconds: 0, remainingHours: 0, remainingMinutes: 0, remainingSeconds: 0, weeks: 0, percentElapsed: 100 };
   };
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft(examDate));
@@ -128,16 +134,13 @@ const ExamCountdown = () => {
               {/* Divider */}
               <div className="hidden md:block w-px h-24 bg-primary-foreground/20" />
               
-              {/* Time */}
+              {/* Time - Total Hours */}
               <div className="text-center">
                 <div className="text-4xl md:text-5xl font-light tracking-tight tabular-nums flex items-center gap-1">
-                  <RollingNumber value={formatTime(timeLeft.hours)} />
-                  <span className="opacity-50">:</span>
-                  <RollingNumber value={formatTime(timeLeft.minutes)} />
-                  <span className="opacity-50">:</span>
-                  <RollingNumber value={formatTime(timeLeft.seconds)} />
+                  <RollingNumber value={String(timeLeft.totalHours).padStart(4, '0')} />
+                  <span className="text-2xl md:text-3xl opacity-50 ml-1">hrs</span>
                 </div>
-                <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Hours : Minutes : Seconds</div>
+                <div className="text-xs uppercase tracking-[0.2em] mt-2 opacity-60">Total Hours Remaining</div>
               </div>
             </div>
 
