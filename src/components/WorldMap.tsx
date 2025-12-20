@@ -63,6 +63,9 @@ const WorldMap = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isPinching, setIsPinching] = useState(false);
+  const [initialPinchDistance, setInitialPinchDistance] = useState(0);
+  const [initialPinchScale, setInitialPinchScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,6 +98,21 @@ const WorldMap = () => {
     md: 'w-10 h-10 md:w-12 md:h-12',
     sm: 'w-6 h-6 md:w-8 md:h-8',
     xs: 'w-5 h-5 md:w-6 md:h-6',
+  };
+
+  // Calculate distance between two touch points
+  const getTouchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Get center point between two touches
+  const getTouchCenter = (touches: React.TouchList) => {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+    };
   };
 
   // Calculate position offset for region focus
@@ -132,15 +150,47 @@ const WorldMap = () => {
 
   // Mobile touch/drag handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
+    if (e.touches.length === 2) {
+      // Pinch zoom start
+      setIsPinching(true);
+      setIsDragging(false);
+      const distance = getTouchDistance(e.touches);
+      setInitialPinchDistance(distance);
+      setInitialPinchScale(scale);
+    } else if (e.touches.length === 1 && !isPinching) {
+      // Single finger drag
       setIsDragging(true);
-      setDragStart({ x: e.touches[0].clientX - position.x, y: e.touches[0].clientY - position.y });
+      setDragStart({ 
+        x: e.touches[0].clientX - position.x, 
+        y: e.touches[0].clientY - position.y 
+      });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    if (e.touches.length === 1 && scale > 1) {
+    if (e.touches.length === 2 && isPinching) {
+      // Pinch zoom
+      const currentDistance = getTouchDistance(e.touches);
+      const scaleChange = currentDistance / initialPinchDistance;
+      const newScale = Math.max(1, Math.min(4, initialPinchScale * scaleChange));
+      
+      setScale(newScale);
+      
+      // Adjust position to zoom towards pinch center
+      if (newScale === 1) {
+        setPosition({ x: 0, y: 0 });
+      } else {
+        const containerWidth = containerRef.current?.offsetWidth || 0;
+        const containerHeight = containerRef.current?.offsetHeight || 0;
+        const maxOffsetX = containerWidth * (newScale - 1) / 2;
+        const maxOffsetY = containerHeight * (newScale - 1) / 2;
+        setPosition({
+          x: Math.max(-maxOffsetX, Math.min(maxOffsetX, position.x)),
+          y: Math.max(-maxOffsetY, Math.min(maxOffsetY, position.y)),
+        });
+      }
+    } else if (e.touches.length === 1 && isDragging && scale > 1) {
+      // Single finger pan when zoomed in
       const newX = e.touches[0].clientX - dragStart.x;
       const newY = e.touches[0].clientY - dragStart.y;
       const containerWidth = containerRef.current?.offsetWidth || 0;
@@ -154,12 +204,17 @@ const WorldMap = () => {
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      setIsPinching(false);
+    }
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+    }
   };
 
   const handleZoomIn = () => {
-    const newScale = Math.min(3, scale + 0.5);
+    const newScale = Math.min(4, scale + 0.5);
     setScale(newScale);
   };
 
