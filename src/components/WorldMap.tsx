@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import worldMapImage from '@/assets/world-map.png';
 
-interface Location {
+interface Country {
   id: string;
   name: string;
   students: number;
@@ -11,60 +11,44 @@ interface Location {
   region: string;
 }
 
-// Student origin locations with coordinates (percentage-based for responsiveness)
-const locations: Location[] = [
-  // Korea
-  { id: 'seoul', name: 'Seoul, South Korea', students: 85, x: 83.5, y: 35, region: 'Asia' },
-  { id: 'busan', name: 'Busan, South Korea', students: 12, x: 84.5, y: 37, region: 'Asia' },
-  // Japan
-  { id: 'tokyo', name: 'Tokyo, Japan', students: 28, x: 88, y: 34, region: 'Asia' },
-  { id: 'osaka', name: 'Osaka, Japan', students: 8, x: 86.5, y: 36, region: 'Asia' },
-  // China
-  { id: 'beijing', name: 'Beijing, China', students: 18, x: 78, y: 31, region: 'Asia' },
-  { id: 'shanghai', name: 'Shanghai, China', students: 22, x: 80, y: 38, region: 'Asia' },
-  { id: 'shenzhen', name: 'Shenzhen, China', students: 10, x: 77.5, y: 44, region: 'Asia' },
-  // Hong Kong & Taiwan
-  { id: 'hongkong', name: 'Hong Kong', students: 18, x: 78.5, y: 44, region: 'Asia' },
-  { id: 'taipei', name: 'Taipei, Taiwan', students: 7, x: 81, y: 42, region: 'Asia' },
-  // Southeast Asia
-  { id: 'singapore', name: 'Singapore', students: 14, x: 75, y: 58, region: 'Asia' },
-  { id: 'hanoi', name: 'Hanoi, Vietnam', students: 8, x: 74, y: 45, region: 'Asia' },
-  { id: 'bangkok', name: 'Bangkok, Thailand', students: 6, x: 72, y: 50, region: 'Asia' },
-  { id: 'jakarta', name: 'Jakarta, Indonesia', students: 10, x: 74.5, y: 63, region: 'Asia' },
-  // India
-  { id: 'mumbai', name: 'Mumbai, India', students: 8, x: 63, y: 48, region: 'Asia' },
-  { id: 'delhi', name: 'New Delhi, India', students: 4, x: 64, y: 40, region: 'Asia' },
-  // USA
-  { id: 'newyork', name: 'New York, USA', students: 8, x: 26, y: 32, region: 'Americas' },
-  { id: 'losangeles', name: 'Los Angeles, USA', students: 5, x: 14, y: 36, region: 'Americas' },
-  { id: 'sanfrancisco', name: 'San Francisco, USA', students: 4, x: 12, y: 32, region: 'Americas' },
-  // Canada
-  { id: 'toronto', name: 'Toronto, Canada', students: 6, x: 24, y: 28, region: 'Americas' },
-  { id: 'vancouver', name: 'Vancouver, Canada', students: 4, x: 12, y: 25, region: 'Americas' },
-  // UK & Europe
-  { id: 'london', name: 'London, UK', students: 5, x: 47.5, y: 25, region: 'Europe' },
-  { id: 'paris', name: 'Paris, France', students: 3, x: 48.5, y: 28, region: 'Europe' },
-  { id: 'berlin', name: 'Berlin, Germany', students: 4, x: 51, y: 24, region: 'Europe' },
-  // Australia
-  { id: 'sydney', name: 'Sydney, Australia', students: 4, x: 90, y: 72, region: 'Oceania' },
-  { id: 'melbourne', name: 'Melbourne, Australia', students: 3, x: 88, y: 75, region: 'Oceania' },
+// Student distribution by country (Total: 223 students)
+const countries: Country[] = [
+  // Asia
+  { id: 'KR', name: 'South Korea', students: 98, x: 83.5, y: 35, region: 'Asia' },
+  { id: 'JP', name: 'Japan', students: 24, x: 88, y: 34, region: 'Asia' },
+  { id: 'CN', name: 'China', students: 32, x: 78, y: 36, region: 'Asia' },
+  { id: 'HK', name: 'Hong Kong', students: 15, x: 78.5, y: 44, region: 'Asia' },
+  { id: 'TW', name: 'Taiwan', students: 8, x: 81, y: 42, region: 'Asia' },
+  { id: 'SG', name: 'Singapore', students: 12, x: 75, y: 58, region: 'Asia' },
+  { id: 'VN', name: 'Vietnam', students: 6, x: 74, y: 48, region: 'Asia' },
+  { id: 'TH', name: 'Thailand', students: 5, x: 72, y: 50, region: 'Asia' },
+  { id: 'ID', name: 'Indonesia', students: 7, x: 76, y: 62, region: 'Asia' },
+  { id: 'IN', name: 'India', students: 4, x: 64, y: 44, region: 'Asia' },
+  // Americas
+  { id: 'US', name: 'United States', students: 5, x: 20, y: 35, region: 'Americas' },
+  { id: 'CA', name: 'Canada', students: 3, x: 18, y: 26, region: 'Americas' },
+  // Europe
+  { id: 'GB', name: 'United Kingdom', students: 2, x: 47.5, y: 25, region: 'Europe' },
+  { id: 'DE', name: 'Germany', students: 1, x: 51, y: 26, region: 'Europe' },
+  // Oceania
+  { id: 'AU', name: 'Australia', students: 1, x: 88, y: 70, region: 'Oceania' },
 ];
 
 // Calculate region totals
-const regionTotals = locations.reduce((acc, loc) => {
-  acc[loc.region] = (acc[loc.region] || 0) + loc.students;
+const regionTotals = countries.reduce((acc, country) => {
+  acc[country.region] = (acc[country.region] || 0) + country.students;
   return acc;
 }, {} as Record<string, number>);
 
-const totalStudents = locations.reduce((sum, loc) => sum + loc.students, 0);
+const totalStudents = 223;
 
 const WorldMap = () => {
-  const [hoveredLocation, setHoveredLocation] = useState<Location | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
-  const filteredLocations = selectedRegion 
-    ? locations.filter(loc => loc.region === selectedRegion)
-    : locations;
+  const filteredCountries = selectedRegion 
+    ? countries.filter(c => c.region === selectedRegion)
+    : countries;
 
   const getPinSize = (students: number) => {
     if (students >= 50) return 'lg';
@@ -134,15 +118,15 @@ const WorldMap = () => {
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20" />
 
-        {/* Location Pins */}
+        {/* Country Pins */}
         <AnimatePresence>
-          {filteredLocations.map((location, index) => {
-            const size = getPinSize(location.students);
-            const isHovered = hoveredLocation?.id === location.id;
+          {filteredCountries.map((country, index) => {
+            const size = getPinSize(country.students);
+            const isHovered = hoveredCountry?.id === country.id;
 
             return (
               <motion.div
-                key={location.id}
+                key={country.id}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
@@ -154,12 +138,12 @@ const WorldMap = () => {
                 }}
                 className="absolute cursor-pointer"
                 style={{ 
-                  left: `${location.x}%`, 
-                  top: `${location.y}%`,
+                  left: `${country.x}%`, 
+                  top: `${country.y}%`,
                   transform: 'translate(-50%, -50%)'
                 }}
-                onMouseEnter={() => setHoveredLocation(location)}
-                onMouseLeave={() => setHoveredLocation(null)}
+                onMouseEnter={() => setHoveredCountry(country)}
+                onMouseLeave={() => setHoveredCountry(null)}
               >
                 {/* Pulse Animation */}
                 <motion.div
@@ -205,9 +189,9 @@ const WorldMap = () => {
                   whileHover={{ scale: 1.3 }}
                   animate={isHovered ? { scale: 1.3 } : { scale: 1 }}
                 >
-                  {size === 'lg' && (
+                  {(size === 'lg' || size === 'md') && (
                     <span className="text-[10px] font-bold text-primary-foreground">
-                      {location.students}
+                      {country.students}
                     </span>
                   )}
                 </motion.div>
@@ -221,9 +205,9 @@ const WorldMap = () => {
                       exit={{ opacity: 0, y: 10, scale: 0.9 }}
                       className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50"
                     >
-                      <div className="font-semibold text-sm">{location.name}</div>
+                      <div className="font-semibold text-sm">{country.name}</div>
                       <div className="text-background/70 text-xs mt-0.5">
-                        {location.students} students
+                        {country.students} students
                       </div>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
                     </motion.div>
@@ -244,10 +228,10 @@ const WorldMap = () => {
             </linearGradient>
           </defs>
           {/* Curved connection lines between major hubs */}
-          {filteredLocations.filter(l => l.students >= 20).map((loc, i) => (
+          {filteredCountries.filter(c => c.students >= 20).map((country, i) => (
             <motion.path
-              key={`line-${loc.id}`}
-              d={`M ${loc.x}% ${loc.y}% Q 50% ${30 + i * 5}% 50% 50%`}
+              key={`line-${country.id}`}
+              d={`M ${country.x}% ${country.y}% Q 50% ${30 + i * 5}% 50% 50%`}
               fill="none"
               stroke="url(#lineGradient)"
               strokeWidth="1"
