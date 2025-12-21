@@ -30,7 +30,6 @@ const Header = () => {
     { label: '프로그램', href: '#programs' },
     { label: '성과', href: '#results' },
     { label: '컨설팅', href: '#consulting' },
-    { label: '인사이트', href: '#insights' },
   ];
 
   return (

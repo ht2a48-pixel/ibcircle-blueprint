@@ -8,7 +8,6 @@ import SampleReport from '@/components/SampleReport';
 import ExamCountdown from '@/components/ExamCountdown';
 import Metrics from '@/components/Metrics';
 import UniversityWall from '@/components/UniversityWall';
-import Timeline from '@/components/Timeline';
 import FAQ from '@/components/FAQ';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
@@ -45,8 +44,6 @@ const Index = () => {
         <Metrics />
         {/* Global University Acceptances */}
         <UniversityWall />
-        {/* Student Strategy Timeline */}
-        <Timeline />
         {/* Frequently Asked Questions */}
         <FAQ />
         {/* Consultation & Contact */}
