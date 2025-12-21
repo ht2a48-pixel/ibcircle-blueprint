@@ -71,7 +71,7 @@ const Contact = () => {
             >
               {/* KakaoTalk Open Chat */}
               <a
-                href="https://open.kakao.com/o/sIBCircle"
+                href="https://open.kakao.com/me/ibcircle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-6 bg-secondary/50 border border-border hover:bg-secondary transition-colors duration-300 group"
