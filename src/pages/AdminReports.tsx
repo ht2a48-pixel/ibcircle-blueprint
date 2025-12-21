@@ -5,37 +5,62 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LogOut, Download, Plus, Trash2 } from "lucide-react";
 
-interface Subject {
-  name: string;
-  teacher: string;
-  level: string;
-  grade: string;
-  trend: string;
-  comment: string;
+interface SkillScore {
+  label: string;
+  score: string;
+}
+
+interface RiskFlag {
+  text: string;
+  level: "high" | "medium";
+}
+
+interface Recommendation {
+  text: string;
+}
+
+interface Priority {
+  label: string;
+  text: string;
 }
 
 interface ReportData {
-  studentName: string;
-  grade: string;
-  date: string;
-  overallSummary: string;
-  subjects: Subject[];
-  goals: string[];
-  parentNotes: string;
+  subjectTitle: string;
+  sessionNumber: string;
+  summary: string;
+  challengeContent: string;
+  evaluationText: string;
+  skillScores: SkillScore[];
+  riskFlags: RiskFlag[];
+  recommendations: Recommendation[];
+  priorities: Priority[];
 }
 
 const AdminReports = () => {
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<ReportData>({
-    studentName: "",
-    grade: "",
-    date: new Date().toISOString().split("T")[0],
-    overallSummary: "",
-    subjects: [
-      { name: "", teacher: "", level: "", grade: "", trend: "↑", comment: "" },
+    subjectTitle: "IB Economics HL 수업 리포트",
+    sessionNumber: "24",
+    summary: "",
+    challengeContent: "",
+    evaluationText: "",
+    skillScores: [
+      { label: "개념 이해", score: "92" },
+      { label: "그래프 분석", score: "88" },
+      { label: "에세이 구조", score: "85" },
+      { label: "비판적 사고", score: "90" },
     ],
-    goals: [""],
-    parentNotes: "",
+    riskFlags: [
+      { text: "", level: "high" },
+    ],
+    recommendations: [
+      { text: "" },
+    ],
+    priorities: [
+      { label: "Priority 1", text: "" },
+      { label: "Priority 2", text: "" },
+      { label: "Priority 3", text: "" },
+    ],
   });
 
   useEffect(() => {
@@ -50,50 +75,67 @@ const AdminReports = () => {
     navigate("/admin");
   };
 
-  const addSubject = () => {
+  const updateSkillScore = (index: number, field: keyof SkillScore, value: string) => {
     setReportData((prev) => ({
       ...prev,
-      subjects: [
-        ...prev.subjects,
-        { name: "", teacher: "", level: "", grade: "", trend: "↑", comment: "" },
-      ],
-    }));
-  };
-
-  const removeSubject = (index: number) => {
-    setReportData((prev) => ({
-      ...prev,
-      subjects: prev.subjects.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateSubject = (index: number, field: keyof Subject, value: string) => {
-    setReportData((prev) => ({
-      ...prev,
-      subjects: prev.subjects.map((s, i) =>
+      skillScores: prev.skillScores.map((s, i) =>
         i === index ? { ...s, [field]: value } : s
       ),
     }));
   };
 
-  const addGoal = () => {
+  const addRiskFlag = () => {
     setReportData((prev) => ({
       ...prev,
-      goals: [...prev.goals, ""],
+      riskFlags: [...prev.riskFlags, { text: "", level: "medium" }],
     }));
   };
 
-  const removeGoal = (index: number) => {
+  const removeRiskFlag = (index: number) => {
     setReportData((prev) => ({
       ...prev,
-      goals: prev.goals.filter((_, i) => i !== index),
+      riskFlags: prev.riskFlags.filter((_, i) => i !== index),
     }));
   };
 
-  const updateGoal = (index: number, value: string) => {
+  const updateRiskFlag = (index: number, field: keyof RiskFlag, value: string) => {
     setReportData((prev) => ({
       ...prev,
-      goals: prev.goals.map((g, i) => (i === index ? value : g)),
+      riskFlags: prev.riskFlags.map((r, i) =>
+        i === index ? { ...r, [field]: value } : r
+      ),
+    }));
+  };
+
+  const addRecommendation = () => {
+    setReportData((prev) => ({
+      ...prev,
+      recommendations: [...prev.recommendations, { text: "" }],
+    }));
+  };
+
+  const removeRecommendation = (index: number) => {
+    setReportData((prev) => ({
+      ...prev,
+      recommendations: prev.recommendations.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateRecommendation = (index: number, value: string) => {
+    setReportData((prev) => ({
+      ...prev,
+      recommendations: prev.recommendations.map((r, i) =>
+        i === index ? { text: value } : r
+      ),
+    }));
+  };
+
+  const updatePriority = (index: number, value: string) => {
+    setReportData((prev) => ({
+      ...prev,
+      priorities: prev.priorities.map((p, i) =>
+        i === index ? { ...p, text: value } : p
+      ),
     }));
   };
 
@@ -106,109 +148,194 @@ const AdminReports = () => {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>IBCircle Progress Report - ${reportData.studentName}</title>
+  <title>IBCircle Progress Report</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
-    .report { max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 32px; text-align: center; }
-    .header h1 { font-size: 28px; margin-bottom: 8px; }
-    .header p { opacity: 0.8; }
-    .student-info { display: flex; justify-content: space-between; padding: 24px 32px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; }
-    .student-info div { text-align: center; }
-    .student-info label { font-size: 12px; color: #6c757d; display: block; margin-bottom: 4px; }
-    .student-info span { font-size: 18px; font-weight: 600; color: #1a1a2e; }
-    .section { padding: 24px 32px; }
-    .section-title { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #667eea; }
-    .summary { background: #f8f9fa; padding: 16px; border-radius: 8px; line-height: 1.6; }
-    .subject-card { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    .subject-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .subject-name { font-size: 18px; font-weight: 600; color: #1a1a2e; }
-    .subject-meta { display: flex; gap: 16px; font-size: 14px; color: #6c757d; }
-    .grade-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; }
-    .subject-comment { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef; line-height: 1.6; }
-    .goals-list { list-style: none; }
-    .goals-list li { padding: 12px 16px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
-    .goals-list li::before { content: "🎯"; }
-    .parent-notes { background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #667eea; }
-    .footer { text-align: center; padding: 24px; background: #f8f9fa; color: #6c757d; font-size: 14px; }
-    @media print { body { padding: 0; background: white; } .report { box-shadow: none; } }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; padding: 20px; color: #1a1a1a; line-height: 1.6; }
+    .report { max-width: 800px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #e5e5e5; }
+    
+    /* Header - matches SampleReport primary style */
+    .header { background: #1a1a2e; color: white; padding: 24px 32px; }
+    .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .header-left { }
+    .header-subtitle { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+    .header-title { font-size: 20px; font-weight: 500; }
+    .session-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 500; }
+    
+    /* Content */
+    .content { padding: 32px 40px; }
+    
+    /* Section styling */
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title svg { width: 16px; height: 16px; }
+    
+    /* Summary */
+    .summary-text { font-size: 14px; line-height: 1.8; color: #1a1a1a; }
+    .summary-text p { margin-bottom: 16px; }
+    .summary-text p:last-child { margin-bottom: 0; }
+    
+    /* Challenge box */
+    .challenge-box { background: #f8f9fa; padding: 24px; border-radius: 8px; border: 1px solid #e5e5e5; }
+    .challenge-box .section-title { margin-bottom: 12px; }
+    .challenge-text { font-size: 14px; line-height: 1.8; }
+    
+    /* Evaluation */
+    .evaluation-text { font-size: 14px; line-height: 1.8; margin-bottom: 24px; }
+    .skill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .skill-item { text-align: center; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+    .skill-score { font-size: 24px; font-weight: 500; color: #1a1a1a; margin-bottom: 4px; }
+    .skill-label { font-size: 11px; color: #6b7280; }
+    
+    /* Risk flags box */
+    .risk-box { background: #fef2f2; padding: 24px; border-radius: 8px; border: 1px solid #fecaca; }
+    .risk-box .section-title { color: #dc2626; }
+    .risk-list { list-style: none; }
+    .risk-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; }
+    .risk-item:last-child { margin-bottom: 0; }
+    .risk-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
+    .risk-dot.high { background: #dc2626; }
+    .risk-dot.medium { background: #f59e0b; }
+    
+    /* Recommendations box */
+    .rec-box { background: #eff6ff; padding: 24px; border-radius: 8px; border: 1px solid #bfdbfe; }
+    .rec-box .section-title { color: #2563eb; }
+    .rec-list { list-style: none; }
+    .rec-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; }
+    .rec-item:last-child { margin-bottom: 0; }
+    .rec-dot { width: 6px; height: 6px; border-radius: 50%; background: #2563eb; margin-top: 8px; flex-shrink: 0; }
+    
+    /* Priorities box */
+    .priorities-box { background: #fef3c7; padding: 24px; border-radius: 8px; border: 1px solid #fde68a; }
+    .priorities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .priority-item { padding: 16px; background: white; border-radius: 8px; border: 1px solid #e5e5e5; }
+    .priority-label { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+    .priority-text { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+    
+    /* Footer */
+    .footer { padding: 16px 32px; background: #f8f9fa; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; }
+    
+    @media print { 
+      body { padding: 0; background: white; } 
+      .report { box-shadow: none; border: none; }
+    }
   </style>
 </head>
 <body>
   <div class="report">
     <div class="header">
-      <h1>📊 IBCircle Progress Report</h1>
-      <p>학생 성장 리포트</p>
-    </div>
-    
-    <div class="student-info">
-      <div><label>학생 이름</label><span>${reportData.studentName || "-"}</span></div>
-      <div><label>학년</label><span>${reportData.grade || "-"}</span></div>
-      <div><label>작성일</label><span>${reportData.date || "-"}</span></div>
-    </div>
-    
-    <div class="section">
-      <h2 class="section-title">📝 전체 요약</h2>
-      <div class="summary">${reportData.overallSummary || "요약 내용이 없습니다."}</div>
-    </div>
-    
-    <div class="section">
-      <h2 class="section-title">📚 과목별 성적</h2>
-      ${reportData.subjects
-        .filter((s) => s.name)
-        .map(
-          (subject) => `
-        <div class="subject-card">
-          <div class="subject-header">
-            <div>
-              <div class="subject-name">${subject.name}</div>
-              <div class="subject-meta">
-                <span>👨‍🏫 ${subject.teacher || "-"}</span>
-                <span>📊 ${subject.level || "-"}</span>
-              </div>
-            </div>
-            <div class="grade-badge">
-              <span>${subject.grade || "-"}</span>
-              <span>${subject.trend}</span>
-            </div>
-          </div>
-          ${subject.comment ? `<div class="subject-comment">${subject.comment}</div>` : ""}
+      <div class="header-content">
+        <div class="header-left">
+          <div class="header-subtitle">IBCircle Progress Report</div>
+          <div class="header-title">${reportData.subjectTitle}</div>
         </div>
-      `
-        )
-        .join("")}
+        <div class="session-badge">
+          <span>📄</span>
+          <span>Session #${reportData.sessionNumber}</span>
+        </div>
+      </div>
     </div>
     
-    ${
-      reportData.goals.filter((g) => g).length > 0
-        ? `
-    <div class="section">
-      <h2 class="section-title">🎯 다음 분기 목표</h2>
-      <ul class="goals-list">
-        ${reportData.goals
-          .filter((g) => g)
-          .map((goal) => `<li>${goal}</li>`)
-          .join("")}
-      </ul>
+    <div class="content">
+      <!-- Summary Section -->
+      <div class="section">
+        <div class="section-title">
+          <span>📈</span> 수업 요약
+        </div>
+        <div class="summary-text">
+          ${reportData.summary.split('\n').map(p => `<p>${p}</p>`).join('')}
+        </div>
+      </div>
+      
+      <!-- Challenge Section -->
+      ${reportData.challengeContent ? `
+      <div class="section">
+        <div class="challenge-box">
+          <div class="section-title">
+            <span>🎯</span> 심화 학습
+          </div>
+          <div class="challenge-text">${reportData.challengeContent}</div>
+        </div>
+      </div>
+      ` : ''}
+      
+      <!-- Evaluation Section -->
+      <div class="section">
+        <div class="section-title">
+          <span>✓</span> 학습 평가
+        </div>
+        <div class="evaluation-text">${reportData.evaluationText}</div>
+        <div class="skill-grid">
+          ${reportData.skillScores.map(skill => `
+            <div class="skill-item">
+              <div class="skill-score">${skill.score}</div>
+              <div class="skill-label">${skill.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- Risk Flags -->
+      ${reportData.riskFlags.filter(r => r.text).length > 0 ? `
+      <div class="section">
+        <div class="risk-box">
+          <div class="section-title">
+            <span>⚠️</span> Academic Risk Flags
+          </div>
+          <ul class="risk-list">
+            ${reportData.riskFlags.filter(r => r.text).map(risk => `
+              <li class="risk-item">
+                <span class="risk-dot ${risk.level}"></span>
+                <span>${risk.text}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+      ` : ''}
+      
+      <!-- Recommendations -->
+      ${reportData.recommendations.filter(r => r.text).length > 0 ? `
+      <div class="section">
+        <div class="rec-box">
+          <div class="section-title">
+            <span>💡</span> Strategic Recommendations
+          </div>
+          <ul class="rec-list">
+            ${reportData.recommendations.filter(r => r.text).map(rec => `
+              <li class="rec-item">
+                <span class="rec-dot"></span>
+                <span>${rec.text}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+      ` : ''}
+      
+      <!-- Priorities -->
+      ${reportData.priorities.filter(p => p.text).length > 0 ? `
+      <div class="section">
+        <div class="priorities-box">
+          <div class="section-title">
+            <span>→</span> Next Step Priorities
+          </div>
+          <div class="priorities-grid">
+            ${reportData.priorities.filter(p => p.text).map(priority => `
+              <div class="priority-item">
+                <div class="priority-label">${priority.label}</div>
+                <div class="priority-text">${priority.text}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      ` : ''}
     </div>
-    `
-        : ""
-    }
-    
-    ${
-      reportData.parentNotes
-        ? `
-    <div class="section">
-      <h2 class="section-title">💬 학부모님께</h2>
-      <div class="parent-notes">${reportData.parentNotes}</div>
-    </div>
-    `
-        : ""
-    }
     
     <div class="footer">
-      <p>IBCircle Education | Excellence in IB Education</p>
+      <span>IBCircle · Premium IB Education</span>
+      <span>Confidential Student Report</span>
     </div>
   </div>
   <script>window.onload = () => window.print();</script>
@@ -238,139 +365,110 @@ const AdminReports = () => {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        {/* Student Info */}
+        {/* Report Header Info */}
         <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">학생 정보</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <h2 className="text-lg font-semibold mb-4">리포트 헤더</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">학생 이름</label>
+              <label className="text-sm text-muted-foreground mb-1 block">과목 제목</label>
               <Input
-                value={reportData.studentName}
-                onChange={(e) => setReportData((p) => ({ ...p, studentName: e.target.value }))}
-                placeholder="홍길동"
+                value={reportData.subjectTitle}
+                onChange={(e) => setReportData((p) => ({ ...p, subjectTitle: e.target.value }))}
+                placeholder="IB Economics HL 수업 리포트"
               />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">학년</label>
+              <label className="text-sm text-muted-foreground mb-1 block">세션 번호</label>
               <Input
-                value={reportData.grade}
-                onChange={(e) => setReportData((p) => ({ ...p, grade: e.target.value }))}
-                placeholder="11학년"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">작성일</label>
-              <Input
-                type="date"
-                value={reportData.date}
-                onChange={(e) => setReportData((p) => ({ ...p, date: e.target.value }))}
+                value={reportData.sessionNumber}
+                onChange={(e) => setReportData((p) => ({ ...p, sessionNumber: e.target.value }))}
+                placeholder="24"
               />
             </div>
           </div>
         </section>
 
-        {/* Overall Summary */}
+        {/* Summary */}
         <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">전체 요약</h2>
+          <h2 className="text-lg font-semibold mb-4">수업 요약</h2>
           <Textarea
-            value={reportData.overallSummary}
-            onChange={(e) => setReportData((p) => ({ ...p, overallSummary: e.target.value }))}
-            placeholder="학생의 전반적인 학업 성취도와 발전 상황을 요약해주세요..."
-            rows={4}
+            value={reportData.summary}
+            onChange={(e) => setReportData((p) => ({ ...p, summary: e.target.value }))}
+            placeholder="오늘 수업에서 다룬 내용을 상세히 작성해주세요. 여러 문단으로 나누어 작성할 수 있습니다."
+            rows={6}
           />
         </section>
 
-        {/* Subjects */}
+        {/* Challenge Content */}
         <section className="bg-card border border-border rounded-xl p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">과목별 성적</h2>
-            <Button variant="outline" size="sm" onClick={addSubject} className="gap-1">
-              <Plus className="w-4 h-4" />
-              과목 추가
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {reportData.subjects.map((subject, index) => (
-              <div key={index} className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-1">
-                    <Input
-                      value={subject.name}
-                      onChange={(e) => updateSubject(index, "name", e.target.value)}
-                      placeholder="과목명"
-                    />
-                    <Input
-                      value={subject.teacher}
-                      onChange={(e) => updateSubject(index, "teacher", e.target.value)}
-                      placeholder="담당 선생님"
-                    />
-                    <Input
-                      value={subject.level}
-                      onChange={(e) => updateSubject(index, "level", e.target.value)}
-                      placeholder="레벨 (HL/SL)"
-                    />
-                    <div className="flex gap-2">
-                      <Input
-                        value={subject.grade}
-                        onChange={(e) => updateSubject(index, "grade", e.target.value)}
-                        placeholder="점수"
-                        className="flex-1"
-                      />
-                      <select
-                        value={subject.trend}
-                        onChange={(e) => updateSubject(index, "trend", e.target.value)}
-                        className="px-3 rounded-md border border-input bg-background"
-                      >
-                        <option value="↑">↑</option>
-                        <option value="→">→</option>
-                        <option value="↓">↓</option>
-                      </select>
-                    </div>
-                  </div>
-                  {reportData.subjects.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeSubject(index)}
-                      className="ml-2 text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-                <Textarea
-                  value={subject.comment}
-                  onChange={(e) => updateSubject(index, "comment", e.target.value)}
-                  placeholder="과목별 코멘트..."
-                  rows={2}
+          <h2 className="text-lg font-semibold mb-4">심화 학습</h2>
+          <Textarea
+            value={reportData.challengeContent}
+            onChange={(e) => setReportData((p) => ({ ...p, challengeContent: e.target.value }))}
+            placeholder="심화 학습 내용을 작성해주세요 (선택사항)"
+            rows={3}
+          />
+        </section>
+
+        {/* Evaluation */}
+        <section className="bg-card border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold mb-4">학습 평가</h2>
+          <Textarea
+            value={reportData.evaluationText}
+            onChange={(e) => setReportData((p) => ({ ...p, evaluationText: e.target.value }))}
+            placeholder="학생의 학습 태도와 성취도에 대한 평가를 작성해주세요."
+            rows={3}
+            className="mb-4"
+          />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {reportData.skillScores.map((skill, index) => (
+              <div key={index} className="space-y-2">
+                <Input
+                  value={skill.label}
+                  onChange={(e) => updateSkillScore(index, "label", e.target.value)}
+                  placeholder="스킬명"
+                />
+                <Input
+                  value={skill.score}
+                  onChange={(e) => updateSkillScore(index, "score", e.target.value)}
+                  placeholder="점수"
                 />
               </div>
             ))}
           </div>
         </section>
 
-        {/* Goals */}
+        {/* Risk Flags */}
         <section className="bg-card border border-border rounded-xl p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">다음 분기 목표</h2>
-            <Button variant="outline" size="sm" onClick={addGoal} className="gap-1">
+            <h2 className="text-lg font-semibold">Academic Risk Flags</h2>
+            <Button variant="outline" size="sm" onClick={addRiskFlag} className="gap-1">
               <Plus className="w-4 h-4" />
-              목표 추가
+              추가
             </Button>
           </div>
-          <div className="space-y-2">
-            {reportData.goals.map((goal, index) => (
+          <div className="space-y-3">
+            {reportData.riskFlags.map((risk, index) => (
               <div key={index} className="flex gap-2">
+                <select
+                  value={risk.level}
+                  onChange={(e) => updateRiskFlag(index, "level", e.target.value)}
+                  className="px-3 rounded-md border border-input bg-background"
+                >
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                </select>
                 <Input
-                  value={goal}
-                  onChange={(e) => updateGoal(index, e.target.value)}
-                  placeholder={`목표 ${index + 1}`}
+                  value={risk.text}
+                  onChange={(e) => updateRiskFlag(index, "text", e.target.value)}
+                  placeholder="리스크 내용"
+                  className="flex-1"
                 />
-                {reportData.goals.length > 1 && (
+                {reportData.riskFlags.length > 1 && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeGoal(index)}
+                    onClick={() => removeRiskFlag(index)}
                     className="text-destructive"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -381,15 +479,54 @@ const AdminReports = () => {
           </div>
         </section>
 
-        {/* Parent Notes */}
+        {/* Recommendations */}
         <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">학부모님께</h2>
-          <Textarea
-            value={reportData.parentNotes}
-            onChange={(e) => setReportData((p) => ({ ...p, parentNotes: e.target.value }))}
-            placeholder="학부모님께 전달할 메시지를 작성해주세요..."
-            rows={4}
-          />
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Strategic Recommendations</h2>
+            <Button variant="outline" size="sm" onClick={addRecommendation} className="gap-1">
+              <Plus className="w-4 h-4" />
+              추가
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {reportData.recommendations.map((rec, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={rec.text}
+                  onChange={(e) => updateRecommendation(index, e.target.value)}
+                  placeholder="추천 사항"
+                  className="flex-1"
+                />
+                {reportData.recommendations.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeRecommendation(index)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Priorities */}
+        <section className="bg-card border border-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Next Step Priorities</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {reportData.priorities.map((priority, index) => (
+              <div key={index}>
+                <label className="text-sm text-muted-foreground mb-1 block">{priority.label}</label>
+                <Input
+                  value={priority.text}
+                  onChange={(e) => updatePriority(index, e.target.value)}
+                  placeholder="우선순위 내용"
+                />
+              </div>
+            ))}
+          </div>
         </section>
       </main>
     </div>
