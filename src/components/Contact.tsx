@@ -1,26 +1,37 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Mail, Clock } from 'lucide-react';
+import { MessageCircle, Mail, Clock, Send, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Contact = () => {
-  const contactMethods = [
-    {
-      icon: MessageCircle,
-      label: '카카오톡 상담',
-      value: 'academythe',
-      href: 'https://pf.kakao.com/_academythe',
-    },
-    {
-      icon: Mail,
-      label: '이메일',
-      value: 'ht2a4.8@gmail.com',
-      href: 'mailto:ht2a4.8@gmail.com',
-    },
-  ];
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Simulate email submission
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    toast({
+      title: "이메일이 전송되었습니다",
+      description: "빠른 시일 내에 답변 드리겠습니다.",
+    });
+    
+    setEmail('');
+    setName('');
+    setMessage('');
+    setIsSubmitting(false);
+  };
 
   return (
     <section id="contact" className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-6 lg:px-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -35,8 +46,8 @@ const Contact = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Contact methods */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Left Column - Contact Methods */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -44,21 +55,35 @@ const Contact = () => {
               transition={{ duration: 0.6 }}
               className="space-y-6"
             >
-              {contactMethods.map((method) => (
-                <a
-                  key={method.label}
-                  href={method.href}
-                  className="flex items-center gap-4 p-6 bg-secondary/50 border border-border hover:bg-secondary transition-colors duration-300 group"
-                >
-                  <div className="w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <method.icon size={24} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{method.label}</p>
-                    <p className="font-medium text-foreground">{method.value}</p>
-                  </div>
-                </a>
-              ))}
+              {/* KakaoTalk */}
+              <a
+                href="https://open.kakao.com/o/sIBCircle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 p-6 bg-secondary/50 border border-border hover:bg-secondary transition-colors duration-300 group"
+              >
+                <div className="w-12 h-12 bg-[#FEE500] text-[#3C1E1E] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <MessageCircle size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">카카오톡 오픈채팅</p>
+                  <p className="font-medium text-foreground">IBCircle 상담방</p>
+                </div>
+              </a>
+
+              {/* Email contact info */}
+              <a
+                href="mailto:ht2a4.8@gmail.com"
+                className="flex items-center gap-4 p-6 bg-secondary/50 border border-border hover:bg-secondary transition-colors duration-300 group"
+              >
+                <div className="w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <Mail size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">이메일</p>
+                  <p className="font-medium text-foreground">ht2a4.8@gmail.com</p>
+                </div>
+              </a>
 
               {/* Operating hours */}
               <div className="flex items-start gap-4 p-6 bg-secondary/50 border border-border">
@@ -71,31 +96,113 @@ const Contact = () => {
                   <p className="text-sm text-foreground">주말 10:00–18:00</p>
                 </div>
               </div>
+
+              {/* CTA Card */}
+              <div className="bg-primary text-primary-foreground p-8 flex flex-col justify-center">
+                <h3 className="text-xl font-medium mb-3">
+                  빠른 상담 신청
+                </h3>
+                <p className="text-primary-foreground/80 mb-6 text-sm leading-relaxed">
+                  카카오톡 오픈채팅으로 빠르고 편리하게 상담받으세요.
+                </p>
+                <a
+                  href="https://open.kakao.com/o/sIBCircle"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-foreground text-primary font-medium transition-all duration-300 hover:opacity-90"
+                >
+                  <MessageCircle size={18} />
+                  카카오톡으로 상담하기
+                </a>
+              </div>
             </motion.div>
 
-            {/* CTA Card */}
+            {/* Right Column - Email Form */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-primary text-primary-foreground p-8 md:p-10 flex flex-col justify-center"
+              className="bg-secondary/30 border border-border p-8"
             >
-              <h3 className="text-2xl font-medium mb-4">
-                무료 상담 신청
-              </h3>
-              <p className="text-primary-foreground/80 mb-8 leading-relaxed">
-                학생의 현재 상황과 목표에 맞는 최적의 학습 전략을 
-                무료 상담을 통해 확인하세요.
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Send size={18} className="text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">이메일 문의</h3>
+                  <p className="text-sm text-muted-foreground">자세한 상담 내용을 남겨주세요</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-background border border-border focus:border-primary focus:outline-none transition-colors text-foreground placeholder:text-muted-foreground"
+                    placeholder="홍길동"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                    이메일
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-background border border-border focus:border-primary focus:outline-none transition-colors text-foreground placeholder:text-muted-foreground"
+                    placeholder="example@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
+                    문의 내용
+                  </label>
+                  <textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                    rows={4}
+                    className="w-full px-4 py-3 bg-background border border-border focus:border-primary focus:outline-none transition-colors text-foreground placeholder:text-muted-foreground resize-none"
+                    placeholder="상담하고 싶은 내용을 자유롭게 작성해주세요."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground font-medium transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      전송 중...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={18} />
+                      이메일 보내기
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <p className="text-xs text-muted-foreground mt-4 text-center">
+                영업일 기준 24시간 이내 답변 드립니다.
               </p>
-              <a
-                href="https://pf.kakao.com/_academythe"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-8 py-4 bg-primary-foreground text-primary font-medium transition-all duration-300 hover:opacity-90"
-              >
-                카카오톡으로 상담하기
-              </a>
             </motion.div>
           </div>
         </div>

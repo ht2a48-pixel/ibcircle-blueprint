@@ -66,7 +66,11 @@ const WorldMap = () => {
   const [isPinching, setIsPinching] = useState(false);
   const [initialPinchDistance, setInitialPinchDistance] = useState(0);
   const [initialPinchScale, setInitialPinchScale] = useState(1);
+  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
+  const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
+  const [lastTouchTime, setLastTouchTime] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const momentumRef = useRef<number | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -164,6 +168,15 @@ const WorldMap = () => {
         x: e.touches[0].clientX - position.x, 
         y: e.touches[0].clientY - position.y 
       });
+      setLastTouchPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      setLastTouchTime(Date.now());
+      setVelocity({ x: 0, y: 0 });
+      
+      // Cancel any ongoing momentum
+      if (momentumRef.current) {
+        cancelAnimationFrame(momentumRef.current);
+        momentumRef.current = null;
+      }
     }
   };
 
@@ -191,8 +204,24 @@ const WorldMap = () => {
       }
     } else if (e.touches.length === 1 && isDragging && scale > 1) {
       // Single finger pan when zoomed in
-      const newX = e.touches[0].clientX - dragStart.x;
-      const newY = e.touches[0].clientY - dragStart.y;
+      const currentTime = Date.now();
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      
+      // Calculate velocity for momentum
+      const timeDelta = currentTime - lastTouchTime;
+      if (timeDelta > 0) {
+        setVelocity({
+          x: (currentX - lastTouchPosition.x) / timeDelta * 16,
+          y: (currentY - lastTouchPosition.y) / timeDelta * 16,
+        });
+      }
+      
+      setLastTouchPosition({ x: currentX, y: currentY });
+      setLastTouchTime(currentTime);
+      
+      const newX = currentX - dragStart.x;
+      const newY = currentY - dragStart.y;
       const containerWidth = containerRef.current?.offsetWidth || 0;
       const containerHeight = containerRef.current?.offsetHeight || 0;
       const maxOffsetX = containerWidth * (scale - 1) / 2;
@@ -204,12 +233,55 @@ const WorldMap = () => {
     }
   };
 
+  // Apply momentum scrolling
+  const applyMomentum = useCallback(() => {
+    if (momentumRef.current) {
+      cancelAnimationFrame(momentumRef.current);
+    }
+
+    const friction = 0.95;
+    const minVelocity = 0.5;
+
+    const animate = () => {
+      setVelocity(prev => {
+        const newVelocity = {
+          x: prev.x * friction,
+          y: prev.y * friction,
+        };
+
+        if (Math.abs(newVelocity.x) < minVelocity && Math.abs(newVelocity.y) < minVelocity) {
+          return { x: 0, y: 0 };
+        }
+
+        const containerWidth = containerRef.current?.offsetWidth || 0;
+        const containerHeight = containerRef.current?.offsetHeight || 0;
+        const maxOffsetX = containerWidth * (scale - 1) / 2;
+        const maxOffsetY = containerHeight * (scale - 1) / 2;
+
+        setPosition(prevPos => ({
+          x: Math.max(-maxOffsetX, Math.min(maxOffsetX, prevPos.x + newVelocity.x)),
+          y: Math.max(-maxOffsetY, Math.min(maxOffsetY, prevPos.y + newVelocity.y)),
+        }));
+
+        momentumRef.current = requestAnimationFrame(animate);
+        return newVelocity;
+      });
+    };
+
+    momentumRef.current = requestAnimationFrame(animate);
+  }, [scale]);
+
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (e.touches.length < 2) {
       setIsPinching(false);
     }
     if (e.touches.length === 0) {
       setIsDragging(false);
+      
+      // Apply momentum if there's velocity
+      if (scale > 1 && (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1)) {
+        applyMomentum();
+      }
     }
   };
 
