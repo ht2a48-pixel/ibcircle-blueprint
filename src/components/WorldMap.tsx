@@ -380,17 +380,8 @@ const WorldMap = () => {
               const isHovered = hoveredCountry?.id === country.id;
 
               return (
-                <motion.div
+                <div
                   key={country.id}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ 
-                    duration: 0.5, 
-                    delay: index * 0.03,
-                    type: 'spring',
-                    stiffness: 200
-                  }}
                   className="absolute cursor-pointer"
                   style={{ 
                     left: `${country.x}%`, 
@@ -408,56 +399,28 @@ const WorldMap = () => {
                     setTimeout(() => setHoveredCountry(null), 2000);
                   }}
                 >
-                  {/* Pulse Animation */}
-                  <motion.div
-                    className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/30`}
+                  {/* Simplified Pulse - CSS only for performance */}
+                  <div 
+                    className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/20 animate-ping`}
                     style={{ 
                       left: '50%', 
                       top: '50%', 
-                      transform: 'translate(-50%, -50%)' 
-                    }}
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.4, 0, 0.4],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: index * 0.1,
-                    }}
-                  />
-
-                  {/* Second Pulse Layer */}
-                  <motion.div
-                    className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/20`}
-                    style={{ 
-                      left: '50%', 
-                      top: '50%', 
-                      transform: 'translate(-50%, -50%)' 
-                    }}
-                    animate={{
-                      scale: [1, 2, 1],
-                      opacity: [0.3, 0, 0.3],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      delay: index * 0.1 + 0.5,
+                      transform: 'translate(-50%, -50%)',
+                      animationDuration: '2s',
+                      animationDelay: `${(index % 5) * 0.2}s`
                     }}
                   />
 
                   {/* Pin Marker */}
-                  <motion.div
-                    className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10`}
-                    whileHover={{ scale: 1.3 }}
-                    animate={isHovered ? { scale: 1.3 } : { scale: 1 }}
+                  <div
+                    className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10 transition-transform duration-200 ${isHovered ? 'scale-125' : 'scale-100'}`}
                   >
                     {(size === 'lg' || size === 'md') && (
                       <span className="text-[8px] md:text-[10px] font-bold text-primary-foreground">
                         {country.students}
                       </span>
                     )}
-                  </motion.div>
+                  </div>
 
                   {/* Tooltip */}
                   <AnimatePresence>
@@ -477,7 +440,7 @@ const WorldMap = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               );
             })}
           </AnimatePresence>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Mail, Clock, Send, CheckCircle } from 'lucide-react';
+import { MessageCircle, Mail, Clock, Send, CheckCircle, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -14,18 +15,31 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate email submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "이메일이 전송되었습니다",
-      description: "빠른 시일 내에 답변 드리겠습니다.",
-    });
-    
-    setEmail('');
-    setName('');
-    setMessage('');
-    setIsSubmitting(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: { name, email, message }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "이메일이 전송되었습니다",
+        description: "빠른 시일 내에 답변 드리겠습니다.",
+      });
+      
+      setEmail('');
+      setName('');
+      setMessage('');
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "전송 실패",
+        description: "잠시 후 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -55,7 +69,7 @@ const Contact = () => {
               transition={{ duration: 0.6 }}
               className="space-y-6"
             >
-              {/* KakaoTalk */}
+              {/* KakaoTalk Open Chat */}
               <a
                 href="https://open.kakao.com/o/sIBCircle"
                 target="_blank"
@@ -70,6 +84,17 @@ const Contact = () => {
                   <p className="font-medium text-foreground">IBCircle 상담방</p>
                 </div>
               </a>
+
+              {/* Director Kakao ID */}
+              <div className="flex items-center gap-4 p-6 bg-secondary/50 border border-border">
+                <div className="w-12 h-12 bg-[#FEE500] text-[#3C1E1E] flex items-center justify-center flex-shrink-0">
+                  <User size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">원장 카카오 ID</p>
+                  <p className="font-medium text-foreground">Academythe</p>
+                </div>
+              </div>
 
               {/* Email contact info */}
               <a
@@ -95,25 +120,6 @@ const Contact = () => {
                   <p className="text-sm text-foreground">평일 09:00–22:00</p>
                   <p className="text-sm text-foreground">주말 10:00–18:00</p>
                 </div>
-              </div>
-
-              {/* CTA Card */}
-              <div className="bg-primary text-primary-foreground p-8 flex flex-col justify-center">
-                <h3 className="text-xl font-medium mb-3">
-                  빠른 상담 신청
-                </h3>
-                <p className="text-primary-foreground/80 mb-6 text-sm leading-relaxed">
-                  카카오톡 오픈채팅으로 빠르고 편리하게 상담받으세요.
-                </p>
-                <a
-                  href="https://open.kakao.com/o/sIBCircle"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-foreground text-primary font-medium transition-all duration-300 hover:opacity-90"
-                >
-                  <MessageCircle size={18} />
-                  카카오톡으로 상담하기
-                </a>
               </div>
             </motion.div>
 
