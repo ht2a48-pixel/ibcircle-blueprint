@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBCircle Progress Report Template</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+    
+    .report-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .report-header {
+      background: #1a1a1a;
+      color: white;
+      padding: 32px 40px;
+    }
+    
+    .report-header .label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    
+    .report-header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    
+    .report-meta {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .report-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .session-badge {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .report-content {
+      padding: 40px;
+    }
+    
+    .section {
+      margin-bottom: 32px;
+    }
+    
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+    
+    .section p {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    
+    .highlight-box {
+      background: #f8f8f8;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .skill-item {
+      text-align: center;
+      padding: 20px 16px;
+      background: #f8f8f8;
+      border-radius: 8px;
+    }
+    
+    .skill-score {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    
+    .skill-label {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .risk-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .risk-box .section-title {
+      color: #dc2626;
+    }
+    
+    .risk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .risk-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .risk-dot {
+      width: 6px;
+      height: 6px;
+      background: #dc2626;
+      border-radius: 50%;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    
+    .risk-dot.warning {
+      background: #f59e0b;
+    }
+    
+    .recommendation-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .recommendation-box .section-title {
+      color: #0284c7;
+    }
+    
+    .recommendation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .recommendation-dot {
+      width: 6px;
+      height: 6px;
+      background: #0284c7;
+      border-radius: 50%;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    
+    .priorities-box {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 24px;
+    }
+    
+    .priorities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    
+    .priority-item {
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .priority-label {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 4px;
+    }
+    
+    .priority-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+    
+    .report-footer {
+      background: #f8f8f8;
+      border-top: 1px solid #e5e5e5;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    /* Editable field styling */
+    .editable {
+      background: #fffbeb;
+      border: 1px dashed #fbbf24;
+      padding: 2px 6px;
+      border-radius: 4px;
+      min-width: 100px;
+      display: inline-block;
+    }
+    
+    .editable:focus {
+      outline: none;
+      background: #fef3c7;
+      border-color: #f59e0b;
+    }
+    
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      .report-container {
+        box-shadow: none;
+        border-radius: 0;
+      }
+      
+      .editable {
+        background: transparent;
+        border: none;
+        padding: 0;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+    }
+    
+    /* Instructions banner */
+    .instructions {
+      max-width: 800px;
+      margin: 0 auto 24px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px 24px;
+      font-size: 14px;
+      color: #1e40af;
+    }
+    
+    .instructions h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .instructions ul {
+      margin-left: 20px;
+    }
+    
+    .print-btn {
+      display: block;
+      max-width: 800px;
+      margin: 24px auto;
+      padding: 16px 32px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .print-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <!-- Instructions (won't print) -->
+  <div class="instructions no-print">
+    <h3>📝 사용 방법</h3>
+    <ul>
+      <li>노란색 하이라이트된 부분을 클릭하여 내용을 수정하세요</li>
+      <li>수정 완료 후 "PDF로 저장" 버튼을 클릭하거나 Ctrl+P (Cmd+P)로 인쇄하세요</li>
+      <li>인쇄 시 "PDF로 저장"을 선택하면 PDF 파일로 저장됩니다</li>
+    </ul>
+  </div>
+
+  <div class="report-container">
+    <!-- Header -->
+    <div class="report-header">
+      <div class="label">IBCircle Progress Report</div>
+      <h1><span class="editable" contenteditable="true">IB Economics HL</span> 수업 리포트</h1>
+      <div class="report-meta">
+        <span>📅 <span class="editable" contenteditable="true">2024년 12월 21일</span></span>
+        <span>👤 <span class="editable" contenteditable="true">학생 이름</span></span>
+        <span class="session-badge">Session #<span class="editable" contenteditable="true">24</span></span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="report-content">
+      <!-- Summary -->
+      <div class="section">
+        <div class="section-title">수업 요약</div>
+        <p class="editable" contenteditable="true">
+          오늘 수업에서는 그동안 진행해온 거시경제학(Macroeconomics) 전 범위를 마무리하며, 
+          공급측면 정책(Supply-side policies)까지의 핵심 개념을 체계적으로 정리했습니다. 
+          단순 개념 암기가 아닌, 그래프 해석과 인과 관계 분석을 중심으로 IB 평가 기준에 맞춘 학습을 진행했습니다.
+        </p>
+        <p class="editable" contenteditable="true">
+          특히 학생들이 가장 어려워하는 개념 중 하나인 디플레이션(deflation)을 심층적으로 다루었습니다. 
+          디플레이션이 발생하는 구조를 수요·공급 모형을 통해 단계적으로 분석하고, 
+          실질 부채 부담 증가, 소비 및 투자 위축 등 경제 전반에 미치는 영향을 논리적으로 정리했습니다.
+        </p>
+      </div>
+
+      <!-- Advanced Study -->
+      <div class="highlight-box">
+        <div class="section-title">심화 학습</div>
+        <p class="editable" contenteditable="true">
+          또한 난이도가 높은 Paper 1, Part B 수준의 '인플레이션과 실업 비교·분석' 문제에 도전했습니다. 
+          단기와 장기의 차이, 상충 관계(trade-off), 정책적 시사점까지 포함하는 고급 분석이 요구되는 문항이었으며, 
+          전반적으로 논리성과 균형 잡힌 서술이 잘 이루어졌습니다.
+        </p>
+      </div>
+
+      <!-- Evaluation -->
+      <div class="section">
+        <div class="section-title">학습 평가</div>
+        <p class="editable" contenteditable="true">
+          학생은 경제 개념을 단순히 외우는 수준을 넘어, "왜 그런 결과가 나타나는지"를 이해하려는 태도가 매우 우수합니다. 
+          특히 거시 파트 후반부의 복잡한 그래프 분석과 에세이 구조를 빠르게 습득한 점이 인상적이었습니다.
+        </p>
+        
+        <div class="skills-grid">
+          <div class="skill-item">
+            <div class="skill-score editable" contenteditable="true">92</div>
+            <div class="skill-label">개념 이해</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-score editable" contenteditable="true">88</div>
+            <div class="skill-label">그래프 분석</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-score editable" contenteditable="true">85</div>
+            <div class="skill-label">에세이 구조</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-score editable" contenteditable="true">90</div>
+            <div class="skill-label">비판적 사고</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Flags -->
+      <div class="risk-box">
+        <div class="section-title">Academic Risk Flags</div>
+        <div class="risk-item">
+          <div class="risk-dot"></div>
+          <span class="editable" contenteditable="true">Paper 2 Data Response 문항에서 계산 실수가 간헐적으로 발생 — 시간 배분 및 검토 루틴 개선 필요</span>
+        </div>
+        <div class="risk-item">
+          <div class="risk-dot warning"></div>
+          <span class="editable" contenteditable="true">국제 경제(International Economics) 파트 그래프 해석력 보완 권장</span>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="recommendation-box">
+        <div class="section-title">Strategic Recommendations</div>
+        <div class="recommendation-item">
+          <div class="recommendation-dot"></div>
+          <span class="editable" contenteditable="true">Paper 1 Part B 에세이 연습 시, 서론에서 정의와 논점을 명확히 제시하는 연습 강화</span>
+        </div>
+        <div class="recommendation-item">
+          <div class="recommendation-dot"></div>
+          <span class="editable" contenteditable="true">IA(Internal Assessment) 주제 선정을 위해 실제 경제 뉴스 기사 스크랩 시작 권장</span>
+        </div>
+        <div class="recommendation-item">
+          <div class="recommendation-dot"></div>
+          <span class="editable" contenteditable="true">시험 직전 2주간 과거 기출문제 집중 풀이 예정 — 오답 정리 노트 병행</span>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="priorities-box">
+        <div class="section-title">Next Step Priorities</div>
+        <div class="priorities-grid">
+          <div class="priority-item">
+            <div class="priority-label">Priority 1</div>
+            <div class="priority-text editable" contenteditable="true">Paper 1 & 2 문제 풀이 심화 훈련</div>
+          </div>
+          <div class="priority-item">
+            <div class="priority-label">Priority 2</div>
+            <div class="priority-text editable" contenteditable="true">IA 주제 브레인스토밍 및 1차 선정</div>
+          </div>
+          <div class="priority-item">
+            <div class="priority-label">Priority 3</div>
+            <div class="priority-text editable" contenteditable="true">국제 경제 그래프 집중 복습</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <span>IBCircle · Premium IB Education</span>
+      <span>Confidential Student Report</span>
+    </div>
+  </div>
+
+  <button class="print-btn no-print" onclick="window.print()">📄 PDF로 저장 / 인쇄</button>
+
+  <script>
+    // Prevent line breaks in single-line editable fields
+    document.querySelectorAll('.editable').forEach(el => {
+      if (!el.classList.contains('multiline')) {
+        el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

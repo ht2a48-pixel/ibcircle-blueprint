@@ -1,83 +1,7 @@
-import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, TrendingUp, Target, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { FileText, TrendingUp, Target, CheckCircle, AlertTriangle, Lightbulb, ArrowRight } from 'lucide-react';
 
 const SampleReport = () => {
-  const reportRef = useRef<HTMLDivElement>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
-
-  const handleDownloadPDF = async () => {
-    if (!reportRef.current) return;
-    
-    setIsGenerating(true);
-    toast({
-      title: "PDF 생성 중...",
-      description: "잠시만 기다려주세요.",
-    });
-
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const jsPDF = (await import('jspdf')).default;
-
-      const element = reportRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 0;
-
-      // Handle multi-page if content is too long
-      const pageHeight = pdfHeight;
-      const contentHeight = (imgHeight * ratio);
-      let heightLeft = contentHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', imgX, position, imgWidth * ratio, imgHeight * ratio);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - contentHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', imgX, position, imgWidth * ratio, imgHeight * ratio);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save('IBCircle_Progress_Report.pdf');
-
-      toast({
-        title: "PDF 다운로드 완료",
-        description: "IBCircle Progress Report가 저장되었습니다.",
-      });
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      toast({
-        title: "PDF 생성 실패",
-        description: "다시 시도해주세요.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <section className="py-24 md:py-32 bg-secondary/30">
       <div className="container mx-auto px-6 lg:px-12">
@@ -102,29 +26,8 @@ const SampleReport = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-4xl mx-auto"
         >
-          {/* Download Button */}
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={handleDownloadPDF}
-              disabled={isGenerating}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  생성 중...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  PDF 다운로드
-                </>
-              )}
-            </button>
-          </div>
-
           {/* Report Card */}
-          <div ref={reportRef} className="bg-background border border-border rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-background border border-border rounded-lg shadow-lg overflow-hidden">
             {/* Report Header */}
             <div className="bg-primary text-primary-foreground px-8 py-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
