@@ -192,8 +192,8 @@ const UniversityWall = () => {
                           </span>
                         )}
                       </div>
-                      <span className="text-sm font-semibold text-foreground line-clamp-1">
-                        {university.shortName}
+                      <span className="text-xs font-semibold text-foreground line-clamp-2 text-center leading-tight">
+                        {university.name}
                       </span>
                       <span className="text-[11px] text-muted-foreground mt-1">
                         {university.country}
