@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LogOut, Download, Plus, Trash2 } from "lucide-react";
+import { LogOut, Download, Plus, Trash2, Printer } from "lucide-react";
 
 interface SkillScore {
   label: string;
@@ -139,11 +139,8 @@ const AdminReports = () => {
     }));
   };
 
-  const generatePDF = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-
-    const html = `
+  const generateReportHTML = () => {
+    return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -338,10 +335,27 @@ const AdminReports = () => {
       <span>Confidential Student Report</span>
     </div>
   </div>
-  <script>window.onload = () => window.print();</script>
 </body>
 </html>`;
+  };
 
+  const downloadReport = () => {
+    const html = generateReportHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `IBCircle_Report_Session${reportData.sessionNumber}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const printReport = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    const html = generateReportHTML() + `<script>window.onload = () => window.print();</script>`;
     printWindow.document.write(html);
     printWindow.document.close();
   };
@@ -352,9 +366,13 @@ const AdminReports = () => {
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold text-foreground">리포트 생성기</h1>
           <div className="flex gap-2">
-            <Button onClick={generatePDF} className="gap-2">
+            <Button onClick={downloadReport} className="gap-2">
               <Download className="w-4 h-4" />
-              PDF 생성
+              다운로드
+            </Button>
+            <Button onClick={printReport} variant="secondary" className="gap-2">
+              <Printer className="w-4 h-4" />
+              인쇄
             </Button>
             <Button variant="outline" onClick={handleLogout} className="gap-2">
               <LogOut className="w-4 h-4" />
