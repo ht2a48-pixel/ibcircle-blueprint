@@ -53,7 +53,7 @@ const Consulting = () => {
               <div className="w-12 h-12 bg-primary-foreground/10 flex items-center justify-center mb-6">
                 <service.icon size={24} />
               </div>
-              <h3 className="text-xl font-medium mb-2">{service.title}</h3>
+              <h3 className="text-xl font-medium mb-2 text-primary-foreground">{service.title}</h3>
               <p className="text-primary-foreground/70 mb-6">{service.description}</p>
               <ul className="space-y-2">
                 {service.details.map((detail) => (
