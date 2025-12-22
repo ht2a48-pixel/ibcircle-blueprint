@@ -61,37 +61,67 @@ const AnimatedNumber = ({
 
 const Metrics = () => {
   return (
-    <section id="results" className="py-24 md:py-32 bg-secondary/30">
-      <div className="container mx-auto px-6 lg:px-12">
+    <section id="results" className="py-24 md:py-32 bg-secondary/30 relative overflow-hidden">
+      {/* Background decoration */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
+          backgroundSize: '50px 50px'
+        }}
+      />
+      
+      <div className="container mx-auto px-6 lg:px-12 relative">
         {/* Metrics Grid */}
         <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-20">
           {metrics.map((metric, index) => (
             <motion.div
               key={metric.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
               className="text-center"
             >
-              <div className="metric-value">
+              <motion.div 
+                initial={{ scale: 0.5 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 + index * 0.15 }}
+                className="metric-value"
+              >
                 <AnimatedNumber 
                   value={metric.value} 
                   decimals={metric.decimals} 
                   suffix={metric.suffix} 
                 />
-              </div>
-              <div className="metric-label">{metric.label}</div>
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.4 + index * 0.15 }}
+                className="metric-label"
+              >
+                {metric.label}
+              </motion.div>
             </motion.div>
           ))}
         </div>
 
         {/* World Map */}
-        <WorldMap />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+        >
+          <WorldMap />
+        </motion.div>
 
         {/* Supporting copy */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
