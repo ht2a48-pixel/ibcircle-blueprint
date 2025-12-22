@@ -38,7 +38,7 @@ const RollingNumber = ({ value, className }: { value: string; className?: string
   );
 };
 
-const ExamCountdown = () => {
+const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
   // Get next IB exam date (April 24 each year)
   const getNextExamDate = () => {
     const now = new Date();
@@ -94,6 +94,60 @@ const ExamCountdown = () => {
 
   const formatTime = (num: number) => String(num).padStart(2, '0');
 
+  // Compact version for embedding in other sections
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 1 }}
+        className="mt-8 bg-primary text-primary-foreground p-5 md:p-6"
+      >
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">
+              {examYear} IB Exam Countdown
+            </p>
+            <div className="text-2xl md:text-3xl font-medium tabular-nums">
+              D–<RollingNumber value={String(timeLeft.days)} />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 text-xl md:text-2xl font-light tabular-nums">
+            <div className="flex flex-col items-center">
+              <RollingNumber value={formatTime(timeLeft.remainingHours)} />
+              <span className="text-[9px] uppercase tracking-wider opacity-50">H</span>
+            </div>
+            <span className="opacity-40">:</span>
+            <div className="flex flex-col items-center">
+              <RollingNumber value={formatTime(timeLeft.remainingMinutes)} />
+              <span className="text-[9px] uppercase tracking-wider opacity-50">M</span>
+            </div>
+            <span className="opacity-40">:</span>
+            <div className="flex flex-col items-center">
+              <RollingNumber value={formatTime(timeLeft.remainingSeconds)} />
+              <span className="text-[9px] uppercase tracking-wider opacity-50">S</span>
+            </div>
+          </div>
+          
+          <div className="hidden md:flex items-center gap-4 text-sm">
+            <div className="text-center">
+              <div className="font-medium">{timeLeft.weeks}</div>
+              <div className="text-[9px] uppercase tracking-wider opacity-60">Weeks</div>
+            </div>
+            <div className="w-px h-8 bg-primary-foreground/20" />
+            <div className="text-center">
+              <div className="font-medium">{timeLeft.percentElapsed.toFixed(0)}%</div>
+              <div className="text-[9px] uppercase tracking-wider opacity-60">Elapsed</div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Full version (original)
   return (
     <section className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-6 lg:px-12">

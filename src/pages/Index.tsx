@@ -5,7 +5,6 @@ import Programs from '@/components/Programs';
 import Consulting from '@/components/Consulting';
 import Philosophy from '@/components/Philosophy';
 import SampleReport from '@/components/SampleReport';
-import ExamCountdown from '@/components/ExamCountdown';
 import Metrics from '@/components/Metrics';
 import UniversityWall from '@/components/UniversityWall';
 import FAQ from '@/components/FAQ';
@@ -30,7 +29,7 @@ const Index = () => {
         {/* Main page */}
         <Hero />
         {/* IB Diploma Programme - included in Programs */}
-        {/* Personalized IB Coaching */}
+        {/* Personalized IB Coaching + Compact Exam Countdown */}
         <Programs />
         {/* Private Consulting Services */}
         <Consulting />
@@ -38,8 +37,6 @@ const Index = () => {
         <Philosophy />
         {/* Progress Report System Preview */}
         <SampleReport />
-        {/* IB Exam Readiness Tracker */}
-        <ExamCountdown />
         {/* Statistics + Student location */}
         <Metrics />
         {/* Global University Acceptances */}
