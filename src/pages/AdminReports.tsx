@@ -139,6 +139,18 @@ const AdminReports = () => {
     }));
   };
 
+  // HTML escape function to prevent XSS
+  const escapeHtml = (text: string): string => {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  };
+
   const generateReportHTML = () => {
     return `
 <!DOCTYPE html>
@@ -224,11 +236,11 @@ const AdminReports = () => {
       <div class="header-content">
         <div class="header-left">
           <div class="header-subtitle">IBCircle Progress Report</div>
-          <div class="header-title">${reportData.subjectTitle}</div>
+          <div class="header-title">${escapeHtml(reportData.subjectTitle)}</div>
         </div>
         <div class="session-badge">
           <span>📄</span>
-          <span>Session #${reportData.sessionNumber}</span>
+          <span>Session #${escapeHtml(reportData.sessionNumber)}</span>
         </div>
       </div>
     </div>
@@ -240,7 +252,7 @@ const AdminReports = () => {
           <span>📈</span> 수업 요약
         </div>
         <div class="summary-text">
-          ${reportData.summary.split('\n').map(p => `<p>${p}</p>`).join('')}
+          ${reportData.summary.split('\n').map(p => `<p>${escapeHtml(p)}</p>`).join('')}
         </div>
       </div>
       
@@ -251,7 +263,7 @@ const AdminReports = () => {
           <div class="section-title">
             <span>🎯</span> 심화 학습
           </div>
-          <div class="challenge-text">${reportData.challengeContent}</div>
+          <div class="challenge-text">${escapeHtml(reportData.challengeContent)}</div>
         </div>
       </div>
       ` : ''}
@@ -261,12 +273,12 @@ const AdminReports = () => {
         <div class="section-title">
           <span>✓</span> 학습 평가
         </div>
-        <div class="evaluation-text">${reportData.evaluationText}</div>
+        <div class="evaluation-text">${escapeHtml(reportData.evaluationText)}</div>
         <div class="skill-grid">
           ${reportData.skillScores.map(skill => `
             <div class="skill-item">
-              <div class="skill-score">${skill.score}</div>
-              <div class="skill-label">${skill.label}</div>
+              <div class="skill-score">${escapeHtml(skill.score)}</div>
+              <div class="skill-label">${escapeHtml(skill.label)}</div>
             </div>
           `).join('')}
         </div>
@@ -282,8 +294,8 @@ const AdminReports = () => {
           <ul class="risk-list">
             ${reportData.riskFlags.filter(r => r.text).map(risk => `
               <li class="risk-item">
-                <span class="risk-dot ${risk.level}"></span>
-                <span>${risk.text}</span>
+                <span class="risk-dot ${escapeHtml(risk.level)}"></span>
+                <span>${escapeHtml(risk.text)}</span>
               </li>
             `).join('')}
           </ul>
@@ -302,7 +314,7 @@ const AdminReports = () => {
             ${reportData.recommendations.filter(r => r.text).map(rec => `
               <li class="rec-item">
                 <span class="rec-dot"></span>
-                <span>${rec.text}</span>
+                <span>${escapeHtml(rec.text)}</span>
               </li>
             `).join('')}
           </ul>
@@ -320,8 +332,8 @@ const AdminReports = () => {
           <div class="priorities-grid">
             ${reportData.priorities.filter(p => p.text).map(priority => `
               <div class="priority-item">
-                <div class="priority-label">${priority.label}</div>
-                <div class="priority-text">${priority.text}</div>
+                <div class="priority-label">${escapeHtml(priority.label)}</div>
+                <div class="priority-text">${escapeHtml(priority.text)}</div>
               </div>
             `).join('')}
           </div>
