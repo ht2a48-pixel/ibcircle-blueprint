@@ -43,21 +43,51 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-24 md:py-32 bg-background">
-      <div className="container mx-auto px-6 lg:px-12">
+    <section id="contact" className="py-24 md:py-32 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 0.02 }}
+        viewport={{ once: true }}
+        className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full border border-primary/30"
+      />
+      
+      <div className="container mx-auto px-6 lg:px-12 relative">
         <div className="max-w-5xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center mb-16"
           >
-            <p className="section-title">Consultation & Contact</p>
-            <h2 className="section-heading mb-6">상담 문의</h2>
-            <p className="text-lg text-muted-foreground">
+            <motion.p 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="section-title"
+            >
+              Consultation & Contact
+            </motion.p>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="section-heading mb-6"
+            >
+              상담 문의
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg text-muted-foreground"
+            >
               무료 상담을 통해 맞춤형 학습 전략을 확인하세요.
-            </p>
+            </motion.p>
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-8">

@@ -84,39 +84,71 @@ const Programs = () => {
   ];
 
   return (
-    <section id="programs" className="py-24 md:py-32 bg-secondary/30">
-      <div className="container mx-auto px-6 lg:px-12">
+    <section id="programs" className="py-24 md:py-32 bg-secondary/30 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}
+      />
+      
+      <div className="container mx-auto px-6 lg:px-12 relative">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left content */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <p className="section-title">Personalized IB Coaching</p>
-            <h2 className="section-heading mb-4">
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="section-title"
+            >
+              Personalized IB Coaching
+            </motion.p>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="section-heading mb-4"
+            >
               1:1 및 1:2 맞춤 수업
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg text-muted-foreground leading-relaxed mb-8"
+            >
               IBCircle의 수업은 학생 개개인의 학습 스타일과 일정에 맞춰 설계된
               개인 맞춤형 IB 전문 프로그램입니다.
-            </p>
+            </motion.p>
 
             {/* Features */}
             <div className="space-y-6">
               {features.map((feature, index) => (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="flex items-start gap-4"
+                  transition={{ duration: 0.5, delay: 0.5 + index * 0.15 }}
+                  className="flex items-start gap-4 group"
                 >
-                  <div className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0">
+                  <motion.div 
+                    whileHover={{ scale: 1.1 }}
+                    className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 transition-transform"
+                  >
                     <feature.icon size={20} />
-                  </div>
+                  </motion.div>
                   <div>
                     <h4 className="font-medium text-foreground mb-1">{feature.title}</h4>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
@@ -126,10 +158,10 @@ const Programs = () => {
             </div>
 
             <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
               className="mt-10 text-muted-foreground italic border-l-2 border-primary pl-4"
             >
               단순한 강의가 아닌, 전략적으로 설계된 학업 파트너십입니다.
