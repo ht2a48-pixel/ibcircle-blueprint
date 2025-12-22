@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimeLeft {
@@ -39,6 +39,8 @@ const RollingNumber = ({ value, className }: { value: string; className?: string
 };
 
 const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Get next IB exam date (April 24 each year)
   const getNextExamDate = () => {
     const now = new Date();
@@ -93,6 +95,7 @@ const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
   }, []);
 
   const formatTime = (num: number) => String(num).padStart(2, '0');
+  const formatLargeNumber = (num: number) => num.toLocaleString();
 
   // Compact version for embedding in other sections
   if (compact) {
@@ -102,47 +105,132 @@ const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 1 }}
-        className="mt-8 bg-primary text-primary-foreground p-5 md:p-6"
+        className="mt-8 bg-primary text-primary-foreground cursor-pointer overflow-hidden"
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+        onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">
-              {examYear} IB Exam Countdown
-            </p>
-            <div className="text-2xl md:text-3xl font-medium tabular-nums">
-              D–<RollingNumber value={String(timeLeft.days)} />
+        {/* Main compact view */}
+        <div className="p-5 md:p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">
+                {examYear} IB Exam Countdown
+              </p>
+              <div className="text-2xl md:text-3xl font-medium tabular-nums">
+                D–<RollingNumber value={String(timeLeft.days)} />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3 text-xl md:text-2xl font-light tabular-nums">
-            <div className="flex flex-col items-center">
-              <RollingNumber value={formatTime(timeLeft.remainingHours)} />
-              <span className="text-[9px] uppercase tracking-wider opacity-50">H</span>
+            
+            {/* Total time display - showing full hours:min:sec */}
+            <div className="flex items-center gap-2 text-xl md:text-2xl font-light tabular-nums">
+              <div className="flex flex-col items-center">
+                <RollingNumber value={String(timeLeft.totalHours).padStart(4, '0')} />
+                <span className="text-[9px] uppercase tracking-wider opacity-50">Hours</span>
+              </div>
+              <span className="opacity-40">:</span>
+              <div className="flex flex-col items-center">
+                <RollingNumber value={formatTime(timeLeft.remainingMinutes)} />
+                <span className="text-[9px] uppercase tracking-wider opacity-50">Min</span>
+              </div>
+              <span className="opacity-40">:</span>
+              <div className="flex flex-col items-center">
+                <RollingNumber value={formatTime(timeLeft.remainingSeconds)} />
+                <span className="text-[9px] uppercase tracking-wider opacity-50">Sec</span>
+              </div>
             </div>
-            <span className="opacity-40">:</span>
-            <div className="flex flex-col items-center">
-              <RollingNumber value={formatTime(timeLeft.remainingMinutes)} />
-              <span className="text-[9px] uppercase tracking-wider opacity-50">M</span>
-            </div>
-            <span className="opacity-40">:</span>
-            <div className="flex flex-col items-center">
-              <RollingNumber value={formatTime(timeLeft.remainingSeconds)} />
-              <span className="text-[9px] uppercase tracking-wider opacity-50">S</span>
-            </div>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-4 text-sm">
-            <div className="text-center">
-              <div className="font-medium">{timeLeft.weeks}</div>
-              <div className="text-[9px] uppercase tracking-wider opacity-60">Weeks</div>
-            </div>
-            <div className="w-px h-8 bg-primary-foreground/20" />
-            <div className="text-center">
-              <div className="font-medium">{timeLeft.percentElapsed.toFixed(0)}%</div>
-              <div className="text-[9px] uppercase tracking-wider opacity-60">Elapsed</div>
+            
+            <div className="hidden md:flex items-center gap-4 text-sm">
+              <div className="text-center">
+                <div className="font-medium">{timeLeft.weeks}</div>
+                <div className="text-[9px] uppercase tracking-wider opacity-60">Weeks</div>
+              </div>
+              <div className="w-px h-8 bg-primary-foreground/20" />
+              <div className="text-center">
+                <div className="font-medium">{timeLeft.percentElapsed.toFixed(0)}%</div>
+                <div className="text-[9px] uppercase tracking-wider opacity-60">Elapsed</div>
+              </div>
+              
+              {/* Expand indicator */}
+              <motion.div 
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="ml-2 opacity-50"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </motion.div>
             </div>
           </div>
         </div>
+        
+        {/* Expanded details */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+                {/* Divider */}
+                <div className="h-px bg-primary-foreground/10 mb-4" />
+                
+                {/* Progress bar */}
+                <div className="mb-4">
+                  <div className="h-1.5 bg-primary-foreground/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${timeLeft.percentElapsed}%` }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                      className="h-full bg-warm rounded-full"
+                    />
+                  </div>
+                  <div className="flex justify-between mt-2 text-[10px] opacity-60">
+                    <span>Preparation Started</span>
+                    <span>{timeLeft.percentElapsed.toFixed(1)}% Complete</span>
+                  </div>
+                </div>
+                
+                {/* Detailed metrics */}
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-lg md:text-xl font-medium tabular-nums">
+                      {formatLargeNumber(timeLeft.totalHours)}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Total Hours</div>
+                  </div>
+                  <div>
+                    <div className="text-lg md:text-xl font-medium tabular-nums">
+                      {formatLargeNumber(timeLeft.totalMinutes)}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Total Minutes</div>
+                  </div>
+                  <div>
+                    <div className="text-lg md:text-xl font-medium tabular-nums">
+                      {formatLargeNumber(timeLeft.totalSeconds)}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Total Seconds</div>
+                  </div>
+                  <div>
+                    <div className="text-lg md:text-xl font-medium tabular-nums">
+                      {timeLeft.weeks}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Weeks Left</div>
+                  </div>
+                </div>
+                
+                {/* Exam date reminder */}
+                <div className="mt-4 text-center text-[10px] uppercase tracking-[0.15em] opacity-50">
+                  April 24, {examYear} · IB Diploma Examination
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     );
   }
