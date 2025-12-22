@@ -168,158 +168,169 @@ const SampleReport = () => {
           {/* Report Card Container with scrollable area */}
           <div className="bg-background border border-border rounded-lg shadow-lg overflow-hidden">
             {/* Report Header - Fixed */}
-            <div className="bg-primary text-primary-foreground px-4 md:px-6 py-4">
-              <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="bg-primary text-primary-foreground px-4 md:px-6 py-3 md:py-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                  <div className="text-[10px] md:text-xs font-medium tracking-[0.12em] uppercase opacity-70 mb-0.5">
+                  <div className="text-[9px] md:text-[10px] font-medium tracking-[0.12em] uppercase opacity-70 mb-0.5">
                     IBCircle Progress Report
                   </div>
-                  <h3 className="text-base md:text-lg font-medium">IB Economics HL 수업 리포트</h3>
+                  <h3 className="text-sm md:text-base font-medium">IB Economics HL 수업 리포트</h3>
                 </div>
-                <div className="flex items-center gap-1.5 bg-primary-foreground/10 px-3 py-1.5 rounded text-xs md:text-sm">
-                  <FileText className="w-3 h-3 md:w-4 md:h-4" />
+                <div className="flex items-center gap-1.5 bg-primary-foreground/10 px-2 py-1 rounded text-[10px] md:text-xs">
+                  <FileText className="w-3 h-3" />
                   <span className="font-medium">Session #24</span>
                 </div>
               </div>
             </div>
 
             {/* Scrollable Report Content */}
-            <div className="h-[400px] md:h-[450px] overflow-y-auto scrollbar-thin">
-              <div className="p-4 md:p-6 space-y-6">
+            <div className="h-[350px] md:h-[420px] overflow-y-auto overscroll-contain">
+              <div className="p-4 md:p-5 space-y-4 md:space-y-5 text-[11px] md:text-xs">
                 {/* Summary Section */}
                 <div>
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-muted-foreground mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-3.5 h-3.5" />
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" />
                     수업 요약
                   </h4>
-                  <div className="text-sm text-foreground leading-relaxed space-y-3">
+                  <div className="text-foreground leading-relaxed space-y-2">
                     <p>
                       오늘 수업에서는 그동안 진행해온 거시경제학(Macroeconomics) 전 범위를 마무리하며, 
-                      공급측면 정책(Supply-side policies)까지의 핵심 개념을 체계적으로 정리했습니다.
+                      공급측면 정책(Supply-side policies)까지의 핵심 개념을 체계적으로 정리했습니다. 
+                      단순 개념 암기가 아닌, 그래프 해석과 인과 관계 분석을 중심으로 IB 평가 기준에 맞춘 학습을 진행했습니다.
                     </p>
                     <p>
                       특히 학생들이 가장 어려워하는 개념 중 하나인 <strong>디플레이션(deflation)</strong>을 
-                      심층적으로 다루었습니다.
+                      심층적으로 다루었습니다. 디플레이션이 발생하는 구조를 수요·공급 모형을 통해 단계적으로 분석하고, 
+                      실질 부채 부담 증가, 소비 및 투자 위축 등 경제 전반에 미치는 영향을 논리적으로 정리했습니다.
+                    </p>
+                    <p>
+                      이후 IB Economics Paper 1, Part A 유형의 서술형 문제를 활용하여, 
+                      핵심 개념을 평가 기준에 맞게 구조화하여 답안을 작성하는 연습을 진행했습니다.
                     </p>
                   </div>
                 </div>
 
                 {/* Challenge Section */}
-                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-muted-foreground mb-2 flex items-center gap-2">
-                    <Target className="w-3.5 h-3.5" />
+                <div className="p-3 bg-secondary/50 rounded-lg border border-border">
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <Target className="w-3 h-3" />
                     심화 학습
                   </h4>
-                  <p className="text-sm text-foreground leading-relaxed">
-                    난이도가 높은 Paper 1, Part B 수준의 '인플레이션과 실업 비교·분석' 문제에 도전했습니다.
+                  <p className="text-foreground leading-relaxed">
+                    또한 난이도가 높은 Paper 1, Part B 수준의 '인플레이션과 실업 비교·분석' 문제에 도전했습니다. 
+                    단기와 장기의 차이, 상충 관계(trade-off), 정책적 시사점까지 포함하는 고급 분석이 요구되는 문항이었으며, 
+                    전반적으로 논리성과 균형 잡힌 서술이 잘 이루어졌습니다.
                   </p>
                 </div>
 
                 {/* Evaluation Section */}
                 <div>
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-muted-foreground mb-3 flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5" />
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <CheckCircle className="w-3 h-3" />
                     학습 평가
                   </h4>
-                  <p className="text-sm text-foreground leading-relaxed mb-4">
-                    학생은 경제 개념을 단순히 외우는 수준을 넘어, "왜 그런 결과가 나타나는지"를 이해하려는 태도가 매우 우수합니다.
+                  <p className="text-foreground leading-relaxed mb-3">
+                    학생은 경제 개념을 단순히 외우는 수준을 넘어, "왜 그런 결과가 나타나는지"를 이해하려는 태도가 매우 우수합니다. 
+                    특히 거시 파트 후반부의 복잡한 그래프 분석과 에세이 구조를 빠르게 습득한 점이 인상적이었습니다.
                   </p>
                   
-                  {/* Skill indicators - 2x2 grid for mobile */}
-                  <div className="grid grid-cols-2 gap-2 md:gap-3">
+                  {/* Skill indicators */}
+                  <div className="grid grid-cols-4 gap-1.5 md:gap-2">
                     {[
                       { label: '개념 이해', score: 92 },
                       { label: '그래프 분석', score: 88 },
                       { label: '에세이 구조', score: 85 },
                       { label: '비판적 사고', score: 90 },
                     ].map((skill) => (
-                      <div key={skill.label} className="text-center p-3 bg-secondary/30 rounded-lg">
-                        <div className="text-lg md:text-xl font-medium text-foreground mb-0.5">{skill.score}</div>
-                        <div className="text-[10px] md:text-xs text-muted-foreground">{skill.label}</div>
+                      <div key={skill.label} className="text-center p-2 bg-secondary/30 rounded">
+                        <div className="text-base md:text-lg font-medium text-foreground">{skill.score}</div>
+                        <div className="text-[8px] md:text-[9px] text-muted-foreground leading-tight">{skill.label}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Academic Risk Flags */}
-                <div className="p-4 bg-destructive/5 rounded-lg border border-destructive/20">
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-destructive mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5" />
+                <div className="p-3 bg-destructive/5 rounded-lg border border-destructive/20">
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-destructive mb-2 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3 h-3" />
                     Academic Risk Flags
                   </h4>
-                  <ul className="space-y-2 text-sm text-foreground">
+                  <ul className="space-y-1.5 text-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 flex-shrink-0" />
-                      <span>Paper 2 Data Response 문항에서 계산 실수 발생</span>
+                      <span className="w-1 h-1 rounded-full bg-destructive mt-1.5 flex-shrink-0" />
+                      <span>Paper 2 Data Response 문항에서 계산 실수가 간헐적으로 발생 — 시간 배분 및 검토 루틴 개선 필요</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-warm mt-1.5 flex-shrink-0" />
-                      <span>국제 경제 파트 그래프 해석력 보완 권장</span>
+                      <span className="w-1 h-1 rounded-full bg-warm mt-1.5 flex-shrink-0" />
+                      <span>국제 경제(International Economics) 파트 그래프 해석력 보완 권장</span>
                     </li>
                   </ul>
                 </div>
 
                 {/* Strategic Recommendations */}
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-primary mb-3 flex items-center gap-2">
-                    <Lightbulb className="w-3.5 h-3.5" />
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-primary mb-2 flex items-center gap-1.5">
+                    <Lightbulb className="w-3 h-3" />
                     Strategic Recommendations
                   </h4>
-                  <ul className="space-y-2 text-sm text-foreground">
+                  <ul className="space-y-1.5 text-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                      <span>Paper 1 Part B 에세이 서론 연습 강화</span>
+                      <span className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <span>Paper 1 Part B 에세이 연습 시, 서론에서 정의와 논점을 명확히 제시하는 연습 강화</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                      <span>IA 주제 선정을 위한 뉴스 스크랩 시작</span>
+                      <span className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <span>IA(Internal Assessment) 주제 선정을 위해 실제 경제 뉴스 기사 스크랩 시작 권장</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                      <span>과거 기출문제 집중 풀이 예정</span>
+                      <span className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <span>시험 직전 2주간 과거 기출문제 집중 풀이 예정 — 오답 정리 노트 병행</span>
                     </li>
                   </ul>
                 </div>
 
                 {/* Next Steps Section */}
-                <div className="p-4 bg-accent/30 rounded-lg border border-accent/50">
-                  <h4 className="text-xs font-medium tracking-[0.1em] uppercase text-foreground mb-3 flex items-center gap-2">
-                    <ArrowRight className="w-3.5 h-3.5" />
+                <div className="p-3 bg-accent/30 rounded-lg border border-accent/50">
+                  <h4 className="text-[10px] md:text-[11px] font-medium tracking-[0.1em] uppercase text-foreground mb-2 flex items-center gap-1.5">
+                    <ArrowRight className="w-3 h-3" />
                     Next Step Priorities
                   </h4>
-                  <div className="space-y-2">
-                    {[
-                      { num: 1, text: 'Paper 1 & 2 문제 풀이 심화 훈련' },
-                      { num: 2, text: 'IA 주제 브레인스토밍 및 1차 선정' },
-                      { num: 3, text: '국제 경제 그래프 집중 복습' },
-                    ].map((priority) => (
-                      <div key={priority.num} className="p-3 bg-background rounded-lg border border-border">
-                        <div className="text-[10px] text-muted-foreground mb-0.5">Priority {priority.num}</div>
-                        <p className="text-xs md:text-sm font-medium text-foreground">{priority.text}</p>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                    <div className="p-2 bg-background rounded border border-border">
+                      <div className="text-[8px] md:text-[9px] text-muted-foreground mb-0.5">Priority 1</div>
+                      <p className="text-[10px] md:text-[11px] font-medium text-foreground leading-tight">Paper 1 & 2 문제 풀이 심화 훈련</p>
+                    </div>
+                    <div className="p-2 bg-background rounded border border-border">
+                      <div className="text-[8px] md:text-[9px] text-muted-foreground mb-0.5">Priority 2</div>
+                      <p className="text-[10px] md:text-[11px] font-medium text-foreground leading-tight">IA 주제 브레인스토밍 및 1차 선정</p>
+                    </div>
+                    <div className="p-2 bg-background rounded border border-border">
+                      <div className="text-[8px] md:text-[9px] text-muted-foreground mb-0.5">Priority 3</div>
+                      <p className="text-[10px] md:text-[11px] font-medium text-foreground leading-tight">국제 경제 그래프 집중 복습</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Scroll indicator */}
-            <div className="px-4 py-2 bg-secondary/50 border-t border-border text-center">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">↓ 스크롤하여 전체 리포트 보기</span>
+            <div className="px-3 py-1.5 bg-gradient-to-t from-secondary/80 to-secondary/30 border-t border-border text-center">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">↕ 스크롤하여 전체 리포트 보기</span>
             </div>
 
             {/* Report Footer */}
-            <div className="px-4 md:px-6 py-3 bg-secondary/30 border-t border-border">
-              <div className="flex items-center justify-between text-[10px] md:text-xs text-muted-foreground">
+            <div className="px-4 py-2 bg-secondary/30 border-t border-border">
+              <div className="flex items-center justify-between text-[9px] md:text-[10px] text-muted-foreground">
                 <span>IBCircle · Premium IB Education</span>
                 <span>Confidential Student Report</span>
               </div>
             </div>
 
             {/* Download Button */}
-            <div className="px-4 md:px-6 py-4 bg-background border-t border-border">
-              <Button onClick={downloadReport} size="sm" className="w-full gap-2 text-sm">
-                <Download className="w-3.5 h-3.5" />
+            <div className="px-4 py-3 bg-background border-t border-border">
+              <Button onClick={downloadReport} size="sm" className="w-full gap-1.5 text-xs h-8">
+                <Download className="w-3 h-3" />
                 샘플 리포트 다운로드
               </Button>
             </div>
