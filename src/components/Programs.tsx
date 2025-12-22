@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Calendar, UserCheck, ChevronDown, X } from 'lucide-react';
+import ExamCountdown from './ExamCountdown';
 
 interface SubjectGroup {
   id: number;
@@ -166,6 +167,9 @@ const Programs = () => {
             >
               단순한 강의가 아닌, 전략적으로 설계된 학업 파트너십입니다.
             </motion.p>
+
+            {/* Compact Exam Countdown */}
+            <ExamCountdown compact />
           </motion.div>
 
           {/* Right content - IB Programme info */}
