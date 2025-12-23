@@ -38,11 +38,14 @@ const RollingNumber = ({ value, className }: { value: string; className?: string
   );
 };
 
-const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
+const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; targetYear?: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Get next IB exam date (April 24 each year)
-  const getNextExamDate = () => {
+  // Get exam date for specific year or next upcoming exam
+  const getExamDate = () => {
+    if (targetYear) {
+      return new Date(`${targetYear}-04-24T09:00:00`);
+    }
     const now = new Date();
     const currentYear = now.getFullYear();
     const examThisYear = new Date(`${currentYear}-04-24T09:00:00`);
@@ -54,7 +57,7 @@ const ExamCountdown = ({ compact = false }: { compact?: boolean }) => {
     return examThisYear;
   };
   
-  const examDate = getNextExamDate();
+  const examDate = getExamDate();
   const examYear = examDate.getFullYear();
 
   const calculateTimeLeft = (targetDate: Date): TimeLeft => {
