@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LogOut, Download, Plus, Trash2, Printer, Loader2 } from "lucide-react";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { LogOut, Download, Plus, Trash2, Printer } from "lucide-react";
 
 interface SkillScore {
   label: string;
@@ -39,7 +38,6 @@ interface ReportData {
 
 const AdminReports = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, isLoading, signOut } = useAdminAuth();
   const [reportData, setReportData] = useState<ReportData>({
     subjectTitle: "IB Economics HL 수업 리포트",
     sessionNumber: "24",
@@ -65,19 +63,16 @@ const AdminReports = () => {
     ],
   });
 
-  // Redirect if not authenticated or not admin
+  // Check if user is authenticated via passcode
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        navigate("/admin");
-      } else if (!isAdmin) {
-        navigate("/admin");
-      }
+    const isAuthenticated = sessionStorage.getItem("adminAuthenticated");
+    if (!isAuthenticated) {
+      navigate("/admin");
     }
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [navigate]);
 
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuthenticated");
     navigate("/admin");
   };
 
@@ -378,24 +373,6 @@ const AdminReports = () => {
     printWindow.document.close();
   };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Don't render if not admin (redirect will happen via useEffect)
-  if (!user || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border sticky top-0 z-10">
@@ -496,18 +473,17 @@ const AdminReports = () => {
         <section className="bg-card border border-border rounded-xl p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Academic Risk Flags</h2>
-            <Button variant="outline" size="sm" onClick={addRiskFlag} className="gap-1">
-              <Plus className="w-4 h-4" />
-              추가
+            <Button onClick={addRiskFlag} variant="outline" size="sm" className="gap-1">
+              <Plus className="w-4 h-4" /> 추가
             </Button>
           </div>
           <div className="space-y-3">
             {reportData.riskFlags.map((risk, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex gap-2 items-center">
                 <select
                   value={risk.level}
                   onChange={(e) => updateRiskFlag(index, "level", e.target.value)}
-                  className="px-3 rounded-md border border-input bg-background"
+                  className="border border-border rounded-md px-2 py-2 text-sm bg-background"
                 >
                   <option value="high">High</option>
                   <option value="medium">Medium</option>
@@ -515,19 +491,17 @@ const AdminReports = () => {
                 <Input
                   value={risk.text}
                   onChange={(e) => updateRiskFlag(index, "text", e.target.value)}
-                  placeholder="리스크 내용"
+                  placeholder="리스크 내용을 입력하세요"
                   className="flex-1"
                 />
-                {reportData.riskFlags.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeRiskFlag(index)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
+                <Button
+                  onClick={() => removeRiskFlag(index)}
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
           </div>
@@ -537,30 +511,27 @@ const AdminReports = () => {
         <section className="bg-card border border-border rounded-xl p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Strategic Recommendations</h2>
-            <Button variant="outline" size="sm" onClick={addRecommendation} className="gap-1">
-              <Plus className="w-4 h-4" />
-              추가
+            <Button onClick={addRecommendation} variant="outline" size="sm" className="gap-1">
+              <Plus className="w-4 h-4" /> 추가
             </Button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {reportData.recommendations.map((rec, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex gap-2 items-center">
                 <Input
                   value={rec.text}
                   onChange={(e) => updateRecommendation(index, e.target.value)}
-                  placeholder="추천 사항"
+                  placeholder="추천 내용을 입력하세요"
                   className="flex-1"
                 />
-                {reportData.recommendations.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeRecommendation(index)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
+                <Button
+                  onClick={() => removeRecommendation(index)}
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
           </div>
