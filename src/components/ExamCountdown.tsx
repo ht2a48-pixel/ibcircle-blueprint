@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimeLeft {
@@ -13,30 +13,34 @@ interface TimeLeft {
   percentElapsed: number;
 }
 
-// Animated number with rolling effect
-const RollingNumber = ({ value, className }: { value: string; className?: string }) => {
+// Memoized digit component to prevent unnecessary re-renders
+const Digit = memo(({ value }: { value: string }) => (
+  <AnimatePresence mode="popLayout">
+    <motion.span
+      key={value}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 20, opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="inline-block"
+    >
+      {value}
+    </motion.span>
+  </AnimatePresence>
+));
+Digit.displayName = 'Digit';
+
+// Optimized rolling number - only re-renders digits that change
+const RollingNumber = memo(({ value, className }: { value: string; className?: string }) => {
   return (
     <span className={`inline-flex overflow-hidden ${className}`}>
       {value.split('').map((digit, index) => (
-        <AnimatePresence mode="popLayout" key={index}>
-          <motion.span
-            key={`${index}-${digit}`}
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 30, opacity: 0 }}
-            transition={{ 
-              duration: 0.3, 
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="inline-block"
-          >
-            {digit}
-          </motion.span>
-        </AnimatePresence>
+        <Digit key={`${index}-${digit}`} value={digit} />
       ))}
     </span>
   );
-};
+});
+RollingNumber.displayName = 'RollingNumber';
 
 const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; targetYear?: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);

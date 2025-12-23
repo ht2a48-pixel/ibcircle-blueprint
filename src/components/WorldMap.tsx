@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import worldMapImage from '@/assets/world-map.png';
 
 interface Country {
@@ -373,79 +373,70 @@ const WorldMap = () => {
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20 pointer-events-none" />
 
-          {/* Country Pins - These move with the map */}
-          <AnimatePresence>
-            {filteredCountries.map((country, index) => {
-              const size = getPinSize(country.students);
-              const isHovered = hoveredCountry?.id === country.id;
+          {/* Country Pins - Static with CSS animations only */}
+          {filteredCountries.map((country, index) => {
+            const size = getPinSize(country.students);
+            const isHovered = hoveredCountry?.id === country.id;
 
-              return (
-                <div
-                  key={country.id}
-                  className="absolute cursor-pointer"
+            return (
+              <div
+                key={country.id}
+                className="absolute cursor-pointer"
+                style={{ 
+                  left: `${country.x}%`, 
+                  top: `${country.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+                onMouseEnter={() => setHoveredCountry(country)}
+                onMouseLeave={() => setHoveredCountry(null)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setHoveredCountry(country);
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  setTimeout(() => setHoveredCountry(null), 2000);
+                }}
+              >
+                {/* Static glow - no animation for performance */}
+                <div 
+                  className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/10`}
                   style={{ 
-                    left: `${country.x}%`, 
-                    top: `${country.y}%`,
+                    left: '50%', 
+                    top: '50%', 
                     transform: 'translate(-50%, -50%)'
                   }}
-                  onMouseEnter={() => setHoveredCountry(country)}
-                  onMouseLeave={() => setHoveredCountry(null)}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    setHoveredCountry(country);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.stopPropagation();
-                    setTimeout(() => setHoveredCountry(null), 2000);
-                  }}
+                />
+
+                {/* Pin Marker */}
+                <div
+                  className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10 transition-transform duration-200 ${isHovered ? 'scale-125' : 'scale-100'}`}
                 >
-                  {/* Simplified Pulse - CSS only for performance */}
-                  <div 
-                    className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/20 animate-ping`}
-                    style={{ 
-                      left: '50%', 
-                      top: '50%', 
-                      transform: 'translate(-50%, -50%)',
-                      animationDuration: '2s',
-                      animationDelay: `${(index % 5) * 0.2}s`
-                    }}
-                  />
-
-                  {/* Pin Marker */}
-                  <div
-                    className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10 transition-transform duration-200 ${isHovered ? 'scale-125' : 'scale-100'}`}
-                  >
-                    {(size === 'lg' || size === 'md') && (
-                      <span className="text-[8px] md:text-[10px] font-bold text-primary-foreground">
-                        {country.students}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Tooltip */}
-                  <AnimatePresence>
-                    {isHovered && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 md:px-4 md:py-2 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50"
-                        style={{ transform: `translate(-50%, 0) scale(${1 / scale})` }}
-                      >
-                        <div className="font-semibold text-xs md:text-sm">{country.name}</div>
-                        <div className="text-background/70 text-[10px] md:text-xs mt-0.5">
-                          {country.students} students
-                        </div>
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {(size === 'lg' || size === 'md') && (
+                    <span className="text-[8px] md:text-[10px] font-bold text-primary-foreground">
+                      {country.students}
+                    </span>
+                  )}
                 </div>
-              );
-            })}
-          </AnimatePresence>
 
-          {/* Connection Lines (animated) */}
+                {/* Tooltip */}
+                {isHovered && (
+                  <div
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 md:px-4 md:py-2 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50 animate-fade-in"
+                    style={{ transform: `translate(-50%, 0) scale(${1 / scale})` }}
+                  >
+                    <div className="font-semibold text-xs md:text-sm">{country.name}</div>
+                    <div className="text-background/70 text-[10px] md:text-xs mt-0.5">
+                      {country.students} students
+                    </div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Connection Lines - Static SVG, no animation */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
             <defs>
               <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -455,16 +446,13 @@ const WorldMap = () => {
               </linearGradient>
             </defs>
             {filteredCountries.filter(c => c.students >= 20).map((country, i) => (
-              <motion.path
+              <path
                 key={`line-${country.id}`}
                 d={`M ${country.x}% ${country.y}% Q 50% ${30 + i * 5}% 50% 50%`}
                 fill="none"
                 stroke="url(#lineGradient)"
                 strokeWidth="1"
-                initial={{ pathLength: 0, opacity: 0 }}
-                whileInView={{ pathLength: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 2, delay: i * 0.2 }}
+                className="opacity-60"
               />
             ))}
           </svg>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import all university logos
@@ -161,55 +161,48 @@ const UniversityWall = () => {
             ref={scrollRef}
             className="overflow-x-auto hide-scrollbar py-4"
           >
-            <motion.div
-              layout
+            <div
               className="flex gap-5 px-4"
               style={{ minWidth: 'max-content' }}
             >
-              <AnimatePresence mode="popLayout">
-                {filteredUniversities.map((university, index) => (
-                  <motion.div
-                    key={university.name}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
-                    className="group relative flex-shrink-0"
-                  >
-                    <div className="w-40 h-48 bg-white border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/40 hover:shadow-xl cursor-pointer rounded-lg">
-                      {/* University Logo or Name Fallback */}
-                      <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                        {university.logo ? (
-                          <img 
-                            src={university.logo} 
-                            alt={`${university.name} logo`}
-                            className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
-                          />
-                        ) : (
-                          <span className="text-lg font-bold text-primary text-center leading-tight">
-                            {university.shortName}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-semibold text-foreground line-clamp-2 text-center leading-tight">
-                        {university.name}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground mt-1">
-                        {university.country}
-                      </span>
+              {filteredUniversities.map((university) => (
+                <div
+                  key={university.name}
+                  className="group relative flex-shrink-0"
+                >
+                  <div className="w-40 h-48 bg-white border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/40 hover:shadow-xl cursor-pointer rounded-lg">
+                    {/* University Logo or Name Fallback */}
+                    <div className="w-20 h-20 mb-3 flex items-center justify-center">
+                      {university.logo ? (
+                        <img 
+                          src={university.logo} 
+                          alt={`${university.name} logo`}
+                          className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-lg font-bold text-primary text-center leading-tight">
+                          {university.shortName}
+                        </span>
+                      )}
                     </div>
-                    
-                    {/* Hover tooltip with full name */}
-                    <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
+                    <span className="text-xs font-semibold text-foreground line-clamp-2 text-center leading-tight">
                       {university.name}
-                      <div className="text-[10px] text-background/60 mt-0.5">IBCircle Student Acceptance</div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
+                    </span>
+                    <span className="text-[11px] text-muted-foreground mt-1">
+                      {university.country}
+                    </span>
+                  </div>
+                  
+                  {/* Hover tooltip with full name */}
+                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
+                    {university.name}
+                    <div className="text-[10px] text-background/60 mt-0.5">IBCircle Student Acceptance</div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Fade edges */}

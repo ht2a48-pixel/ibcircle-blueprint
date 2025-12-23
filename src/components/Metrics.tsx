@@ -72,39 +72,27 @@ const Metrics = () => {
       />
       
       <div className="container mx-auto px-6 lg:px-12 relative">
-        {/* Metrics Grid */}
+        {/* Metrics Grid - Simplified animations */}
         <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-20">
           {metrics.map((metric, index) => (
             <motion.div
               key={metric.label}
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className="text-center"
             >
-              <motion.div 
-                initial={{ scale: 0.5 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.15 }}
-                className="metric-value"
-              >
+              <div className="metric-value">
                 <AnimatedNumber 
                   value={metric.value} 
                   decimals={metric.decimals} 
                   suffix={metric.suffix} 
                 />
-              </motion.div>
-              <motion.div 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.4 + index * 0.15 }}
-                className="metric-label"
-              >
+              </div>
+              <div className="metric-label">
                 {metric.label}
-              </motion.div>
+              </div>
             </motion.div>
           ))}
         </div>
