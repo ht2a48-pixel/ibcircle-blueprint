@@ -16,7 +16,7 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-16 md:pt-20 md:pb-0 overflow-hidden">
-      {/* Subtle grid pattern */}
+      {/* Subtle grid pattern - static, no animation needed */}
       <div 
         className="absolute inset-0 opacity-[0.015]"
         style={{
@@ -28,69 +28,12 @@ const Hero = () => {
         }}
       />
       
-      {/* Noise texture overlay */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] mix-blend-overlay"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-        }}
-      />
+      {/* Static gradient background - removed animation */}
+      <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background to-secondary/10" />
       
-      {/* Animated gradient background */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.5 }}
-        className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background to-secondary/10" 
-      />
-      
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ 
-              opacity: [0, 0.3, 0],
-              y: [-20, -200],
-              x: [0, (i % 2 === 0 ? 30 : -30)]
-            }}
-            transition={{ 
-              duration: 8 + i * 2,
-              repeat: Infinity,
-              delay: i * 1.5,
-              ease: "easeInOut"
-            }}
-            className="absolute w-1 h-1 rounded-full bg-primary/40"
-            style={{ 
-              left: `${15 + i * 15}%`,
-              bottom: '10%'
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Decorative vertical line */}
-      <motion.div
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: 1 }}
-        transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
-        className="absolute left-[8%] top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-border to-transparent origin-top hidden lg:block"
-      />
-      
-      {/* Decorative circles */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.08, scale: 1 }}
-        transition={{ duration: 1.5, delay: 0.5 }}
-        className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full border border-primary/20"
-      />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.04 }}
-        transition={{ duration: 2, delay: 0.8 }}
-        className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-primary/30 blur-3xl"
-      />
+      {/* Decorative circles - static with CSS opacity */}
+      <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full border border-primary/10 opacity-80" />
+      <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-primary/20 blur-3xl opacity-40" />
 
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-8 items-center">
@@ -103,16 +46,11 @@ const Hero = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex items-center gap-3 mb-6 md:mb-8"
             >
-              <motion.span 
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="w-8 md:w-12 h-px bg-primary origin-left" 
-              />
+              <span className="w-8 md:w-12 h-px bg-primary" />
               <span className="text-xs md:text-sm tracking-[0.15em] md:tracking-[0.2em] text-muted-foreground uppercase">Premium IB Education</span>
             </motion.div>
 
-            {/* Main Headline - restructured for better word grouping */}
+            {/* Main Headline */}
             <div className="mb-6 md:mb-8">
               <motion.p
                 custom={1}
@@ -184,26 +122,22 @@ const Hero = () => {
               transition={{ duration: 0.8, delay: 1.1 }}
               className="flex flex-col sm:flex-row items-start gap-3 md:gap-4"
             >
-              <motion.a 
+              <a 
                 href="#contact" 
-                className="btn-primary w-full sm:w-auto text-center"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="btn-primary w-full sm:w-auto text-center hover:scale-[1.02] active:scale-[0.98] transition-transform"
               >
                 무료 상담 받기
-              </motion.a>
-              <motion.a 
+              </a>
+              <a 
                 href="#programs" 
-                className="btn-secondary w-full sm:w-auto text-center"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="btn-secondary w-full sm:w-auto text-center hover:scale-[1.02] active:scale-[0.98] transition-transform"
               >
                 프로그램 알아보기
-              </motion.a>
+              </a>
             </motion.div>
           </div>
 
-          {/* Right side - Decorative element */}
+          {/* Right side - Simplified decorative element with CSS animations */}
           <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -211,110 +145,61 @@ const Hero = () => {
               transition={{ duration: 1, delay: 0.5 }}
               className="relative"
             >
-              {/* Abstract decorative shape */}
+              {/* Simplified decorative shape with CSS animations */}
               <div className="relative w-72 h-72 xl:w-80 xl:h-80">
-                {/* Outer ring with pulse */}
-                <motion.div
-                  animate={{ 
-                    rotate: 360,
-                    scale: [1, 1.02, 1]
-                  }}
-                  transition={{ 
-                    rotate: { duration: 60, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                  className="absolute inset-0 rounded-full border border-border/40"
-                />
+                {/* Outer ring - CSS rotation */}
+                <div className="absolute inset-0 rounded-full border border-border/40 animate-[spin_60s_linear_infinite]" />
                 
-                {/* Secondary rotating ring */}
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-4 rounded-full border border-dashed border-border/20"
-                />
+                {/* Secondary ring - CSS rotation opposite */}
+                <div className="absolute inset-4 rounded-full border border-dashed border-border/20 animate-[spin_45s_linear_infinite_reverse]" />
                 
-                {/* Middle ring with animated dots */}
+                {/* Middle ring with static dots */}
                 <div className="absolute inset-8 rounded-full border border-border/30">
                   {[0, 90, 180, 270].map((rotation, i) => (
-                    <motion.div
+                    <div
                       key={i}
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.8, 0.4] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
-                      className="absolute w-2 h-2 rounded-full bg-primary/40"
+                      className="absolute w-2 h-2 rounded-full bg-primary/40 animate-pulse"
                       style={{
                         top: rotation === 0 ? '-4px' : rotation === 180 ? 'auto' : '50%',
                         bottom: rotation === 180 ? '-4px' : 'auto',
                         left: rotation === 270 ? '-4px' : rotation === 90 ? 'auto' : '50%',
                         right: rotation === 90 ? '-4px' : 'auto',
-                        transform: (rotation === 0 || rotation === 180) ? 'translateX(-50%)' : 'translateY(-50%)'
+                        transform: (rotation === 0 || rotation === 180) ? 'translateX(-50%)' : 'translateY(-50%)',
+                        animationDelay: `${i * 0.5}s`
                       }}
                     />
                   ))}
                 </div>
                 
-                {/* Inner circle with gradient */}
-                <motion.div 
-                  animate={{ opacity: [0.5, 0.7, 0.5] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute inset-16 rounded-full bg-gradient-to-br from-secondary/60 to-transparent" 
-                />
+                {/* Inner circle with gradient - static */}
+                <div className="absolute inset-16 rounded-full bg-gradient-to-br from-secondary/60 to-transparent opacity-60" />
                 
-                {/* Center text with subtle animation */}
-                <motion.div 
-                  animate={{ scale: [1, 1.03, 1] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-0 flex flex-col items-center justify-center text-center"
-                >
+                {/* Center text - static */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-5xl xl:text-6xl font-light text-primary/80">IB</span>
                   <span className="text-xs tracking-[0.3em] text-muted-foreground mt-2">CIRCLE</span>
-                </motion.div>
+                </div>
                 
-                {/* Floating elements */}
-                <motion.div
-                  animate={{ 
-                    y: [-8, 8, -8],
-                    rotate: [0, 180, 360]
-                  }}
-                  transition={{ 
-                    y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                    rotate: { duration: 8, repeat: Infinity, ease: "linear" }
-                  }}
-                  className="absolute -top-6 -right-6 w-10 h-10 rounded-full border border-warm/30"
-                />
-                <motion.div
-                  animate={{ 
-                    y: [8, -8, 8],
-                    x: [-4, 4, -4]
-                  }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -bottom-4 -left-4 w-6 h-6 rounded-full border border-primary/40"
-                />
-                <motion.div
-                  animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute top-1/4 -right-8 w-3 h-3 rounded-full bg-primary/30"
-                />
+                {/* Floating elements - CSS animations */}
+                <div className="absolute -top-6 -right-6 w-10 h-10 rounded-full border border-warm/30 animate-[bounce_4s_ease-in-out_infinite]" />
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 rounded-full border border-primary/40 animate-[bounce_5s_ease-in-out_infinite_0.5s]" />
               </div>
             </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator - CSS animation */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1.4 }}
         className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2"
       >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex flex-col items-center gap-2"
-        >
+        <div className="flex flex-col items-center gap-2">
           <span className="text-[10px] tracking-widest text-muted-foreground uppercase">Scroll</span>
-          <div className="w-px h-12 md:h-16 bg-gradient-to-b from-primary/40 to-transparent" />
-        </motion.div>
+          <div className="w-px h-12 md:h-16 bg-gradient-to-b from-primary/40 to-transparent animate-pulse" />
+        </div>
       </motion.div>
     </section>
   );
