@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LogOut, Download, Plus, Trash2, Printer } from "lucide-react";
+import { LogOut, Download, Plus, Trash2, Printer, Loader2 } from "lucide-react";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface SkillScore {
   label: string;
@@ -38,6 +39,7 @@ interface ReportData {
 
 const AdminReports = () => {
   const navigate = useNavigate();
+  const { user, isAdmin, isLoading, signOut } = useAdminAuth();
   const [reportData, setReportData] = useState<ReportData>({
     subjectTitle: "IB Economics HL 수업 리포트",
     sessionNumber: "24",
@@ -63,15 +65,19 @@ const AdminReports = () => {
     ],
   });
 
+  // Redirect if not authenticated or not admin
   useEffect(() => {
-    const isAuthenticated = sessionStorage.getItem("admin_authenticated");
-    if (!isAuthenticated) {
-      navigate("/admin");
+    if (!isLoading) {
+      if (!user) {
+        navigate("/admin");
+      } else if (!isAdmin) {
+        navigate("/admin");
+      }
     }
-  }, [navigate]);
+  }, [user, isAdmin, isLoading, navigate]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("admin_authenticated");
+  const handleLogout = async () => {
+    await signOut();
     navigate("/admin");
   };
 
@@ -371,6 +377,24 @@ const AdminReports = () => {
     printWindow.document.write(html);
     printWindow.document.close();
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Don't render if not admin (redirect will happen via useEffect)
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
