@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-
-const ADMIN_PASSCODE = "040707";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminLogin = () => {
   const [passcode, setPasscode] = useState("");
@@ -17,14 +16,30 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      // Validate passcode on the server
+      const { data, error } = await supabase.functions.invoke("verify-admin-passcode", {
+        body: { action: "verify-passcode", passcode },
+      });
 
-    if (passcode === ADMIN_PASSCODE) {
-      sessionStorage.setItem("adminAuthenticated", "true");
-      toast.success("Access granted");
-      navigate("/admin/reports");
-    } else {
-      toast.error("Invalid passcode");
+      if (error) {
+        console.error("Error calling verify-admin-passcode:", error);
+        toast.error("서버 오류가 발생했습니다");
+        setIsLoading(false);
+        return;
+      }
+
+      if (data?.success && data?.token) {
+        // Store the server-generated token (not the passcode)
+        sessionStorage.setItem("adminToken", data.token);
+        toast.success("Access granted");
+        navigate("/admin/reports");
+      } else {
+        toast.error("Invalid passcode");
+      }
+    } catch (err) {
+      console.error("Error during authentication:", err);
+      toast.error("인증 중 오류가 발생했습니다");
     }
 
     setIsLoading(false);
@@ -51,7 +66,7 @@ const AdminLogin = () => {
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 className="text-center text-lg tracking-widest"
-                maxLength={10}
+                maxLength={50}
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading || !passcode}>

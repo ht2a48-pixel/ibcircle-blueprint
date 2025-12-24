@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LogOut, Download, Plus, Trash2, Printer } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SkillScore {
   label: string;
@@ -63,16 +64,36 @@ const AdminReports = () => {
     ],
   });
 
-  // Check if user is authenticated via passcode
+  // Check if user is authenticated via server-validated token
   useEffect(() => {
-    const isAuthenticated = sessionStorage.getItem("adminAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/admin");
-    }
+    const verifyAccess = async () => {
+      const token = sessionStorage.getItem("adminToken");
+      if (!token) {
+        navigate("/admin");
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-admin-passcode", {
+          body: { action: "verify-token", token },
+        });
+
+        if (error || !data?.valid) {
+          sessionStorage.removeItem("adminToken");
+          navigate("/admin");
+        }
+      } catch (err) {
+        console.error("Error verifying token:", err);
+        sessionStorage.removeItem("adminToken");
+        navigate("/admin");
+      }
+    };
+
+    verifyAccess();
   }, [navigate]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("adminAuthenticated");
+    sessionStorage.removeItem("adminToken");
     navigate("/admin");
   };
 
