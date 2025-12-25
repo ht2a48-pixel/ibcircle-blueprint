@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LogOut, Download, Plus, Trash2, Printer } from "lucide-react";
+import { LogOut, Download, Plus, Trash2, Printer, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SkillScore {
@@ -399,7 +399,13 @@ const AdminReports = () => {
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 md:py-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <h1 className="text-lg md:text-xl font-bold text-foreground">리포트 생성기</h1>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5 px-2">
+                <Home className="w-4 h-4" />
+                <span className="hidden xs:inline">홈</span>
+              </Button>
+              <h1 className="text-lg md:text-xl font-bold text-foreground">리포트 생성기</h1>
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={downloadReport} size="sm" className="gap-1.5 flex-1 sm:flex-none">
                 <Download className="w-4 h-4" />
