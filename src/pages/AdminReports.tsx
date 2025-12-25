@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ interface ReportData {
   priorities: Priority[];
 }
 
-const AdminReports = () => {
+const AdminReports = memo(() => {
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<ReportData>({
     subjectTitle: "IB Economics HL 수업 리포트",
@@ -92,77 +92,77 @@ const AdminReports = () => {
     verifyAccess();
   }, [navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     sessionStorage.removeItem("adminToken");
     navigate("/admin");
-  };
+  }, [navigate]);
 
-  const updateSkillScore = (index: number, field: keyof SkillScore, value: string) => {
+  const updateSkillScore = useCallback((index: number, field: keyof SkillScore, value: string) => {
     setReportData((prev) => ({
       ...prev,
       skillScores: prev.skillScores.map((s, i) =>
         i === index ? { ...s, [field]: value } : s
       ),
     }));
-  };
+  }, []);
 
-  const addRiskFlag = () => {
+  const addRiskFlag = useCallback(() => {
     setReportData((prev) => ({
       ...prev,
       riskFlags: [...prev.riskFlags, { text: "", level: "medium" }],
     }));
-  };
+  }, []);
 
-  const removeRiskFlag = (index: number) => {
+  const removeRiskFlag = useCallback((index: number) => {
     setReportData((prev) => ({
       ...prev,
       riskFlags: prev.riskFlags.filter((_, i) => i !== index),
     }));
-  };
+  }, []);
 
-  const updateRiskFlag = (index: number, field: keyof RiskFlag, value: string) => {
+  const updateRiskFlag = useCallback((index: number, field: keyof RiskFlag, value: string) => {
     setReportData((prev) => ({
       ...prev,
       riskFlags: prev.riskFlags.map((r, i) =>
         i === index ? { ...r, [field]: value } : r
       ),
     }));
-  };
+  }, []);
 
-  const addRecommendation = () => {
+  const addRecommendation = useCallback(() => {
     setReportData((prev) => ({
       ...prev,
       recommendations: [...prev.recommendations, { text: "" }],
     }));
-  };
+  }, []);
 
-  const removeRecommendation = (index: number) => {
+  const removeRecommendation = useCallback((index: number) => {
     setReportData((prev) => ({
       ...prev,
       recommendations: prev.recommendations.filter((_, i) => i !== index),
     }));
-  };
+  }, []);
 
-  const updateRecommendation = (index: number, value: string) => {
+  const updateRecommendation = useCallback((index: number, value: string) => {
     setReportData((prev) => ({
       ...prev,
       recommendations: prev.recommendations.map((r, i) =>
         i === index ? { text: value } : r
       ),
     }));
-  };
+  }, []);
 
-  const updatePriority = (index: number, value: string) => {
+  const updatePriority = useCallback((index: number, value: string) => {
     setReportData((prev) => ({
       ...prev,
       priorities: prev.priorities.map((p, i) =>
         i === index ? { ...p, text: value } : p
       ),
     }));
-  };
+  }, []);
 
   // HTML escape function to prevent XSS
-  const escapeHtml = (text: string): string => {
+  const escapeHtml = useCallback((text: string): string => {
     const map: Record<string, string> = {
       '&': '&amp;',
       '<': '&lt;',
@@ -171,9 +171,9 @@ const AdminReports = () => {
       "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
-  };
+  }, []);
 
-  const generateReportHTML = () => {
+  const generateReportHTML = useCallback(() => {
     return `
 <!DOCTYPE html>
 <html>
@@ -371,9 +371,9 @@ const AdminReports = () => {
   </div>
 </body>
 </html>`;
-  };
+  }, [reportData, escapeHtml]);
 
-  const downloadReport = () => {
+  const downloadReport = useCallback(() => {
     const html = generateReportHTML();
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -384,15 +384,15 @@ const AdminReports = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  };
+  }, [generateReportHTML, reportData.sessionNumber]);
 
-  const printReport = () => {
+  const printReport = useCallback(() => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
     const html = generateReportHTML() + `<script>window.onload = () => window.print();</script>`;
     printWindow.document.write(html);
     printWindow.document.close();
-  };
+  }, [generateReportHTML]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -611,6 +611,8 @@ const AdminReports = () => {
       </main>
     </div>
   );
-};
+});
+
+AdminReports.displayName = "AdminReports";
 
 export default AdminReports;
