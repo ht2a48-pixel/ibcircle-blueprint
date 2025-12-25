@@ -8,6 +8,57 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 submissions per hour per IP
+
+// In-memory rate limit store (resets on function cold start, but provides basic protection)
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIP(req: Request): string {
+  // Try various headers for client IP
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  const realIP = req.headers.get("x-real-ip");
+  if (realIP) {
+    return realIP;
+  }
+  // Fallback to a default identifier
+  return "unknown";
+}
+
+function checkRateLimit(clientIP: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(clientIP);
+  
+  // Clean up expired entries
+  if (record && now > record.resetAt) {
+    rateLimitStore.delete(clientIP);
+  }
+  
+  const currentRecord = rateLimitStore.get(clientIP);
+  
+  if (!currentRecord) {
+    // First request from this IP
+    rateLimitStore.set(clientIP, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return { allowed: true };
+  }
+  
+  if (currentRecord.count >= MAX_REQUESTS_PER_WINDOW) {
+    const retryAfter = Math.ceil((currentRecord.resetAt - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  
+  // Increment count
+  currentRecord.count++;
+  return { allowed: true };
+}
+
 interface ContactEmailRequest {
   name: string;
   email: string;
@@ -44,6 +95,28 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Rate limiting check
+    const clientIP = getClientIP(req);
+    const rateLimitResult = checkRateLimit(clientIP);
+    
+    if (!rateLimitResult.allowed) {
+      console.log(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요.",
+          retryAfter: rateLimitResult.retryAfter 
+        }),
+        {
+          status: 429,
+          headers: { 
+            "Content-Type": "application/json", 
+            "Retry-After": String(rateLimitResult.retryAfter),
+            ...corsHeaders 
+          },
+        }
+      );
+    }
+
     const { name, email, message }: ContactEmailRequest = await req.json();
 
     console.log("Received contact form submission");

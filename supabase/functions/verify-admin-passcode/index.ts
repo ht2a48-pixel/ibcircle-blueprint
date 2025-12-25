@@ -1,15 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Simple token generation using HMAC-like approach
-async function generateToken(passcode: string, secret: string): Promise<string> {
+// Token expiration time: 24 hours in milliseconds
+const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+// Generate a token with expiration timestamp
+async function generateToken(secret: string): Promise<{ token: string; expiresAt: number }> {
+  const expiresAt = Date.now() + TOKEN_EXPIRY_MS;
   const encoder = new TextEncoder();
-  const data = encoder.encode(passcode + Date.now().toString() + secret);
+  
+  // Create payload with expiration
+  const payload = JSON.stringify({ exp: expiresAt, iat: Date.now() });
+  const payloadB64 = btoa(payload);
+  
+  // Sign the payload
   const key = await crypto.subtle.importKey(
     "raw",
     encoder.encode(secret),
@@ -17,22 +25,55 @@ async function generateToken(passcode: string, secret: string): Promise<string> 
     false,
     ["sign"]
   );
-  const signature = await crypto.subtle.sign("HMAC", key, data);
-  const token = btoa(String.fromCharCode(...new Uint8Array(signature)));
-  return token;
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payloadB64));
+  const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  
+  // Token format: payload.signature (like a simplified JWT)
+  const token = `${payloadB64}.${signatureB64}`;
+  return { token, expiresAt };
 }
 
-// Verify token is valid (simplified - in production use JWT with expiry)
-async function verifyToken(token: string, secret: string): Promise<boolean> {
-  if (!token || !secret) return false;
-  // For this simple implementation, we just verify the token exists and matches format
-  // In production, use proper JWT with expiration
+// Verify token signature and expiration
+async function verifyToken(token: string, secret: string): Promise<{ valid: boolean; expired?: boolean }> {
+  if (!token || !secret) return { valid: false };
+  
   try {
-    // Token should be a base64 encoded string
-    const decoded = atob(token);
-    return decoded.length > 0;
+    const parts = token.split(".");
+    if (parts.length !== 2) return { valid: false };
+    
+    const [payloadB64, signatureB64] = parts;
+    
+    // Verify signature
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+    
+    const signature = Uint8Array.from(atob(signatureB64), c => c.charCodeAt(0));
+    const isValidSignature = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      signature,
+      encoder.encode(payloadB64)
+    );
+    
+    if (!isValidSignature) return { valid: false };
+    
+    // Check expiration
+    const payload = JSON.parse(atob(payloadB64));
+    if (!payload.exp || typeof payload.exp !== "number") return { valid: false };
+    
+    if (Date.now() > payload.exp) {
+      return { valid: false, expired: true };
+    }
+    
+    return { valid: true };
   } catch {
-    return false;
+    return { valid: false };
   }
 }
 
@@ -84,13 +125,13 @@ serve(async (req) => {
         );
       }
 
-      // Generate a session token
-      const sessionToken = await generateToken(passcode, ADMIN_TOKEN_SECRET);
+      // Generate a session token with expiration
+      const { token: sessionToken, expiresAt } = await generateToken(ADMIN_TOKEN_SECRET);
 
-      console.log("Passcode verified successfully, token generated");
+      console.log("Passcode verified successfully, token generated with expiration");
 
       return new Response(
-        JSON.stringify({ success: true, token: sessionToken }),
+        JSON.stringify({ success: true, token: sessionToken, expiresAt }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
 
@@ -103,10 +144,10 @@ serve(async (req) => {
         );
       }
 
-      const isValid = await verifyToken(token, ADMIN_TOKEN_SECRET);
+      const result = await verifyToken(token, ADMIN_TOKEN_SECRET);
 
       return new Response(
-        JSON.stringify({ valid: isValid }),
+        JSON.stringify({ valid: result.valid, expired: result.expired }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
 
