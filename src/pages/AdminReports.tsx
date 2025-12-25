@@ -397,93 +397,101 @@ const AdminReports = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">리포트 생성기</h1>
-          <div className="flex gap-2">
-            <Button onClick={downloadReport} className="gap-2">
-              <Download className="w-4 h-4" />
-              다운로드
-            </Button>
-            <Button onClick={printReport} variant="secondary" className="gap-2">
-              <Printer className="w-4 h-4" />
-              인쇄
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="gap-2">
-              <LogOut className="w-4 h-4" />
-              로그아웃
-            </Button>
+        <div className="max-w-5xl mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <h1 className="text-lg md:text-xl font-bold text-foreground">리포트 생성기</h1>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={downloadReport} size="sm" className="gap-1.5 flex-1 sm:flex-none">
+                <Download className="w-4 h-4" />
+                <span className="hidden xs:inline">다운로드</span>
+              </Button>
+              <Button onClick={printReport} variant="secondary" size="sm" className="gap-1.5 flex-1 sm:flex-none">
+                <Printer className="w-4 h-4" />
+                <span className="hidden xs:inline">인쇄</span>
+              </Button>
+              <Button variant="outline" onClick={handleLogout} size="sm" className="gap-1.5">
+                <LogOut className="w-4 h-4" />
+                <span className="hidden xs:inline">로그아웃</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
         {/* Report Header Info */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">리포트 헤더</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">리포트 헤더</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">과목 제목</label>
+              <label className="text-xs md:text-sm text-muted-foreground mb-1 block">과목 제목</label>
               <Input
                 value={reportData.subjectTitle}
                 onChange={(e) => setReportData((p) => ({ ...p, subjectTitle: e.target.value }))}
                 placeholder="IB Economics HL 수업 리포트"
+                className="text-sm"
               />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">세션 번호</label>
+              <label className="text-xs md:text-sm text-muted-foreground mb-1 block">세션 번호</label>
               <Input
                 value={reportData.sessionNumber}
                 onChange={(e) => setReportData((p) => ({ ...p, sessionNumber: e.target.value }))}
                 placeholder="24"
+                className="text-sm"
               />
             </div>
           </div>
         </section>
 
         {/* Summary */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">수업 요약</h2>
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">수업 요약</h2>
           <Textarea
             value={reportData.summary}
             onChange={(e) => setReportData((p) => ({ ...p, summary: e.target.value }))}
             placeholder="오늘 수업에서 다룬 내용을 상세히 작성해주세요. 여러 문단으로 나누어 작성할 수 있습니다."
             rows={6}
+            className="text-sm"
           />
         </section>
 
         {/* Challenge Content */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">심화 학습</h2>
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">심화 학습</h2>
           <Textarea
             value={reportData.challengeContent}
             onChange={(e) => setReportData((p) => ({ ...p, challengeContent: e.target.value }))}
             placeholder="심화 학습 내용을 작성해주세요 (선택사항)"
             rows={3}
+            className="text-sm"
           />
         </section>
 
         {/* Evaluation */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">학습 평가</h2>
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">학습 평가</h2>
           <Textarea
             value={reportData.evaluationText}
             onChange={(e) => setReportData((p) => ({ ...p, evaluationText: e.target.value }))}
             placeholder="학생의 학습 태도와 성취도에 대한 평가를 작성해주세요."
             rows={3}
-            className="mb-4"
+            className="mb-3 md:mb-4 text-sm"
           />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             {reportData.skillScores.map((skill, index) => (
-              <div key={index} className="space-y-2">
+              <div key={index} className="space-y-1.5 md:space-y-2">
                 <Input
                   value={skill.label}
                   onChange={(e) => updateSkillScore(index, "label", e.target.value)}
                   placeholder="스킬명"
+                  className="text-sm"
                 />
                 <Input
                   value={skill.score}
                   onChange={(e) => updateSkillScore(index, "score", e.target.value)}
                   placeholder="점수"
+                  className="text-sm"
                 />
               </div>
             ))}
@@ -491,49 +499,61 @@ const AdminReports = () => {
         </section>
 
         {/* Risk Flags */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Academic Risk Flags</h2>
-            <Button onClick={addRiskFlag} variant="outline" size="sm" className="gap-1">
-              <Plus className="w-4 h-4" /> 추가
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h2 className="text-base md:text-lg font-semibold">Academic Risk Flags</h2>
+            <Button onClick={addRiskFlag} variant="outline" size="sm" className="gap-1 text-xs md:text-sm">
+              <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> 추가
             </Button>
           </div>
           <div className="space-y-3">
             {reportData.riskFlags.map((risk, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <select
-                  value={risk.level}
-                  onChange={(e) => updateRiskFlag(index, "level", e.target.value)}
-                  className="border border-border rounded-md px-2 py-2 text-sm bg-background"
-                >
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                </select>
-                <Input
-                  value={risk.text}
-                  onChange={(e) => updateRiskFlag(index, "text", e.target.value)}
-                  placeholder="리스크 내용을 입력하세요"
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => removeRiskFlag(index)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+              <div key={index} className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2 items-center">
+                  <select
+                    value={risk.level}
+                    onChange={(e) => updateRiskFlag(index, "level", e.target.value)}
+                    className="border border-border rounded-md px-2 py-2 text-xs md:text-sm bg-background flex-shrink-0"
+                  >
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                  </select>
+                  <Button
+                    onClick={() => removeRiskFlag(index)}
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive sm:hidden flex-shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex gap-2 flex-1 items-center">
+                  <Input
+                    value={risk.text}
+                    onChange={(e) => updateRiskFlag(index, "text", e.target.value)}
+                    placeholder="리스크 내용을 입력하세요"
+                    className="flex-1 text-sm"
+                  />
+                  <Button
+                    onClick={() => removeRiskFlag(index)}
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hidden sm:flex flex-shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
         {/* Recommendations */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Strategic Recommendations</h2>
-            <Button onClick={addRecommendation} variant="outline" size="sm" className="gap-1">
-              <Plus className="w-4 h-4" /> 추가
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h2 className="text-base md:text-lg font-semibold">Strategic Recommendations</h2>
+            <Button onClick={addRecommendation} variant="outline" size="sm" className="gap-1 text-xs md:text-sm">
+              <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> 추가
             </Button>
           </div>
           <div className="space-y-3">
@@ -543,13 +563,13 @@ const AdminReports = () => {
                   value={rec.text}
                   onChange={(e) => updateRecommendation(index, e.target.value)}
                   placeholder="추천 내용을 입력하세요"
-                  className="flex-1"
+                  className="flex-1 text-sm"
                 />
                 <Button
                   onClick={() => removeRecommendation(index)}
                   variant="ghost"
                   size="icon"
-                  className="text-destructive"
+                  className="text-destructive flex-shrink-0"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -559,21 +579,29 @@ const AdminReports = () => {
         </section>
 
         {/* Priorities */}
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">Next Step Priorities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Next Step Priorities</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             {reportData.priorities.map((priority, index) => (
               <div key={index}>
-                <label className="text-sm text-muted-foreground mb-1 block">{priority.label}</label>
+                <label className="text-xs md:text-sm text-muted-foreground mb-1 block">{priority.label}</label>
                 <Input
                   value={priority.text}
                   onChange={(e) => updatePriority(index, e.target.value)}
                   placeholder="우선순위 내용"
+                  className="text-sm"
                 />
               </div>
             ))}
           </div>
         </section>
+
+        {/* Mobile-friendly floating action button for download */}
+        <div className="fixed bottom-4 right-4 md:hidden flex gap-2 z-20">
+          <Button onClick={downloadReport} size="icon" className="h-12 w-12 rounded-full shadow-lg">
+            <Download className="w-5 h-5" />
+          </Button>
+        </div>
       </main>
     </div>
   );
