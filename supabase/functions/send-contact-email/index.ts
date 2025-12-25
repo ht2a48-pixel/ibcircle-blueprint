@@ -2,11 +2,37 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'https://ibcircle.co.kr',
+  'https://www.ibcircle.co.kr',
+  'http://localhost:8080',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+function getCorsHeaders(request: Request): Record<string, string> {
+  const origin = request.headers.get('origin') || '';
+  
+  // Check if origin is in allowed list or is a Lovable preview domain
+  const isAllowed = ALLOWED_ORIGINS.includes(origin) || 
+    origin.includes('.lovableproject.com') ||
+    origin.includes('.lovable.app');
+  
+  if (isAllowed) {
+    return {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    };
+  }
+  
+  // Return restrictive headers for unknown origins
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
@@ -89,6 +115,8 @@ const sendEmail = async (to: string[], subject: string, html: string) => {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

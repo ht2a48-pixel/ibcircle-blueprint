@@ -4,9 +4,6 @@ import { Button } from '@/components/ui/button';
 
 const SampleReport = () => {
   const downloadReport = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-
     const html = `
 <!DOCTYPE html>
 <html>
@@ -137,8 +134,17 @@ const SampleReport = () => {
 </body>
 </html>`;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    // Use Blob URL for safer HTML rendering (no document.write)
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const blobURL = URL.createObjectURL(blob);
+    const printWindow = window.open(blobURL, '_blank');
+    
+    // Clean up blob URL after window loads
+    if (printWindow) {
+      printWindow.addEventListener('load', () => {
+        URL.revokeObjectURL(blobURL);
+      });
+    }
   };
 
   return (
