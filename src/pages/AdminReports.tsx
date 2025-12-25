@@ -67,10 +67,30 @@ const AdminReports = memo(() => {
   // Check if user is authenticated via server-validated token
   useEffect(() => {
     const verifyAccess = async () => {
-      const token = sessionStorage.getItem("adminToken");
-      if (!token) {
+      const storedData = sessionStorage.getItem("adminToken");
+      if (!storedData) {
         navigate("/admin");
         return;
+      }
+
+      // Parse stored token data with expiry
+      let token: string;
+      let expiresAt: number;
+      try {
+        const parsed = JSON.parse(storedData);
+        token = parsed.token;
+        expiresAt = parsed.expiresAt;
+        
+        // Client-side expiry check before making server request
+        if (!token || !expiresAt || Date.now() > expiresAt) {
+          sessionStorage.removeItem("adminToken");
+          navigate("/admin");
+          return;
+        }
+      } catch {
+        // Handle legacy format (plain token string)
+        token = storedData;
+        expiresAt = 0;
       }
 
       try {
@@ -387,11 +407,25 @@ const AdminReports = memo(() => {
   }, [generateReportHTML, reportData.sessionNumber]);
 
   const printReport = useCallback(() => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    const html = generateReportHTML() + `<script>window.onload = () => window.print();</script>`;
-    printWindow.document.write(html);
-    printWindow.document.close();
+    const reportHTML = generateReportHTML();
+    
+    // Add print script within the HTML body
+    const completeHTML = reportHTML.replace(
+      '</body>',
+      '<script>window.onload = () => { window.print(); };</script></body>'
+    );
+    
+    // Use Blob URL for safer HTML rendering (no document.write)
+    const blob = new Blob([completeHTML], { type: 'text/html;charset=utf-8' });
+    const blobURL = URL.createObjectURL(blob);
+    const printWindow = window.open(blobURL, '_blank');
+    
+    // Clean up blob URL after window loads
+    if (printWindow) {
+      printWindow.addEventListener('load', () => {
+        URL.revokeObjectURL(blobURL);
+      });
+    }
   }, [generateReportHTML]);
 
   return (

@@ -29,9 +29,13 @@ const AdminLogin = memo(() => {
         return;
       }
 
-      if (data?.success && data?.token) {
-        // Store the server-generated token (not the passcode)
-        sessionStorage.setItem("adminToken", data.token);
+      if (data?.success && data?.token && data?.expiresAt) {
+        // Store token with expiration for client-side validation
+        const tokenData = JSON.stringify({
+          token: data.token,
+          expiresAt: data.expiresAt,
+        });
+        sessionStorage.setItem("adminToken", tokenData);
         toast.success("Access granted");
         navigate("/admin/reports");
       } else {
