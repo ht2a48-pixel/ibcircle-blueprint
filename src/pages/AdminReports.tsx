@@ -1,11 +1,19 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LogOut, Download, Plus, Trash2, Printer, Home } from "lucide-react";
+import { LogOut, Download, Plus, Trash2, Printer, Home, Image, FileText, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { toast } from "sonner";
 interface SkillScore {
   label: string;
   score: string;
@@ -393,7 +401,7 @@ const AdminReports = memo(() => {
 </html>`;
   }, [reportData, escapeHtml]);
 
-  const downloadReport = useCallback(() => {
+  const downloadReportHTML = useCallback(() => {
     const html = generateReportHTML();
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -406,21 +414,109 @@ const AdminReports = memo(() => {
     URL.revokeObjectURL(url);
   }, [generateReportHTML, reportData.sessionNumber]);
 
+  const downloadReportAsImage = useCallback(async () => {
+    toast.loading("JPG 생성 중...", { id: "jpg-download" });
+    try {
+      const html = generateReportHTML();
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '800px';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      const reportElement = container.querySelector('.report') as HTMLElement;
+      if (!reportElement) {
+        throw new Error('Report element not found');
+      }
+
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      document.body.removeChild(container);
+
+      const link = document.createElement('a');
+      link.download = `IBCircle_Report_Session${reportData.sessionNumber}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+
+      toast.success("JPG 다운로드 완료", { id: "jpg-download" });
+    } catch (error) {
+      console.error('Error generating JPG:', error);
+      toast.error("JPG 생성 실패", { id: "jpg-download" });
+    }
+  }, [generateReportHTML, reportData.sessionNumber]);
+
+  const downloadReportAsPDF = useCallback(async () => {
+    toast.loading("PDF 생성 중...", { id: "pdf-download" });
+    try {
+      const html = generateReportHTML();
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '800px';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      const reportElement = container.querySelector('.report') as HTMLElement;
+      if (!reportElement) {
+        throw new Error('Report element not found');
+      }
+
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`IBCircle_Report_Session${reportData.sessionNumber}.pdf`);
+      toast.success("PDF 다운로드 완료", { id: "pdf-download" });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("PDF 생성 실패", { id: "pdf-download" });
+    }
+  }, [generateReportHTML, reportData.sessionNumber]);
+
   const printReport = useCallback(() => {
     const reportHTML = generateReportHTML();
     
-    // Add print script within the HTML body
     const completeHTML = reportHTML.replace(
       '</body>',
       '<script>window.onload = () => { window.print(); };</script></body>'
     );
     
-    // Use Blob URL for safer HTML rendering (no document.write)
     const blob = new Blob([completeHTML], { type: 'text/html;charset=utf-8' });
     const blobURL = URL.createObjectURL(blob);
     const printWindow = window.open(blobURL, '_blank');
     
-    // Clean up blob URL after window loads
     if (printWindow) {
       printWindow.addEventListener('load', () => {
         URL.revokeObjectURL(blobURL);
@@ -441,10 +537,29 @@ const AdminReports = memo(() => {
               <h1 className="text-lg md:text-xl font-bold text-foreground">리포트 생성기</h1>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={downloadReport} size="sm" className="gap-1.5 flex-1 sm:flex-none">
-                <Download className="w-4 h-4" />
-                <span className="hidden xs:inline">다운로드</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" className="gap-1.5 flex-1 sm:flex-none">
+                    <Download className="w-4 h-4" />
+                    <span className="hidden xs:inline">다운로드</span>
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={downloadReportAsPDF} className="gap-2">
+                    <FileText className="w-4 h-4" />
+                    PDF 다운로드
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadReportAsImage} className="gap-2">
+                    <Image className="w-4 h-4" />
+                    JPG 다운로드 (모바일용)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadReportHTML} className="gap-2">
+                    <Download className="w-4 h-4" />
+                    HTML 다운로드
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button onClick={printReport} variant="secondary" size="sm" className="gap-1.5 flex-1 sm:flex-none">
                 <Printer className="w-4 h-4" />
                 <span className="hidden xs:inline">인쇄</span>
@@ -636,10 +751,13 @@ const AdminReports = memo(() => {
           </div>
         </section>
 
-        {/* Mobile-friendly floating action button for download */}
-        <div className="fixed bottom-4 right-4 md:hidden flex gap-2 z-20">
-          <Button onClick={downloadReport} size="icon" className="h-12 w-12 rounded-full shadow-lg">
-            <Download className="w-5 h-5" />
+        {/* Mobile-friendly floating action buttons for download */}
+        <div className="fixed bottom-4 right-4 md:hidden flex flex-col gap-2 z-20">
+          <Button onClick={downloadReportAsImage} size="icon" className="h-12 w-12 rounded-full shadow-lg" title="JPG 다운로드">
+            <Image className="w-5 h-5" />
+          </Button>
+          <Button onClick={downloadReportAsPDF} size="icon" variant="secondary" className="h-12 w-12 rounded-full shadow-lg" title="PDF 다운로드">
+            <FileText className="w-5 h-5" />
           </Button>
         </div>
       </main>
