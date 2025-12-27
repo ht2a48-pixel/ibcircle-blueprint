@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react';
-import { motion, Easing } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const Hero = memo(() => {
   const [isMobile, setIsMobile] = useState(false);
@@ -12,7 +12,6 @@ const Hero = memo(() => {
   }, []);
 
   // Simplified animations for mobile
-  const ease: Easing = "easeOut";
   const textVariants = {
     hidden: { opacity: 0, y: isMobile ? 10 : 20 },
     visible: (i: number) => ({
@@ -21,7 +20,7 @@ const Hero = memo(() => {
       transition: {
         delay: isMobile ? i * 0.05 : i * 0.1,
         duration: isMobile ? 0.4 : 0.8,
-        ease
+        ease: [0.25, 0.1, 0.25, 1] as const // easeOut cubic bezier
       }
     })
   };
