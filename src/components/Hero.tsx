@@ -1,15 +1,27 @@
-import { motion } from 'framer-motion';
+import { memo, useEffect, useState } from 'react';
+import { motion, Easing } from 'framer-motion';
 
-const Hero = () => {
+const Hero = memo(() => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Simplified animations for mobile
+  const ease: Easing = "easeOut";
   const textVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: isMobile ? 10 : 20 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.1,
-        duration: 0.8,
-        ease: "easeOut" as const
+        delay: isMobile ? i * 0.05 : i * 0.1,
+        duration: isMobile ? 0.4 : 0.8,
+        ease
       }
     })
   };
@@ -28,12 +40,12 @@ const Hero = () => {
         }}
       />
       
-      {/* Static gradient background - removed animation */}
+      {/* Static gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background to-secondary/10" />
       
-      {/* Decorative circles - static with CSS opacity */}
-      <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full border border-primary/10 opacity-80" />
-      <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-primary/20 blur-3xl opacity-40" />
+      {/* Decorative circles - static */}
+      <div className="absolute -top-32 -right-32 w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full border border-primary/10 opacity-80" />
+      <div className="absolute -bottom-48 -left-48 w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full bg-primary/20 blur-3xl opacity-40" />
 
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-8 items-center">
@@ -41,9 +53,9 @@ const Hero = () => {
           <div className="lg:col-span-7 lg:pl-16">
             {/* Eyebrow text */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: isMobile ? 0.3 : 0.6, delay: 0.1 }}
               className="flex items-center gap-3 mb-6 md:mb-8"
             >
               <span className="w-8 md:w-12 h-px bg-primary" />
@@ -96,7 +108,7 @@ const Hero = () => {
             <motion.div
               initial={{ scaleX: 0, opacity: 0 }}
               animate={{ scaleX: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: isMobile ? 0.4 : 0.8, delay: isMobile ? 0.3 : 0.8 }}
               className="w-16 md:w-24 h-px bg-gradient-to-r from-primary to-transparent mb-8 md:mb-10 origin-left"
             />
 
@@ -117,27 +129,27 @@ const Hero = () => {
 
             {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.1 }}
+              transition={{ duration: isMobile ? 0.3 : 0.8, delay: isMobile ? 0.4 : 1.1 }}
               className="flex flex-col sm:flex-row items-start gap-3 md:gap-4"
             >
               <a 
                 href="#contact" 
-                className="btn-primary w-full sm:w-auto text-center hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                className="btn-primary w-full sm:w-auto text-center active:scale-[0.98] transition-transform touch-target"
               >
                 무료 상담 받기
               </a>
               <a 
                 href="#programs" 
-                className="btn-secondary w-full sm:w-auto text-center hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                className="btn-secondary w-full sm:w-auto text-center active:scale-[0.98] transition-transform touch-target"
               >
                 프로그램 알아보기
               </a>
             </motion.div>
           </div>
 
-          {/* Right side - Simplified decorative element with CSS animations */}
+          {/* Right side - Decorative element (desktop only) */}
           <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -145,12 +157,12 @@ const Hero = () => {
               transition={{ duration: 1, delay: 0.5 }}
               className="relative"
             >
-              {/* Simplified decorative shape with CSS animations */}
+              {/* Simplified decorative shape */}
               <div className="relative w-72 h-72 xl:w-80 xl:h-80">
                 {/* Outer ring - CSS rotation */}
                 <div className="absolute inset-0 rounded-full border border-border/40 animate-[spin_60s_linear_infinite]" />
                 
-                {/* Secondary ring - CSS rotation opposite */}
+                {/* Secondary ring */}
                 <div className="absolute inset-4 rounded-full border border-dashed border-border/20 animate-[spin_45s_linear_infinite_reverse]" />
                 
                 {/* Middle ring with static dots */}
@@ -158,51 +170,52 @@ const Hero = () => {
                   {[0, 90, 180, 270].map((rotation, i) => (
                     <div
                       key={i}
-                      className="absolute w-2 h-2 rounded-full bg-primary/40 animate-pulse"
+                      className="absolute w-2 h-2 rounded-full bg-primary/40"
                       style={{
                         top: rotation === 0 ? '-4px' : rotation === 180 ? 'auto' : '50%',
                         bottom: rotation === 180 ? '-4px' : 'auto',
                         left: rotation === 270 ? '-4px' : rotation === 90 ? 'auto' : '50%',
                         right: rotation === 90 ? '-4px' : 'auto',
                         transform: (rotation === 0 || rotation === 180) ? 'translateX(-50%)' : 'translateY(-50%)',
-                        animationDelay: `${i * 0.5}s`
                       }}
                     />
                   ))}
                 </div>
                 
-                {/* Inner circle with gradient - static */}
+                {/* Inner circle with gradient */}
                 <div className="absolute inset-16 rounded-full bg-gradient-to-br from-secondary/60 to-transparent opacity-60" />
                 
-                {/* Center text - static */}
+                {/* Center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-5xl xl:text-6xl font-light text-primary/80">IB</span>
                   <span className="text-xs tracking-[0.3em] text-muted-foreground mt-2">CIRCLE</span>
                 </div>
                 
-                {/* Floating elements - CSS animations */}
-                <div className="absolute -top-6 -right-6 w-10 h-10 rounded-full border border-warm/30 animate-[bounce_4s_ease-in-out_infinite]" />
-                <div className="absolute -bottom-4 -left-4 w-6 h-6 rounded-full border border-primary/40 animate-[bounce_5s_ease-in-out_infinite_0.5s]" />
+                {/* Floating elements */}
+                <div className="absolute -top-6 -right-6 w-10 h-10 rounded-full border border-warm/30" />
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 rounded-full border border-primary/40" />
               </div>
             </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator - CSS animation */}
+      {/* Scroll indicator - hidden on mobile for cleaner look */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.4 }}
-        className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2"
+        transition={{ duration: 0.5, delay: isMobile ? 0.5 : 1.4 }}
+        className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 hidden md:flex"
       >
         <div className="flex flex-col items-center gap-2">
           <span className="text-[10px] tracking-widest text-muted-foreground uppercase">Scroll</span>
-          <div className="w-px h-12 md:h-16 bg-gradient-to-b from-primary/40 to-transparent animate-pulse" />
+          <div className="w-px h-12 md:h-16 bg-gradient-to-b from-primary/40 to-transparent" />
         </div>
       </motion.div>
     </section>
   );
-};
+});
+
+Hero.displayName = 'Hero';
 
 export default Hero;

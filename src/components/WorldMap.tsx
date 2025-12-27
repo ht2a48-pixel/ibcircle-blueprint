@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import worldMapImage from '@/assets/world-map.png';
 
@@ -10,14 +10,6 @@ interface Country {
   y: number;
   region: string;
 }
-
-// Region center coordinates for zoom focus
-const regionCenters: Record<string, { x: number; y: number; scale: number }> = {
-  Asia: { x: 75, y: 48, scale: 1.8 },
-  Americas: { x: 25, y: 50, scale: 1.6 },
-  Europe: { x: 49, y: 30, scale: 2.2 },
-  Oceania: { x: 85, y: 72, scale: 2 },
-};
 
 // Student distribution by country (Total: 223 students)
 const countries: Country[] = [
@@ -55,34 +47,18 @@ const regionTotals = countries.reduce((acc, country) => {
 
 const totalStudents = 223;
 
-const WorldMap = () => {
-  const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [isPinching, setIsPinching] = useState(false);
-  const [initialPinchDistance, setInitialPinchDistance] = useState(0);
-  const [initialPinchScale, setInitialPinchScale] = useState(1);
-  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
-  const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
-  const [lastTouchTime, setLastTouchTime] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const momentumRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const filteredCountries = selectedRegion 
-    ? countries.filter(c => c.region === selectedRegion)
-    : countries;
-
+// Memoized pin component for better performance
+const CountryPin = memo(({ 
+  country, 
+  isHovered, 
+  onHover, 
+  onLeave 
+}: { 
+  country: Country; 
+  isHovered: boolean; 
+  onHover: () => void; 
+  onLeave: () => void;
+}) => {
   const getPinSize = (students: number) => {
     if (students >= 50) return 'lg';
     if (students >= 20) return 'md';
@@ -91,485 +67,264 @@ const WorldMap = () => {
   };
 
   const pinSizeClasses: Record<string, string> = {
-    lg: 'w-6 h-6 md:w-8 md:h-8',
-    md: 'w-5 h-5 md:w-6 md:h-6',
+    lg: 'w-5 h-5 md:w-8 md:h-8',
+    md: 'w-4 h-4 md:w-6 md:h-6',
     sm: 'w-3 h-3 md:w-4 md:h-4',
-    xs: 'w-2.5 h-2.5 md:w-3 md:h-3',
+    xs: 'w-2 h-2 md:w-3 md:h-3',
   };
 
-  const pulseSizeClasses: Record<string, string> = {
-    lg: 'w-12 h-12 md:w-16 md:h-16',
-    md: 'w-10 h-10 md:w-12 md:h-12',
-    sm: 'w-6 h-6 md:w-8 md:h-8',
-    xs: 'w-5 h-5 md:w-6 md:h-6',
-  };
-
-  // Calculate distance between two touch points
-  const getTouchDistance = (touches: React.TouchList) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  // Get center point between two touches
-  const getTouchCenter = (touches: React.TouchList) => {
-    return {
-      x: (touches[0].clientX + touches[1].clientX) / 2,
-      y: (touches[0].clientY + touches[1].clientY) / 2,
-    };
-  };
-
-  // Calculate position offset for region focus
-  const calculateRegionOffset = useCallback((region: string | null) => {
-    if (!region || !containerRef.current) {
-      return { x: 0, y: 0, scale: 1 };
-    }
-    
-    const center = regionCenters[region];
-    if (!center) return { x: 0, y: 0, scale: 1 };
-    
-    const containerWidth = containerRef.current.offsetWidth;
-    const containerHeight = containerRef.current.offsetHeight;
-    
-    // Calculate offset to center the region
-    const offsetX = (50 - center.x) * (containerWidth / 100) * center.scale;
-    const offsetY = (50 - center.y) * (containerHeight / 100) * center.scale;
-    
-    return { x: offsetX, y: offsetY, scale: center.scale };
-  }, []);
-
-  // Handle region selection with zoom
-  const handleRegionSelect = useCallback((region: string | null) => {
-    setSelectedRegion(region);
-    
-    if (region) {
-      const offset = calculateRegionOffset(region);
-      setScale(offset.scale);
-      setPosition({ x: offset.x, y: offset.y });
-    } else {
-      setScale(1);
-      setPosition({ x: 0, y: 0 });
-    }
-  }, [calculateRegionOffset]);
-
-  // Mobile touch/drag handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      // Pinch zoom start
-      setIsPinching(true);
-      setIsDragging(false);
-      const distance = getTouchDistance(e.touches);
-      setInitialPinchDistance(distance);
-      setInitialPinchScale(scale);
-    } else if (e.touches.length === 1 && !isPinching) {
-      // Single finger drag
-      setIsDragging(true);
-      setDragStart({ 
-        x: e.touches[0].clientX - position.x, 
-        y: e.touches[0].clientY - position.y 
-      });
-      setLastTouchPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-      setLastTouchTime(Date.now());
-      setVelocity({ x: 0, y: 0 });
-      
-      // Cancel any ongoing momentum
-      if (momentumRef.current) {
-        cancelAnimationFrame(momentumRef.current);
-        momentumRef.current = null;
-      }
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2 && isPinching) {
-      // Pinch zoom
-      const currentDistance = getTouchDistance(e.touches);
-      const scaleChange = currentDistance / initialPinchDistance;
-      const newScale = Math.max(1, Math.min(4, initialPinchScale * scaleChange));
-      
-      setScale(newScale);
-      
-      // Adjust position to zoom towards pinch center
-      if (newScale === 1) {
-        setPosition({ x: 0, y: 0 });
-      } else {
-        const containerWidth = containerRef.current?.offsetWidth || 0;
-        const containerHeight = containerRef.current?.offsetHeight || 0;
-        const maxOffsetX = containerWidth * (newScale - 1) / 2;
-        const maxOffsetY = containerHeight * (newScale - 1) / 2;
-        setPosition({
-          x: Math.max(-maxOffsetX, Math.min(maxOffsetX, position.x)),
-          y: Math.max(-maxOffsetY, Math.min(maxOffsetY, position.y)),
-        });
-      }
-    } else if (e.touches.length === 1 && isDragging && scale > 1) {
-      // Single finger pan when zoomed in
-      const currentTime = Date.now();
-      const currentX = e.touches[0].clientX;
-      const currentY = e.touches[0].clientY;
-      
-      // Calculate velocity for momentum
-      const timeDelta = currentTime - lastTouchTime;
-      if (timeDelta > 0) {
-        setVelocity({
-          x: (currentX - lastTouchPosition.x) / timeDelta * 16,
-          y: (currentY - lastTouchPosition.y) / timeDelta * 16,
-        });
-      }
-      
-      setLastTouchPosition({ x: currentX, y: currentY });
-      setLastTouchTime(currentTime);
-      
-      const newX = currentX - dragStart.x;
-      const newY = currentY - dragStart.y;
-      const containerWidth = containerRef.current?.offsetWidth || 0;
-      const containerHeight = containerRef.current?.offsetHeight || 0;
-      const maxOffsetX = containerWidth * (scale - 1) / 2;
-      const maxOffsetY = containerHeight * (scale - 1) / 2;
-      setPosition({
-        x: Math.max(-maxOffsetX, Math.min(maxOffsetX, newX)),
-        y: Math.max(-maxOffsetY, Math.min(maxOffsetY, newY)),
-      });
-    }
-  };
-
-  // Apply momentum scrolling
-  const applyMomentum = useCallback(() => {
-    if (momentumRef.current) {
-      cancelAnimationFrame(momentumRef.current);
-    }
-
-    const friction = 0.95;
-    const minVelocity = 0.5;
-
-    const animate = () => {
-      setVelocity(prev => {
-        const newVelocity = {
-          x: prev.x * friction,
-          y: prev.y * friction,
-        };
-
-        if (Math.abs(newVelocity.x) < minVelocity && Math.abs(newVelocity.y) < minVelocity) {
-          return { x: 0, y: 0 };
-        }
-
-        const containerWidth = containerRef.current?.offsetWidth || 0;
-        const containerHeight = containerRef.current?.offsetHeight || 0;
-        const maxOffsetX = containerWidth * (scale - 1) / 2;
-        const maxOffsetY = containerHeight * (scale - 1) / 2;
-
-        setPosition(prevPos => ({
-          x: Math.max(-maxOffsetX, Math.min(maxOffsetX, prevPos.x + newVelocity.x)),
-          y: Math.max(-maxOffsetY, Math.min(maxOffsetY, prevPos.y + newVelocity.y)),
-        }));
-
-        momentumRef.current = requestAnimationFrame(animate);
-        return newVelocity;
-      });
-    };
-
-    momentumRef.current = requestAnimationFrame(animate);
-  }, [scale]);
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (e.touches.length < 2) {
-      setIsPinching(false);
-    }
-    if (e.touches.length === 0) {
-      setIsDragging(false);
-      
-      // Apply momentum if there's velocity
-      if (scale > 1 && (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1)) {
-        applyMomentum();
-      }
-    }
-  };
-
-  const handleZoomIn = () => {
-    const newScale = Math.min(4, scale + 0.5);
-    setScale(newScale);
-  };
-
-  const handleZoomOut = () => {
-    const newScale = Math.max(1, scale - 0.5);
-    setScale(newScale);
-    if (newScale === 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
-  const handleReset = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-    setSelectedRegion(null);
-  };
+  const size = getPinSize(country.students);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 1 }}
-      className="relative w-full"
+    <div
+      className="absolute gpu-accelerated"
+      style={{ 
+        left: `${country.x}%`, 
+        top: `${country.y}%`,
+        transform: 'translate(-50%, -50%)'
+      }}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        onHover();
+      }}
+      onTouchEnd={(e) => {
+        e.stopPropagation();
+        setTimeout(onLeave, 2000);
+      }}
     >
-      {/* Region Filter */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6">
-        <button
-          onClick={() => handleRegionSelect(null)}
-          className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all duration-300 rounded-full ${
-            selectedRegion === null
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-secondary text-secondary-foreground hover:bg-accent'
-          }`}
-        >
-          All Regions
-        </button>
-        {Object.entries(regionTotals).map(([region, count]) => (
+      {/* Pin Marker */}
+      <div
+        className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10 transition-transform duration-150 ${isHovered ? 'scale-125' : 'scale-100'}`}
+      >
+        {(size === 'lg' || size === 'md') && (
+          <span className="text-[8px] md:text-[10px] font-bold text-primary-foreground">
+            {country.students}
+          </span>
+        )}
+      </div>
+
+      {/* Tooltip - Only render when hovered */}
+      {isHovered && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50">
+          <div className="font-semibold text-xs">{country.name}</div>
+          <div className="text-background/70 text-[10px]">{country.students} students</div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+        </div>
+      )}
+    </div>
+  );
+});
+
+CountryPin.displayName = 'CountryPin';
+
+// Mobile region card component
+const RegionCard = memo(({ 
+  region, 
+  count, 
+  isSelected, 
+  onSelect 
+}: { 
+  region: string; 
+  count: number; 
+  isSelected: boolean;
+  onSelect: () => void;
+}) => {
+  const percentage = Math.round((count / totalStudents) * 100);
+  
+  return (
+    <button
+      onClick={onSelect}
+      className={`flex-shrink-0 w-28 p-3 rounded-xl border text-center transition-all duration-200 touch-target ${
+        isSelected 
+          ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+          : 'border-border bg-secondary/50 active:scale-95'
+      }`}
+    >
+      <div className="text-xl font-bold text-primary">{count}</div>
+      <div className="text-xs text-muted-foreground">{region}</div>
+      <div className="mt-2 w-full bg-border rounded-full h-1 overflow-hidden">
+        <div 
+          className="h-full bg-primary rounded-full transition-all duration-500"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <div className="text-[10px] text-muted-foreground mt-1">{percentage}%</div>
+    </button>
+  );
+});
+
+RegionCard.displayName = 'RegionCard';
+
+const WorldMap = memo(() => {
+  const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const filteredCountries = selectedRegion 
+    ? countries.filter(c => c.region === selectedRegion)
+    : countries;
+
+  const handleRegionSelect = useCallback((region: string | null) => {
+    setSelectedRegion(region);
+  }, []);
+
+  return (
+    <div className="relative w-full">
+      {/* Mobile: Horizontal scrollable region cards */}
+      {isMobile ? (
+        <div className="mb-4 -mx-6 px-6 overflow-x-auto hide-scrollbar scroll-smooth-mobile">
+          <div className="flex gap-3 pb-2" style={{ minWidth: 'max-content' }}>
+            <button
+              onClick={() => handleRegionSelect(null)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-target ${
+                selectedRegion === null
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground active:scale-95'
+              }`}
+            >
+              All ({totalStudents})
+            </button>
+            {Object.entries(regionTotals).map(([region, count]) => (
+              <button
+                key={region}
+                onClick={() => handleRegionSelect(region === selectedRegion ? null : region)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-target ${
+                  selectedRegion === region
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground active:scale-95'
+                }`}
+              >
+                {region} ({count})
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Desktop: Original filter buttons */
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
           <button
-            key={region}
-            onClick={() => handleRegionSelect(region)}
-            className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all duration-300 rounded-full ${
-              selectedRegion === region
+            onClick={() => handleRegionSelect(null)}
+            className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full ${
+              selectedRegion === null
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-accent'
             }`}
           >
-            {region} <span className="opacity-70">({count})</span>
+            All Regions
           </button>
-        ))}
-      </div>
+          {Object.entries(regionTotals).map(([region, count]) => (
+            <button
+              key={region}
+              onClick={() => handleRegionSelect(region === selectedRegion ? null : region)}
+              className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full ${
+                selectedRegion === region
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
+              }`}
+            >
+              {region} <span className="opacity-70">({count})</span>
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Map Container */}
+      {/* Map Container - Simplified for mobile */}
       <div 
         ref={containerRef}
-        className="relative w-full aspect-[2/1] overflow-hidden rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200 border border-border shadow-xl touch-none"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className="relative w-full aspect-[2/1] overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200 border border-border shadow-lg md:shadow-xl gpu-accelerated"
       >
-        {/* Zoomable/Pannable Container */}
-        <motion.div
-          className="absolute inset-0 w-full h-full origin-center"
-          animate={{
-            scale: scale,
-            x: position.x,
-            y: position.y,
-          }}
-          transition={{ 
-            type: 'spring', 
-            stiffness: 200, 
-            damping: 30,
-            duration: isDragging ? 0 : 0.5 
-          }}
-        >
+        {/* Static Map - No zoom/pan on mobile for performance */}
+        <div className="absolute inset-0 w-full h-full">
           {/* World Map Image */}
           <img 
             src={worldMapImage} 
             alt="World Map" 
             className="absolute inset-0 w-full h-full object-cover opacity-80 grayscale select-none pointer-events-none"
             draggable={false}
+            loading="lazy"
           />
 
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20 pointer-events-none" />
 
-          {/* Country Pins - Static with CSS animations only */}
-          {filteredCountries.map((country, index) => {
-            const size = getPinSize(country.students);
-            const isHovered = hoveredCountry?.id === country.id;
+          {/* Country Pins - Simplified rendering */}
+          {filteredCountries.map((country) => (
+            <CountryPin
+              key={country.id}
+              country={country}
+              isHovered={hoveredCountry?.id === country.id}
+              onHover={() => setHoveredCountry(country)}
+              onLeave={() => setHoveredCountry(null)}
+            />
+          ))}
+        </div>
 
-            return (
-              <div
-                key={country.id}
-                className="absolute cursor-pointer"
-                style={{ 
-                  left: `${country.x}%`, 
-                  top: `${country.y}%`,
-                  transform: 'translate(-50%, -50%)'
-                }}
-                onMouseEnter={() => setHoveredCountry(country)}
-                onMouseLeave={() => setHoveredCountry(null)}
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                  setHoveredCountry(country);
-                }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  setTimeout(() => setHoveredCountry(null), 2000);
-                }}
-              >
-                {/* Static glow - no animation for performance */}
-                <div 
-                  className={`absolute ${pulseSizeClasses[size]} rounded-full bg-primary/10`}
-                  style={{ 
-                    left: '50%', 
-                    top: '50%', 
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                />
-
-                {/* Pin Marker */}
-                <div
-                  className={`relative ${pinSizeClasses[size]} rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center z-10 transition-transform duration-200 ${isHovered ? 'scale-125' : 'scale-100'}`}
-                >
-                  {(size === 'lg' || size === 'md') && (
-                    <span className="text-[8px] md:text-[10px] font-bold text-primary-foreground">
-                      {country.students}
-                    </span>
-                  )}
-                </div>
-
-                {/* Tooltip */}
-                {isHovered && (
-                  <div
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 md:px-4 md:py-2 bg-foreground text-background rounded-lg shadow-xl whitespace-nowrap z-50 animate-fade-in"
-                    style={{ transform: `translate(-50%, 0) scale(${1 / scale})` }}
-                  >
-                    <div className="font-semibold text-xs md:text-sm">{country.name}</div>
-                    <div className="text-background/70 text-[10px] md:text-xs mt-0.5">
-                      {country.students} students
-                    </div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Connection Lines - Static SVG, no animation */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            <defs>
-              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {filteredCountries.filter(c => c.students >= 20).map((country, i) => (
-              <path
-                key={`line-${country.id}`}
-                d={`M ${country.x}% ${country.y}% Q 50% ${30 + i * 5}% 50% 50%`}
-                fill="none"
-                stroke="url(#lineGradient)"
-                strokeWidth="1"
-                className="opacity-60"
-              />
-            ))}
-          </svg>
-        </motion.div>
-
-        {/* Mobile Zoom Controls - Fixed position */}
-        {isMobile && (
-          <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-20">
-            <button
-              onClick={handleZoomIn}
-              className="w-10 h-10 bg-background/95 backdrop-blur-sm rounded-full border border-border shadow-lg flex items-center justify-center text-foreground font-bold text-lg active:scale-95 transition-transform"
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-            <button
-              onClick={handleZoomOut}
-              className="w-10 h-10 bg-background/95 backdrop-blur-sm rounded-full border border-border shadow-lg flex items-center justify-center text-foreground font-bold text-lg active:scale-95 transition-transform"
-              aria-label="Zoom out"
-            >
-              −
-            </button>
-            {(scale > 1 || selectedRegion) && (
-              <button
-                onClick={handleReset}
-                className="w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center text-xs font-medium active:scale-95 transition-transform"
-                aria-label="Reset view"
-              >
-                Reset
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Legend - Fixed position */}
-        <div className="absolute bottom-4 right-4 bg-background/95 backdrop-blur-sm px-3 py-2 md:px-5 md:py-3 rounded-xl border border-border shadow-lg z-20">
-          <div className="text-[10px] md:text-xs font-semibold text-foreground mb-1.5 md:mb-2">Student Distribution</div>
+        {/* Legend */}
+        <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-background/95 backdrop-blur-sm px-2.5 py-1.5 md:px-5 md:py-3 rounded-lg md:rounded-xl border border-border shadow-lg z-20">
+          <div className="text-[9px] md:text-xs font-semibold text-foreground mb-1">Student Distribution</div>
           <div className="flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-primary" />
-              <span className="text-[9px] md:text-[11px] text-muted-foreground">50+</span>
+              <span className="text-[8px] md:text-[11px] text-muted-foreground">50+</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-primary" />
-              <span className="text-[9px] md:text-[11px] text-muted-foreground">20-49</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-primary" />
-              <span className="text-[9px] md:text-[11px] text-muted-foreground">10-19</span>
+              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-primary" />
+              <span className="text-[8px] md:text-[11px] text-muted-foreground">20+</span>
             </div>
             <div className="hidden md:flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <span className="text-[11px] text-muted-foreground">&lt;10</span>
+              <span className="text-[11px] text-muted-foreground">&lt;20</span>
             </div>
           </div>
         </div>
 
-        {/* Total Students Badge - Fixed position */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-2 md:px-5 md:py-3 rounded-xl shadow-lg z-20"
-        >
+        {/* Total Students Badge */}
+        <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-primary text-primary-foreground px-3 py-1.5 md:px-5 md:py-3 rounded-lg md:rounded-xl shadow-lg z-20">
           <div className="text-lg md:text-2xl font-bold">{totalStudents}</div>
-          <div className="text-[10px] md:text-xs opacity-80">Total Students</div>
-        </motion.div>
-
-        {/* Zoom indicator */}
-        {scale > 1 && (
-          <div className="absolute top-4 right-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border shadow-lg z-20">
-            <span className="text-xs font-medium text-foreground">{Math.round(scale * 100)}%</span>
-          </div>
-        )}
+          <div className="text-[9px] md:text-xs opacity-80">Total Students</div>
+        </div>
       </div>
 
-      {/* Region Statistics */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
-      >
-        {Object.entries(regionTotals).map(([region, count], index) => (
-          <motion.div
+      {/* Region Statistics - Grid for all devices */}
+      <div className="mt-6 md:mt-8 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        {Object.entries(regionTotals).map(([region, count]) => (
+          <button
             key={region}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
             onClick={() => handleRegionSelect(region === selectedRegion ? null : region)}
-            className={`bg-secondary/50 rounded-xl p-3 md:p-4 text-center border cursor-pointer transition-all duration-300 ${
+            className={`bg-secondary/50 rounded-lg md:rounded-xl p-3 md:p-4 text-center border transition-all duration-200 ${
               selectedRegion === region 
                 ? 'border-primary ring-2 ring-primary/20' 
-                : 'border-border hover:border-primary/50'
+                : 'border-border active:scale-95 md:hover:border-primary/50'
             }`}
           >
             <div className="text-xl md:text-2xl font-bold text-primary">{count}</div>
             <div className="text-xs md:text-sm text-muted-foreground">{region}</div>
             <div className="mt-2 w-full bg-border rounded-full h-1 md:h-1.5 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${(count / totalStudents) * 100}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                className="h-full bg-primary rounded-full"
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${Math.round((count / totalStudents) * 100)}%` }}
               />
             </div>
             <div className="text-[10px] md:text-xs text-muted-foreground mt-1">
               {Math.round((count / totalStudents) * 100)}%
             </div>
-          </motion.div>
+          </button>
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
-};
+});
+
+WorldMap.displayName = 'WorldMap';
 
 export default WorldMap;
