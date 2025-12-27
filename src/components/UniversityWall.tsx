@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, memo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import all university logos
@@ -85,9 +84,56 @@ const universities: University[] = [
 
 const countries = ['All', 'USA', 'UK', 'Canada', 'Japan', 'Hong Kong', 'Singapore', 'Korea'];
 
-const UniversityWall = () => {
+// Memoized university card for performance
+const UniversityCard = memo(({ university }: { university: University }) => (
+  <div className="group relative flex-shrink-0 gpu-accelerated">
+    <div className="w-32 h-40 md:w-40 md:h-48 bg-white border border-border p-3 md:p-4 flex flex-col items-center justify-center text-center transition-all duration-200 active:scale-95 md:hover:border-primary/40 md:hover:shadow-xl cursor-pointer rounded-lg">
+      {/* University Logo or Name Fallback */}
+      <div className="w-16 h-16 md:w-20 md:h-20 mb-2 md:mb-3 flex items-center justify-center">
+        {university.logo ? (
+          <img 
+            src={university.logo} 
+            alt={`${university.name} logo`}
+            className="max-w-full max-h-full object-contain transition-transform duration-200 group-hover:scale-110"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span className="text-base md:text-lg font-bold text-primary text-center leading-tight">
+            {university.shortName}
+          </span>
+        )}
+      </div>
+      <span className="text-[10px] md:text-xs font-semibold text-foreground line-clamp-2 text-center leading-tight">
+        {university.name}
+      </span>
+      <span className="text-[10px] md:text-[11px] text-muted-foreground mt-1">
+        {university.country}
+      </span>
+    </div>
+    
+    {/* Hover tooltip - hidden on mobile */}
+    <div className="hidden md:block absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
+      {university.name}
+      <div className="text-[10px] text-background/60 mt-0.5">IBCircle Student Acceptance</div>
+      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+    </div>
+  </div>
+));
+
+UniversityCard.displayName = 'UniversityCard';
+
+const UniversityWall = memo(() => {
   const [selectedCountry, setSelectedCountry] = useState('All');
+  const [isMobile, setIsMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const filteredUniversities = selectedCountry === 'All'
     ? universities
@@ -95,7 +141,7 @@ const UniversityWall = () => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 400;
+      const scrollAmount = isMobile ? 280 : 400;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
@@ -104,125 +150,82 @@ const UniversityWall = () => {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-background">
-      <div className="container mx-auto px-6 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
+    <section className="py-16 md:py-32 bg-background">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12">
+        {/* Header */}
+        <div className="text-center mb-8 md:mb-12">
           <p className="section-title">Global Admissions Footprint</p>
           <h2 className="section-heading">전 세계 합격 현황</h2>
-        </motion.div>
+        </div>
 
-        {/* Country Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-2 mb-10"
-        >
-          {countries.map((country) => (
-            <button
-              key={country}
-              onClick={() => setSelectedCountry(country)}
-              className={`px-5 py-2 text-sm font-medium transition-all duration-300 rounded-sm ${
-                selectedCountry === country
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
-              }`}
-            >
-              {country}
-            </button>
-          ))}
-        </motion.div>
+        {/* Country Filter - Scrollable on mobile */}
+        <div className={`mb-6 md:mb-10 ${isMobile ? '-mx-4 px-4 overflow-x-auto hide-scrollbar scroll-smooth-mobile' : ''}`}>
+          <div className={`flex gap-2 ${isMobile ? '' : 'flex-wrap justify-center'}`} style={isMobile ? { minWidth: 'max-content' } : undefined}>
+            {countries.map((country) => (
+              <button
+                key={country}
+                onClick={() => setSelectedCountry(country)}
+                className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-full touch-target flex-shrink-0 ${
+                  selectedCountry === country
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground active:scale-95 md:hover:bg-accent'
+                }`}
+              >
+                {country}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Horizontal Scrollable University Cards */}
         <div className="relative">
-          {/* Navigation Arrows */}
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors -translate-x-4"
-          >
-            <ChevronLeft className="w-5 h-5 text-foreground" />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors translate-x-4"
-          >
-            <ChevronRight className="w-5 h-5 text-foreground" />
-          </button>
+          {/* Navigation Arrows - Hidden on mobile */}
+          {!isMobile && (
+            <>
+              <button
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors -translate-x-4"
+              >
+                <ChevronLeft className="w-5 h-5 text-foreground" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-background/95 backdrop-blur-sm border border-border rounded-full shadow-lg flex items-center justify-center hover:bg-secondary transition-colors translate-x-4"
+              >
+                <ChevronRight className="w-5 h-5 text-foreground" />
+              </button>
+            </>
+          )}
 
           {/* Scrollable Container */}
           <div
             ref={scrollRef}
-            className="overflow-x-auto hide-scrollbar py-4"
+            className="overflow-x-auto hide-scrollbar scroll-smooth-mobile py-2 md:py-4"
           >
             <div
-              className="flex gap-5 px-4"
+              className="flex gap-3 md:gap-5 px-2 md:px-4"
               style={{ minWidth: 'max-content' }}
             >
               {filteredUniversities.map((university) => (
-                <div
-                  key={university.name}
-                  className="group relative flex-shrink-0"
-                >
-                  <div className="w-40 h-48 bg-white border border-border p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/40 hover:shadow-xl cursor-pointer rounded-lg">
-                    {/* University Logo or Name Fallback */}
-                    <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                      {university.logo ? (
-                        <img 
-                          src={university.logo} 
-                          alt={`${university.name} logo`}
-                          className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span className="text-lg font-bold text-primary text-center leading-tight">
-                          {university.shortName}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs font-semibold text-foreground line-clamp-2 text-center leading-tight">
-                      {university.name}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground mt-1">
-                      {university.country}
-                    </span>
-                  </div>
-                  
-                  {/* Hover tooltip with full name */}
-                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 shadow-xl">
-                    {university.name}
-                    <div className="text-[10px] text-background/60 mt-0.5">IBCircle Student Acceptance</div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
-                  </div>
-                </div>
+                <UniversityCard key={university.name} university={university} />
               ))}
             </div>
           </div>
 
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />
         </div>
 
         {/* University count */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center text-muted-foreground mt-8 text-sm"
-        >
+        <p className="text-center text-muted-foreground mt-6 md:mt-8 text-sm">
           {filteredUniversities.length}개 대학 합격
-        </motion.p>
+        </p>
       </div>
     </section>
   );
-};
+});
+
+UniversityWall.displayName = 'UniversityWall';
 
 export default UniversityWall;
