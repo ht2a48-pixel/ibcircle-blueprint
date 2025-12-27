@@ -19,7 +19,7 @@ const Index = memo(() => {
         <title>IBCircle | 프리미엄 IB 교육 및 입시 컨설팅</title>
         <meta 
           name="description" 
-          content="전 세계 명문대 출신 강사진이 설립한 프리미엄 IB Diploma Programme 교육 및 글로벌 대학 입시 컨설팅 그룹. 맞춤형 1:1 수업과 전략적 입시 컨설팅을 제공합니다." 
+          content="전 세계 명문대 출신 강사진들이 설립한 프리미엄 IB Diploma Programme 교육 및 글로벌 대학 입시 컨설팅 그룹. 맞춤형 1:1 수업과 전략적 입시 컨설팅을 제공합니다." 
         />
         <meta name="keywords" content="IB, IB Diploma, IB 수업, IB 과외, 입시 컨설팅, 대학 입시, 글로벌 대학, 미국 대학, 영국 대학" />
         <link rel="canonical" href="https://ibcirc.com" />

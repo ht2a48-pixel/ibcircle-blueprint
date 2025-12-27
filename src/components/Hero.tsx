@@ -68,7 +68,7 @@ const Hero = () => {
                 variants={textVariants}
                 className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground leading-snug mb-2"
               >
-                재학 혹은 졸업한 <span className="text-navy-muted">최상위권 출신 강사진</span>이
+                재학 혹은 졸업한 <span className="text-navy-muted">최상위권 출신 강사진들</span>이
               </motion.h1>
               <motion.h1
                 custom={3}
