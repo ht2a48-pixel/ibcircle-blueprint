@@ -107,8 +107,11 @@ const sendEmail = async (to: string[], subject: string, html: string) => {
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to send email: ${error}`);
+    const text = await response.text();
+    const err: any = new Error(`Failed to send email: ${text}`);
+    err.status = response.status;
+    err.provider = 'resend';
+    throw err;
   }
 
   return response.json();
@@ -243,6 +246,19 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-contact-email function:", error);
+
+    // Propagate rate limiting properly (so client can show correct message)
+    const status = typeof error?.status === 'number' ? error.status : 500;
+    if (status === 429) {
+      return new Response(
+        JSON.stringify({ error: "요청이 많아 잠시 후 다시 시도해주세요." }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     // Return generic error message to prevent information leakage
     return new Response(
       JSON.stringify({ error: "이메일 전송에 실패했습니다. 잠시 후 다시 시도해주세요." }),
