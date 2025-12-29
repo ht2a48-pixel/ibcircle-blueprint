@@ -220,22 +220,36 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Notification email sent successfully");
 
     // Send confirmation email to the user
-    const confirmationResult = await sendEmail(
-      [email],
-      "문의가 접수되었습니다 - IBCircle",
-      `
-        <h2>${safeName}님, 문의해 주셔서 감사합니다!</h2>
-        <p>귀하의 문의가 정상적으로 접수되었습니다.</p>
-        <p>영업일 기준 24시간 이내에 답변 드리겠습니다.</p>
-        <hr>
-        <p><strong>보내신 내용:</strong></p>
-        <p>${safeMessage.replace(/\n/g, '<br>')}</p>
-        <hr>
-        <p style="color: #666; font-size: 12px;">IBCircle | 프리미엄 IB 교육 및 입시 컨설팅</p>
-      `
-    );
+    // NOTE: Resend "testing" mode may block sending to arbitrary recipients (403).
+    // We still consider the inquiry received as long as the notification email to the business succeeds.
+    try {
+      const confirmationResult = await sendEmail(
+        [email],
+        "문의가 접수되었습니다 - IBCircle",
+        `
+          <h2>${safeName}님, 문의해 주셔서 감사합니다!</h2>
+          <p>귀하의 문의가 정상적으로 접수되었습니다.</p>
+          <p>영업일 기준 24시간 이내에 답변 드리겠습니다.</p>
+          <hr>
+          <p><strong>보내신 내용:</strong></p>
+          <p>${safeMessage.replace(/\n/g, '<br>')}</p>
+          <hr>
+          <p style="color: #666; font-size: 12px;">IBCircle | 프리미엄 IB 교육 및 입시 컨설팅</p>
+        `
+      );
 
-    console.log("Confirmation email sent:", confirmationResult);
+      console.log("Confirmation email sent:", confirmationResult);
+    } catch (err: any) {
+      // If Resend is in testing mode, it can reject non-owner recipients with 403.
+      if (err?.status === 403) {
+        console.warn("Confirmation email skipped (Resend testing mode restriction)");
+      } else if (err?.status === 429) {
+        console.warn("Confirmation email rate-limited; skipped");
+      } else {
+        // Don't fail the whole request if confirmation fails unexpectedly.
+        console.warn("Confirmation email failed; inquiry still received", err);
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true }),
