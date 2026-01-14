@@ -37,7 +37,6 @@ interface ReportData {
   subjectTitle: string;
   sessionNumber: string;
   summary: string;
-  challengeContent: string;
   evaluationText: string;
   skillScores: SkillScore[];
   riskFlags: RiskFlag[];
@@ -51,7 +50,6 @@ const AdminReports = memo(() => {
     subjectTitle: "IB Economics HL 수업 리포트",
     sessionNumber: "24",
     summary: "",
-    challengeContent: "",
     evaluationText: "",
     skillScores: [
       { label: "개념 이해", score: "92" },
@@ -306,17 +304,6 @@ const AdminReports = memo(() => {
         </div>
       </div>
       
-      <!-- Challenge Section -->
-      ${reportData.challengeContent ? `
-      <div class="section">
-        <div class="challenge-box">
-          <div class="section-title">
-            <span>🎯</span> 심화 학습
-          </div>
-          <div class="challenge-text">${escapeHtml(reportData.challengeContent)}</div>
-        </div>
-      </div>
-      ` : ''}
       
       <!-- Evaluation Section -->
       <div class="section">
@@ -611,17 +598,6 @@ const AdminReports = memo(() => {
           />
         </section>
 
-        {/* Challenge Content */}
-        <section className="bg-card border border-border rounded-xl p-4 md:p-6">
-          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">심화 학습</h2>
-          <Textarea
-            value={reportData.challengeContent}
-            onChange={(e) => setReportData((p) => ({ ...p, challengeContent: e.target.value }))}
-            placeholder="심화 학습 내용을 작성해주세요 (선택사항)"
-            rows={3}
-            className="text-sm"
-          />
-        </section>
 
         {/* Evaluation */}
         <section className="bg-card border border-border rounded-xl p-4 md:p-6">
