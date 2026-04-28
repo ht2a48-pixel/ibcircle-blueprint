@@ -16,6 +16,7 @@ interface FormState {
   class_date: string;
   class_time: string;
   class_length_minutes: string;
+  classes_completed: string;
   topics_covered: string;
   report_text: string;
 }
@@ -27,6 +28,7 @@ const initial: FormState = {
   class_date: "",
   class_time: "",
   class_length_minutes: "60",
+  classes_completed: "",
   topics_covered: "",
   report_text: "",
 };
@@ -65,9 +67,12 @@ const TeacherReportForm = memo(() => {
     if (!token) return;
 
     const lengthNum = Number(form.class_length_minutes);
+    const completedRaw = form.classes_completed.trim();
+    const completedNum = completedRaw === "" ? null : Number(completedRaw);
     if (!form.student_name.trim() || !form.subject.trim() || !form.topics_covered.trim() ||
         !form.report_text.trim() || !form.class_date || !form.class_time ||
-        !Number.isFinite(lengthNum) || lengthNum <= 0 || lengthNum > 600) {
+        !Number.isFinite(lengthNum) || lengthNum <= 0 || lengthNum > 600 ||
+        (completedNum !== null && (!Number.isFinite(completedNum) || completedNum < 0 || completedNum > 10000))) {
       toast.error("Please fill in all required fields correctly.");
       return;
     }
@@ -85,6 +90,7 @@ const TeacherReportForm = memo(() => {
             class_date: form.class_date,
             class_time: form.class_time,
             class_length_minutes: lengthNum,
+            classes_completed: completedNum,
             topics_covered: form.topics_covered.trim(),
             report_text: form.report_text.trim(),
           },
@@ -159,6 +165,22 @@ const TeacherReportForm = memo(() => {
                     onChange={update("class_length_minutes")}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="classes_completed">Classes completed so far</Label>
+                <Input
+                  id="classes_completed"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  placeholder="e.g. 12"
+                  value={form.classes_completed}
+                  onChange={update("classes_completed")}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Total number of classes the student has completed up to and including this one.
+                </p>
               </div>
 
               <div className="space-y-2">
