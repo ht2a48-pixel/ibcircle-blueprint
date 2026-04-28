@@ -2,7 +2,7 @@ import { useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, PencilLine, LogOut, Home, Shield } from "lucide-react";
+import { PencilLine, LogOut, Home, Shield } from "lucide-react";
 
 const AdminHub = memo(() => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const AdminHub = memo(() => {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => navigate("/admin/write")}>
             <CardHeader>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
@@ -63,21 +63,6 @@ const AdminHub = memo(() => {
             </CardHeader>
             <CardContent>
               <Button className="w-full">Open form</Button>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => navigate("/admin/reports")}>
-            <CardHeader>
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>Customize Sample Report</CardTitle>
-              <CardDescription>
-                Edit and export the sample marketing report (PDF, JPG, HTML).
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">Open editor</Button>
             </CardContent>
           </Card>
 
