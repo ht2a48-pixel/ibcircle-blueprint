@@ -179,7 +179,7 @@ const OwnerLogs = memo(() => {
       toast.success("Report deleted");
       setReports((prev) => prev.filter((x) => x.id !== r.id));
       setConfirmDelete(null);
-      if (openReport?.id === r.id) setOpenReport(null);
+      
     } catch (e) {
       console.error(e);
       toast.error("Failed to delete");
