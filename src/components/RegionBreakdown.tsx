@@ -39,10 +39,10 @@ const REGIONS: RegionData[] = [
   {
     region: 'Europe',
     countries: [
-      { name: '영국 (United Kingdom)', students: 4 },
-      { name: '독일 (Germany)', students: 3 },
-      { name: '프랑스 (France)', students: 2 },
-      { name: '스페인 (Spain)', students: 2 },
+      { name: '영국 (United Kingdom)', students: 8 },
+      { name: '독일 (Germany)', students: 6 },
+      { name: '프랑스 (France)', students: 4 },
+      { name: '스페인 (Spain)', students: 4 },
     ],
   },
   {
