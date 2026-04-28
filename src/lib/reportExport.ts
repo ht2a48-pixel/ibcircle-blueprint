@@ -1,5 +1,5 @@
 import type { ReportDocumentData } from "@/components/ReportDocument";
-import { formatTotalClassTime } from "@/components/ReportDocument";
+import { formatTotalClassTime, computeProgress, formatMinutes } from "@/components/ReportDocument";
 
 /** Stable canonical string used for hashing — order matters and must not change. */
 export function canonicalReportPayload(r: ReportDocumentData): string {
@@ -177,6 +177,27 @@ export function buildReportHtml(
         : `<div><div class="meta-label">Submitted</div><div class="meta-value">${escapeHtml(submittedAt)}</div></div>`
     }
   </section>
+
+  ${(() => {
+    const p = computeProgress(r.class_length_minutes, r.classes_completed);
+    if (!p) return "";
+    return `<section class="progress-section">
+      <div class="progress-head">
+        <h2 class="section-title">Program Progress</h2>
+        <span class="section-sub">진도 현황 · 12h 목표</span>
+      </div>
+      <div class="progress-row">
+        <div><strong>${escapeHtml(formatMinutes(p.completedMinutes))}</strong> completed of <strong>${escapeHtml(formatMinutes(p.plannedMinutes))}</strong></div>
+        <div class="progress-percent">${p.percent}%</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.percent}%"></div></div>
+      <div class="progress-grid">
+        <div><div class="meta-label">Classes completed</div><div class="meta-value">${p.classesCompleted} / ${p.plannedClasses}</div></div>
+        <div><div class="meta-label">Classes remaining</div><div class="meta-value">${p.classesRemaining}</div></div>
+        <div><div class="meta-label">Time remaining</div><div class="meta-value">${escapeHtml(formatMinutes(p.remainingMinutes))}</div></div>
+      </div>
+    </section>`;
+  })()}
 
   <section class="section">
     <div class="section-head">
