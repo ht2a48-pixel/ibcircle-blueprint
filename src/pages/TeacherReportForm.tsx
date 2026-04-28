@@ -159,7 +159,10 @@ const TeacherReportForm = memo(() => {
       }
 
       toast.success("Report submitted successfully");
+      localStorage.removeItem(DRAFT_KEY);
       setForm(initial);
+      setDraftSavedAt(null);
+      setDraftStatus("idle");
     } catch (err) {
       console.error(err);
       toast.error("Submission error");
