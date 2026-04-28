@@ -69,43 +69,46 @@ const RegionCard = memo(({ data, expanded, onToggle }: {
 
   return (
     <div
-      className={`rounded-xl border bg-background overflow-hidden transition-colors duration-200 ${
-        expanded ? 'border-primary/60' : 'border-border/60 hover:border-primary/30'
+      className={`bg-background overflow-hidden transition-colors duration-200 ${
+        expanded ? 'ring-1 ring-primary/70 relative z-10' : ''
       }`}
     >
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        className="w-full p-5 text-left"
+        className="w-full px-6 py-5 text-left"
       >
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
                 {data.region}
               </span>
-              <span className="text-[11px] tabular-nums text-muted-foreground">{pct}%</span>
-            </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tabular-nums text-foreground tracking-tight">
-                {total}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                students · {data.countries.length} countries
+              <span className="text-xs font-medium tabular-nums tracking-wide text-muted-foreground">
+                {pct.toString().padStart(2, '0')}%
               </span>
             </div>
-            <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-border/70">
+            <div className="mt-3 flex items-baseline gap-3">
+              <span className="text-4xl font-medium tabular-nums text-foreground tracking-tight leading-none">
+                {total.toString().padStart(2, '0')}
+              </span>
+              <span className="text-xs tracking-wide text-muted-foreground">
+                Students · {data.countries.length.toString().padStart(2, '0')} Countries
+              </span>
+            </div>
+            <div className="mt-5 h-px w-full overflow-hidden bg-border">
               <div
-                className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
+                className="h-full bg-primary transition-[width] duration-700 ease-out"
                 style={{ width: `${pct}%` }}
               />
             </div>
           </div>
           <ChevronDown
-            className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-300 ${
+            className={`h-4 w-4 text-muted-foreground shrink-0 mt-1 transition-transform duration-300 ${
               expanded ? 'rotate-180 text-primary' : ''
             }`}
+            strokeWidth={1.5}
           />
         </div>
       </button>
@@ -116,22 +119,22 @@ const RegionCard = memo(({ data, expanded, onToggle }: {
         style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">
-          <div className="px-5 pb-5 pt-1 border-t border-border/50">
-            <ul className="divide-y divide-border/50">
+          <div className="px-6 pb-6 pt-2 border-t border-border">
+            <ul className="divide-y divide-border">
               {data.countries.map((c) => {
                 const cpct = Math.round((c.students / total) * 100);
                 return (
-                  <li key={c.name} className="flex items-center justify-between gap-4 py-2.5">
-                    <span className="text-sm text-foreground/85 truncate">{c.name}</span>
-                    <span className="flex items-center gap-3 shrink-0">
-                      <span className="hidden sm:block w-24 h-1 rounded-full bg-border/70 overflow-hidden">
+                  <li key={c.name} className="flex items-center justify-between gap-6 py-3">
+                    <span className="text-sm text-foreground tracking-tight truncate">{c.name}</span>
+                    <span className="flex items-center gap-4 shrink-0">
+                      <span className="hidden sm:block w-28 h-px bg-border overflow-hidden">
                         <span
-                          className="block h-full bg-primary/80 rounded-full"
+                          className="block h-full bg-primary"
                           style={{ width: `${cpct}%` }}
                         />
                       </span>
-                      <span className="text-sm font-semibold tabular-nums text-foreground w-8 text-right">
-                        {c.students}
+                      <span className="text-sm font-medium tabular-nums text-foreground w-8 text-right">
+                        {c.students.toString().padStart(2, '0')}
                       </span>
                     </span>
                   </li>
@@ -151,21 +154,21 @@ const RegionBreakdown = memo(() => {
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex items-baseline justify-between gap-4">
-        <div>
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-            Student Distribution
-          </div>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-3xl md:text-4xl font-bold tabular-nums text-foreground tracking-tight">
-              {TOTAL}
-            </span>
-            <span className="text-sm text-muted-foreground">총 졸업생 · 4개 대륙 · 20개 국가</span>
-          </div>
+      <div className="mb-10 pb-6 border-b border-border">
+        <div className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+          Student Distribution
+        </div>
+        <div className="mt-3 flex items-baseline gap-3 flex-wrap">
+          <span className="text-5xl md:text-6xl font-medium tabular-nums text-foreground tracking-tight leading-none">
+            {TOTAL}
+          </span>
+          <span className="text-sm tracking-wide text-muted-foreground">
+            총 졸업생 · 4개 대륙 · 20개 국가
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border">
         {REGIONS.map((r) => (
           <RegionCard
             key={r.region}
