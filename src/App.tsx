@@ -8,6 +8,10 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminReports from "./pages/AdminReports";
+import AdminHub from "./pages/AdminHub";
+import TeacherReportForm from "./pages/TeacherReportForm";
+import OwnerLogin from "./pages/OwnerLogin";
+import OwnerLogs from "./pages/OwnerLogs";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +25,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/hub" element={<AdminHub />} />
+            <Route path="/admin/write" element={<TeacherReportForm />} />
             <Route path="/admin/reports" element={<AdminReports />} />
+            <Route path="/admin/owner" element={<OwnerLogin />} />
+            <Route path="/admin/logs" element={<OwnerLogs />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
