@@ -7,7 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
-import AdminReports from "./pages/AdminReports";
+
 import AdminHub from "./pages/AdminHub";
 import TeacherReportForm from "./pages/TeacherReportForm";
 import OwnerLogin from "./pages/OwnerLogin";
@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/hub" element={<AdminHub />} />
             <Route path="/admin/write" element={<TeacherReportForm />} />
-            <Route path="/admin/reports" element={<AdminReports />} />
+            
             <Route path="/admin/owner" element={<OwnerLogin />} />
             <Route path="/admin/logs" element={<OwnerLogs />} />
             <Route path="/admin/logs/:id" element={<OwnerReportView />} />
