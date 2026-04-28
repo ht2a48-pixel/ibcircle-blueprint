@@ -12,6 +12,7 @@ import AdminHub from "./pages/AdminHub";
 import TeacherReportForm from "./pages/TeacherReportForm";
 import OwnerLogin from "./pages/OwnerLogin";
 import OwnerLogs from "./pages/OwnerLogs";
+import OwnerReportView from "./pages/OwnerReportView";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/owner" element={<OwnerLogin />} />
             <Route path="/admin/logs" element={<OwnerLogs />} />
+            <Route path="/admin/logs/:id" element={<OwnerReportView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
