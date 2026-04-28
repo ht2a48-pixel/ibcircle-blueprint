@@ -309,7 +309,7 @@ const OwnerLogs = memo(() => {
                         <div
                           key={r.id}
                           className="flex items-center justify-between gap-2 p-3 rounded-md border hover:bg-muted/40 cursor-pointer"
-                          onClick={() => setOpenReport(r)}
+                          onClick={() => openReportPage(r)}
                         >
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">
@@ -324,8 +324,8 @@ const OwnerLogs = memo(() => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={(e) => { e.stopPropagation(); downloadReport(r); }}
-                              aria-label="Download"
+                              onClick={(e) => { e.stopPropagation(); openReportPage(r); }}
+                              aria-label="Open"
                             >
                               <Download className="w-4 h-4" />
                             </Button>
