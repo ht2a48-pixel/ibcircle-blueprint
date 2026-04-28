@@ -1,5 +1,5 @@
 import type { ReportDocumentData } from "@/components/ReportDocument";
-import { formatTotalClassTime } from "@/components/ReportDocument";
+import { formatTotalClassTime, computeProgress, formatMinutes } from "@/components/ReportDocument";
 
 /** Stable canonical string used for hashing — order matters and must not change. */
 export function canonicalReportPayload(r: ReportDocumentData): string {
@@ -126,6 +126,13 @@ export function buildReportHtml(
   .section-sub { font-size: 12px; color: #64748b; }
   .section-body { padding-left: 16px; border-left: 3px solid #0f1f3d; }
   .section-body p { margin: 0; font-size: 15px; white-space: pre-wrap; line-height: 1.7; }
+  .progress-section { background: #fff; border: 1px solid #e5e9f2; border-radius: 6px; padding: 20px; margin-bottom: 32px; }
+  .progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .progress-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; font-size: 14px; color: #334155; }
+  .progress-percent { font-size: 14px; font-weight: 600; color: #0f1f3d; }
+  .progress-bar { width: 100%; height: 10px; background: #e5e9f2; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #0f1f3d; border-radius: 999px; }
+  .progress-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
   .footer {
     margin-top: 48px; padding-top: 20px;
     border-top: 1px solid #e5e9f2;
@@ -177,6 +184,27 @@ export function buildReportHtml(
         : `<div><div class="meta-label">Submitted</div><div class="meta-value">${escapeHtml(submittedAt)}</div></div>`
     }
   </section>
+
+  ${(() => {
+    const p = computeProgress(r.class_length_minutes, r.classes_completed);
+    if (!p) return "";
+    return `<section class="progress-section">
+      <div class="progress-head">
+        <h2 class="section-title">Program Progress</h2>
+        <span class="section-sub">진도 현황 · 12h 목표</span>
+      </div>
+      <div class="progress-row">
+        <div><strong>${escapeHtml(formatMinutes(p.completedMinutes))}</strong> completed of <strong>${escapeHtml(formatMinutes(p.plannedMinutes))}</strong></div>
+        <div class="progress-percent">${p.percent}%</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.percent}%"></div></div>
+      <div class="progress-grid">
+        <div><div class="meta-label">Classes completed</div><div class="meta-value">${p.classesCompleted} / ${p.plannedClasses}</div></div>
+        <div><div class="meta-label">Classes remaining</div><div class="meta-value">${p.classesRemaining}</div></div>
+        <div><div class="meta-label">Time remaining</div><div class="meta-value">${escapeHtml(formatMinutes(p.remainingMinutes))}</div></div>
+      </div>
+    </section>`;
+  })()}
 
   <section class="section">
     <div class="section-head">

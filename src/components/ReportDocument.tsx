@@ -32,14 +32,55 @@ function formatDateLong(d: string) {
   });
 }
 
+/** Default planned program length, in minutes. 12 hours = 720 minutes. */
+export const PLANNED_TOTAL_MINUTES = 12 * 60;
+
 export function formatTotalClassTime(lengthMinutes: number, classes: number): string {
   const total = Math.max(0, Math.round(lengthMinutes * classes));
-  if (total === 0) return "0 minutes";
-  const hours = Math.floor(total / 60);
-  const minutes = total % 60;
+  return formatMinutes(total);
+}
+
+export function formatMinutes(total: number): string {
+  const t = Math.max(0, Math.round(total));
+  if (t === 0) return "0 minutes";
+  const hours = Math.floor(t / 60);
+  const minutes = t % 60;
   if (hours === 0) return `${minutes} minutes`;
-  if (minutes === 0) return `${hours} h (${total} min)`;
-  return `${hours} h ${minutes} min (${total} min)`;
+  if (minutes === 0) return `${hours} h (${t} min)`;
+  return `${hours} h ${minutes} min (${t} min)`;
+}
+
+export interface ProgressSnapshot {
+  completedMinutes: number;
+  remainingMinutes: number;
+  plannedMinutes: number;
+  classesCompleted: number;
+  plannedClasses: number;
+  classesRemaining: number;
+  percent: number; // 0–100
+}
+
+export function computeProgress(
+  classLengthMinutes: number,
+  classesCompleted: number | null,
+  plannedTotalMinutes: number = PLANNED_TOTAL_MINUTES,
+): ProgressSnapshot | null {
+  if (!classLengthMinutes || classLengthMinutes <= 0) return null;
+  const done = Math.max(0, classesCompleted ?? 0);
+  const completedMinutes = done * classLengthMinutes;
+  const plannedClasses = Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
+  const cappedDone = Math.min(done, plannedClasses);
+  const remainingMinutes = Math.max(0, plannedTotalMinutes - completedMinutes);
+  const percent = Math.min(100, Math.round((completedMinutes / plannedTotalMinutes) * 100));
+  return {
+    completedMinutes,
+    remainingMinutes,
+    plannedMinutes: plannedTotalMinutes,
+    classesCompleted: done,
+    plannedClasses,
+    classesRemaining: Math.max(0, plannedClasses - cappedDone),
+    percent,
+  };
 }
 
 const ReportDocument = memo(({ report }: Props) => {
@@ -47,6 +88,7 @@ const ReportDocument = memo(({ report }: Props) => {
   const [checksum, setChecksum] = useState<string>("");
   const exportedAt = new Date().toLocaleString();
   const submittedAt = new Date(r.created_at).toLocaleString();
+  const progress = computeProgress(r.class_length_minutes, r.classes_completed);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,6 +178,79 @@ const ReportDocument = memo(({ report }: Props) => {
           />
         )}
       </section>
+
+      {progress && (
+        <section
+          className="mb-8 p-5"
+          style={{ background: "#fff", border: "1px solid #e5e9f2", borderRadius: 6 }}
+        >
+          <div className="flex items-baseline justify-between gap-3 mb-3">
+            <h2
+              className="text-base font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "#0f1f3d" }}
+            >
+              Program Progress
+            </h2>
+            <span className="text-xs text-slate-500">진도 현황 · 12h 목표</span>
+          </div>
+
+          <div className="flex items-end justify-between gap-4 mb-2">
+            <div className="text-sm text-slate-700">
+              <strong className="text-slate-900">{formatMinutes(progress.completedMinutes)}</strong>{" "}
+              completed of <strong className="text-slate-900">{formatMinutes(progress.plannedMinutes)}</strong>
+            </div>
+            <div className="text-sm font-medium" style={{ color: "#0f1f3d" }}>
+              {progress.percent}%
+            </div>
+          </div>
+
+          <div
+            className="w-full overflow-hidden"
+            style={{ height: 10, background: "#e5e9f2", borderRadius: 999 }}
+            role="progressbar"
+            aria-valuenow={progress.percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div
+              style={{
+                width: `${progress.percent}%`,
+                height: "100%",
+                background: "#0f1f3d",
+                borderRadius: 999,
+                transition: "width 400ms ease",
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Classes completed
+              </div>
+              <div className="font-medium text-slate-900">
+                {progress.classesCompleted} / {progress.plannedClasses}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Classes remaining
+              </div>
+              <div className="font-medium text-slate-900">
+                {progress.classesRemaining}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Time remaining
+              </div>
+              <div className="font-medium text-slate-900">
+                {formatMinutes(progress.remainingMinutes)}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Section title="Topics Covered" subtitle="학습 내용">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
