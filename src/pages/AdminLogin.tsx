@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,19 @@ const AdminLogin = () => {
   const [passcode, setPasscode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Prefetch next-step admin route chunks in the background while the user
+  // types their passcode, so navigation after submit is instant.
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+    };
+    const schedule = w.requestIdleCallback ?? ((cb: () => void) => w.setTimeout(cb, 200));
+    schedule(() => {
+      void import("./AdminHub");
+      void import("./TeacherReportForm");
+    });
+  }, []);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

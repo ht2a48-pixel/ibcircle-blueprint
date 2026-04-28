@@ -1,7 +1,5 @@
 import { memo } from 'react';
 import { Helmet } from 'react-helmet-async';
-// Load Korean fonts only when the public (Korean-content) homepage renders
-import '@/styles/korean-fonts';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Programs from '@/components/Programs';
@@ -25,6 +23,13 @@ const Index = memo(() => {
         />
         <meta name="keywords" content="IB, IB Diploma, IB 수업, IB 과외, 입시 컨설팅, 대학 입시, 글로벌 대학, 미국 대학, 영국 대학" />
         <link rel="canonical" href="https://ibcirc.com" />
+        {/* Korean fonts loaded only on the public homepage — admin pages skip this */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        />
       </Helmet>
 
       <main className="min-h-screen bg-background">
