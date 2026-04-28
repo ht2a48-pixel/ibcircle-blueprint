@@ -32,14 +32,55 @@ function formatDateLong(d: string) {
   });
 }
 
+/** Default planned program length, in minutes. 12 hours = 720 minutes. */
+export const PLANNED_TOTAL_MINUTES = 12 * 60;
+
 export function formatTotalClassTime(lengthMinutes: number, classes: number): string {
   const total = Math.max(0, Math.round(lengthMinutes * classes));
-  if (total === 0) return "0 minutes";
-  const hours = Math.floor(total / 60);
-  const minutes = total % 60;
+  return formatMinutes(total);
+}
+
+export function formatMinutes(total: number): string {
+  const t = Math.max(0, Math.round(total));
+  if (t === 0) return "0 minutes";
+  const hours = Math.floor(t / 60);
+  const minutes = t % 60;
   if (hours === 0) return `${minutes} minutes`;
-  if (minutes === 0) return `${hours} h (${total} min)`;
-  return `${hours} h ${minutes} min (${total} min)`;
+  if (minutes === 0) return `${hours} h (${t} min)`;
+  return `${hours} h ${minutes} min (${t} min)`;
+}
+
+export interface ProgressSnapshot {
+  completedMinutes: number;
+  remainingMinutes: number;
+  plannedMinutes: number;
+  classesCompleted: number;
+  plannedClasses: number;
+  classesRemaining: number;
+  percent: number; // 0–100
+}
+
+export function computeProgress(
+  classLengthMinutes: number,
+  classesCompleted: number | null,
+  plannedTotalMinutes: number = PLANNED_TOTAL_MINUTES,
+): ProgressSnapshot | null {
+  if (!classLengthMinutes || classLengthMinutes <= 0) return null;
+  const done = Math.max(0, classesCompleted ?? 0);
+  const completedMinutes = done * classLengthMinutes;
+  const plannedClasses = Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
+  const cappedDone = Math.min(done, plannedClasses);
+  const remainingMinutes = Math.max(0, plannedTotalMinutes - completedMinutes);
+  const percent = Math.min(100, Math.round((completedMinutes / plannedTotalMinutes) * 100));
+  return {
+    completedMinutes,
+    remainingMinutes,
+    plannedMinutes: plannedTotalMinutes,
+    classesCompleted: done,
+    plannedClasses,
+    classesRemaining: Math.max(0, plannedClasses - cappedDone),
+    percent,
+  };
 }
 
 const ReportDocument = memo(({ report }: Props) => {
