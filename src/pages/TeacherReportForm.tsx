@@ -183,6 +183,23 @@ const TeacherReportForm = memo(() => {
             <CardDescription>
               All fields marked with * are required. Your submission will be saved and visible to the owner only.
             </CardDescription>
+            <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Save className="w-3.5 h-3.5" />
+                {draftStatus === "saving" && <span>Saving draft…</span>}
+                {draftStatus === "saved" && draftSavedAt && (
+                  <span>
+                    Draft saved · {new Date(draftSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
+                {draftStatus === "idle" && <span>Drafts auto-save to this browser</span>}
+              </div>
+              {draftSavedAt && (
+                <Button type="button" variant="ghost" size="sm" onClick={discardDraft} className="h-7 text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-3.5 h-3.5 mr-1" /> Discard draft
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
