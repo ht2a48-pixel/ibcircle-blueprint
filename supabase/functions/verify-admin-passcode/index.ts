@@ -157,6 +157,16 @@ serve(async (req) => {
       const class_length_minutes = Number(report.class_length_minutes);
       const report_text = report.report_text;
 
+      let classes_completed: number | null = null;
+      if (report.classes_completed !== null && report.classes_completed !== undefined && report.classes_completed !== "") {
+        const n = Number(report.classes_completed);
+        if (!Number.isFinite(n) || n < 0 || n > 10000 || !Number.isInteger(n)) {
+          return new Response(JSON.stringify({ error: "Invalid classes_completed" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        classes_completed = n;
+      }
+
       if (!isNonEmptyString(student_name, 200) ||
           !isNonEmptyString(subject, 100) ||
           !isNonEmptyString(topics_covered, 2000) ||
@@ -182,6 +192,7 @@ serve(async (req) => {
         class_date,
         class_time,
         class_length_minutes,
+        classes_completed,
         report_text: report_text.trim(),
       });
 

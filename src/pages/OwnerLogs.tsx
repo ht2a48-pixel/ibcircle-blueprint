@@ -16,6 +16,7 @@ interface TeacherReport {
   class_date: string;
   class_time: string;
   class_length_minutes: number;
+  classes_completed: number | null;
   report_text: string;
   created_at: string;
 }
