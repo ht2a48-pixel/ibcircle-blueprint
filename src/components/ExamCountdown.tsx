@@ -110,6 +110,38 @@ const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; tar
   const formatTime = (num: number) => String(num).padStart(2, '0');
   const formatLargeNumber = (num: number) => num.toLocaleString();
 
+  // Exam-in-progress phase: between April 24 and May 20 of the target year.
+  const now = new Date();
+  const examInProgress = now >= examDate && now <= examEndDate;
+  const examMonthDay = examDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+  // Good-luck banner (compact) — shown while exams are running
+  if (compact && examInProgress) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 1 }}
+        className="mt-8 bg-primary text-primary-foreground overflow-hidden"
+      >
+        <div className="p-5 md:p-6 text-center sm:text-left flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">
+              {examYear} IB Examination · In Progress
+            </p>
+            <div className="text-xl md:text-2xl font-medium tracking-tight">
+              Good luck with the {examMonthDay} {examYear} IB exams.
+            </div>
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.2em] opacity-60 sm:text-right">
+            Exam window<br />Apr 24 – May 20
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   // Compact version for embedding in other sections
   if (compact) {
     return (
