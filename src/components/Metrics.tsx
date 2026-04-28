@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import WorldMap from './WorldMap';
+import RegionBreakdown from './RegionBreakdown';
 
 interface Metric {
   value: number;
@@ -97,14 +97,14 @@ const Metrics = () => {
           ))}
         </div>
 
-        {/* World Map */}
+        {/* Region Breakdown */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
-          <WorldMap />
+          <RegionBreakdown />
         </motion.div>
 
         {/* Supporting copy */}
