@@ -224,8 +224,6 @@ export function buildReportHtml(
 
   <footer class="footer">
     <div class="footer-row"><span class="footer-label">Report ID</span><span>${escapeHtml(r.id)}</span></div>
-    <div class="footer-row"><span class="footer-label">SHA-256</span></div>
-    <div class="checksum">${escapeHtml(checksum)}</div>
   </footer>
 </article>
 </body>
