@@ -2,9 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/noto-sans-kr/400.css";
-@import "@fontsource/noto-sans-kr/500.css";
-@import "@fontsource/noto-sans-kr/700.css";
+/* Korean fonts (Noto Sans KR) are loaded per-route — see src/styles/korean-fonts.ts —
+   so admin/owner pages don't pay for them. */
 
 /* IBCircle Premium Design System - McKinsey-Style */
 
