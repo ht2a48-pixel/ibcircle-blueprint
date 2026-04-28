@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const AdminLogin = memo(() => {
+const AdminLogin = () => {
   const [passcode, setPasscode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -89,8 +89,6 @@ const AdminLogin = memo(() => {
       </Card>
     </div>
   );
-});
-
-AdminLogin.displayName = "AdminLogin";
+};
 
 export default AdminLogin;

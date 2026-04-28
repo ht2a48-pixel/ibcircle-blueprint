@@ -4,17 +4,23 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
+import { lazy, Suspense } from "react";
 
-import AdminHub from "./pages/AdminHub";
-import TeacherReportForm from "./pages/TeacherReportForm";
-import OwnerLogin from "./pages/OwnerLogin";
-import OwnerLogs from "./pages/OwnerLogs";
-import OwnerReportView from "./pages/OwnerReportView";
+// Code-split every route so visiting /admin doesn't download the homepage bundle
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminHub = lazy(() => import("./pages/AdminHub"));
+const TeacherReportForm = lazy(() => import("./pages/TeacherReportForm"));
+const OwnerLogin = lazy(() => import("./pages/OwnerLogin"));
+const OwnerLogs = lazy(() => import("./pages/OwnerLogs"));
+const OwnerReportView = lazy(() => import("./pages/OwnerReportView"));
 
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background" aria-hidden="true" />
+);
 
 const App = () => (
   <HelmetProvider>
@@ -23,18 +29,19 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/hub" element={<AdminHub />} />
-            <Route path="/admin/write" element={<TeacherReportForm />} />
-            
-            <Route path="/admin/owner" element={<OwnerLogin />} />
-            <Route path="/admin/logs" element={<OwnerLogs />} />
-            <Route path="/admin/logs/:id" element={<OwnerReportView />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/hub" element={<AdminHub />} />
+              <Route path="/admin/write" element={<TeacherReportForm />} />
+              <Route path="/admin/owner" element={<OwnerLogin />} />
+              <Route path="/admin/logs" element={<OwnerLogs />} />
+              <Route path="/admin/logs/:id" element={<OwnerReportView />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
