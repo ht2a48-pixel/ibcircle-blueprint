@@ -19,6 +19,7 @@ export type Database = {
           class_date: string
           class_length_minutes: number
           class_time: string
+          classes_completed: number | null
           created_at: string
           id: string
           report_text: string
@@ -31,6 +32,7 @@ export type Database = {
           class_date: string
           class_length_minutes: number
           class_time: string
+          classes_completed?: number | null
           created_at?: string
           id?: string
           report_text: string
@@ -43,6 +45,7 @@ export type Database = {
           class_date?: string
           class_length_minutes?: number
           class_time?: string
+          classes_completed?: number | null
           created_at?: string
           id?: string
           report_text?: string
