@@ -2,7 +2,7 @@ import { useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, PencilLine, LogOut, Home } from "lucide-react";
+import { FileText, PencilLine, LogOut, Home, Shield } from "lucide-react";
 
 const AdminHub = memo(() => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const AdminHub = memo(() => {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => navigate("/admin/write")}>
             <CardHeader>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
@@ -78,6 +78,21 @@ const AdminHub = memo(() => {
             </CardHeader>
             <CardContent>
               <Button variant="outline" className="w-full">Open editor</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => navigate("/admin/owner")}>
+            <CardHeader>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Owner Access</CardTitle>
+              <CardDescription>
+                Restricted area. Requires the owner passcode to view all submitted teacher reports.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">Enter passcode</Button>
             </CardContent>
           </Card>
         </div>
