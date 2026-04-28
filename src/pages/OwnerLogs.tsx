@@ -316,67 +316,94 @@ const OwnerLogs = memo(() => {
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
         ) : view === "calendar" ? (
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="border-border/60 shadow-sm">
+            <CardHeader className="pb-4 border-b bg-muted/20">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={goPrevMonth} aria-label="Previous month">
+                <div className="flex items-center gap-3">
+                  <Button variant="outline" size="icon" onClick={goPrevMonth} aria-label="Previous month" className="h-9 w-9">
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <CardTitle className="text-xl min-w-[200px] text-center">
-                    {MONTH_NAMES[cursor.getMonth()]} {cursor.getFullYear()}
+                  <CardTitle className="text-2xl font-semibold tracking-tight min-w-[220px] text-center">
+                    {MONTH_NAMES[cursor.getMonth()]} <span className="text-muted-foreground font-normal">{cursor.getFullYear()}</span>
                   </CardTitle>
-                  <Button variant="outline" size="icon" onClick={goNextMonth} aria-label="Next month">
+                  <Button variant="outline" size="icon" onClick={goNextMonth} aria-label="Next month" className="h-9 w-9">
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
-                <Button variant="ghost" size="sm" onClick={goToday}>Today</Button>
+                <div className="flex items-center gap-3">
+                  <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="inline-block w-2.5 h-2.5 rounded-sm bg-primary/70" />
+                    Reports submitted
+                  </div>
+                  <Button variant="outline" size="sm" onClick={goToday} className="h-9">Today</Button>
+                </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-7 gap-1 mb-2 text-xs font-semibold uppercase text-muted-foreground text-center">
-                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-                  <div key={d} className="py-1">{d}</div>
+            <CardContent className="pt-5">
+              <div className="grid grid-cols-7 mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground text-center border-b">
+                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d, i) => (
+                  <div key={d} className={`py-2 ${i === 0 ? "text-destructive/70" : ""}`}>{d}</div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-1.5">
                 {calendarCells.map((cell) => {
                   if (!cell.date) {
-                    return <div key={cell.key} className="aspect-square rounded-md bg-muted/30" />;
+                    return <div key={cell.key} className="min-h-[110px] rounded-lg bg-muted/20" />;
                   }
                   const key = ymd(cell.date);
                   const dayReports = byDate.get(key) ?? [];
                   const isToday = key === ymd(new Date());
                   const isSelected = key === selectedDate;
                   const hasReports = dayReports.length > 0;
+                  const isSunday = cell.date.getDay() === 0;
                   return (
                     <button
                       key={cell.key}
                       onClick={() => setSelectedDate(key)}
-                      className={`aspect-square rounded-md border p-1 md:p-2 text-left transition-colors flex flex-col overflow-hidden ${
+                      className={`min-h-[110px] rounded-lg border p-2 text-left transition-all flex flex-col overflow-hidden group ${
                         isSelected
-                          ? "border-primary bg-primary/10"
+                          ? "border-primary ring-2 ring-primary/30 bg-primary/5 shadow-sm"
                           : hasReports
-                          ? "border-primary/40 bg-primary/5 hover:bg-primary/10"
-                          : "border-border hover:bg-muted/50"
+                          ? "border-primary/30 bg-card hover:border-primary/60 hover:shadow-sm"
+                          : "border-border/60 bg-card hover:bg-muted/40"
                       }`}
                     >
-                      <div className={`text-xs md:text-sm font-medium ${isToday ? "text-primary" : ""}`}>
-                        {cell.date.getDate()}
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div
+                          className={`text-sm font-semibold tabular-nums flex items-center justify-center ${
+                            isToday
+                              ? "bg-primary text-primary-foreground rounded-full w-6 h-6"
+                              : isSunday
+                              ? "text-destructive/70 px-1"
+                              : "text-foreground px-1"
+                          }`}
+                        >
+                          {cell.date.getDate()}
+                        </div>
+                        {hasReports && (
+                          <span className="text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                            {dayReports.length}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex-1 mt-1 space-y-0.5 overflow-hidden">
-                        {dayReports.slice(0, 2).map((r) => (
+                      <div className="flex-1 space-y-1 overflow-hidden">
+                        {dayReports.slice(0, 3).map((r) => (
                           <div
                             key={r.id}
-                            className="text-[10px] md:text-xs truncate bg-primary text-primary-foreground rounded px-1"
+                            className="text-[10px] leading-tight rounded px-1.5 py-1 bg-primary/10 border-l-2 border-primary overflow-hidden"
                             title={`${r.student_name} · ${r.subject}`}
                           >
-                            {r.student_name}
+                            <div className="font-semibold text-foreground truncate">
+                              {r.student_name}
+                            </div>
+                            <div className="text-muted-foreground truncate">
+                              {r.subject}
+                            </div>
                           </div>
                         ))}
-                        {dayReports.length > 2 && (
-                          <div className="text-[10px] text-muted-foreground">
-                            +{dayReports.length - 2} more
+                        {dayReports.length > 3 && (
+                          <div className="text-[10px] text-muted-foreground font-medium pl-1">
+                            +{dayReports.length - 3} more
                           </div>
                         )}
                       </div>
