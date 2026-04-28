@@ -121,6 +121,7 @@ const OwnerLogs = memo(() => {
                       </CardTitle>
                       <CardDescription className="mt-1">
                         {r.class_date} at {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                        {r.classes_completed !== null && r.classes_completed !== undefined ? ` · Class #${r.classes_completed}` : ""}
                         {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
                       </CardDescription>
                     </div>
