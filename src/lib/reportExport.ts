@@ -126,6 +126,13 @@ export function buildReportHtml(
   .section-sub { font-size: 12px; color: #64748b; }
   .section-body { padding-left: 16px; border-left: 3px solid #0f1f3d; }
   .section-body p { margin: 0; font-size: 15px; white-space: pre-wrap; line-height: 1.7; }
+  .progress-section { background: #fff; border: 1px solid #e5e9f2; border-radius: 6px; padding: 20px; margin-bottom: 32px; }
+  .progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .progress-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; font-size: 14px; color: #334155; }
+  .progress-percent { font-size: 14px; font-weight: 600; color: #0f1f3d; }
+  .progress-bar { width: 100%; height: 10px; background: #e5e9f2; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #0f1f3d; border-radius: 999px; }
+  .progress-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
   .footer {
     margin-top: 48px; padding-top: 20px;
     border-top: 1px solid #e5e9f2;
