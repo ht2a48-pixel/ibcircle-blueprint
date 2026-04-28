@@ -356,7 +356,7 @@ const OwnerLogs = memo(() => {
         ) : (
           <div className="space-y-4">
             {reports.map((r) => (
-              <Card key={r.id}>
+              <Card key={r.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => openReportPage(r)}>
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
@@ -369,11 +369,11 @@ const OwnerLogs = memo(() => {
                         {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Badge variant="secondary" className="text-xs">
                         Submitted {new Date(r.created_at).toLocaleString()}
                       </Badge>
-                      <Button variant="ghost" size="icon" onClick={() => downloadReport(r)} aria-label="Download">
+                      <Button variant="ghost" size="icon" onClick={() => openReportPage(r)} aria-label="Open">
                         <Download className="w-4 h-4" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => setConfirmDelete(r)} aria-label="Delete">
@@ -385,11 +385,11 @@ const OwnerLogs = memo(() => {
                 <CardContent className="space-y-3">
                   <div>
                     <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Topics covered</p>
-                    <p className="text-sm whitespace-pre-wrap">{r.topics_covered}</p>
+                    <p className="text-sm whitespace-pre-wrap line-clamp-2">{r.topics_covered}</p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Report</p>
-                    <p className="text-sm whitespace-pre-wrap">{r.report_text}</p>
+                    <p className="text-sm whitespace-pre-wrap line-clamp-3">{r.report_text}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -398,46 +398,6 @@ const OwnerLogs = memo(() => {
         )}
       </div>
 
-      {/* Report detail dialog (from calendar) */}
-      <Dialog open={!!openReport} onOpenChange={(o) => !o && setOpenReport(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          {openReport && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  {openReport.student_name} · <span className="text-muted-foreground font-normal">{openReport.subject}</span>
-                </DialogTitle>
-                <DialogDescription>
-                  {openReport.class_date} at {openReport.class_time.slice(0, 5)} · {openReport.class_length_minutes} min
-                  {openReport.classes_completed !== null && openReport.classes_completed !== undefined ? ` · Class #${openReport.classes_completed}` : ""}
-                  {openReport.teacher_name ? ` · Teacher: ${openReport.teacher_name}` : ""}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Topics covered</p>
-                  <p className="text-sm whitespace-pre-wrap">{openReport.topics_covered}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Report</p>
-                  <p className="text-sm whitespace-pre-wrap">{openReport.report_text}</p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Submitted {new Date(openReport.created_at).toLocaleString()}
-                </p>
-              </div>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => downloadReport(openReport)}>
-                  <Download className="w-4 h-4 mr-2" /> Download
-                </Button>
-                <Button variant="destructive" onClick={() => setConfirmDelete(openReport)}>
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
