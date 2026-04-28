@@ -73,7 +73,6 @@ const OwnerLogs = memo(() => {
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [openReport, setOpenReport] = useState<TeacherReport | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<TeacherReport | null>(null);
 
   useEffect(() => {
@@ -163,37 +162,8 @@ const OwnerLogs = memo(() => {
 
   const reportsForSelectedDate = selectedDate ? byDate.get(selectedDate) ?? [] : [];
 
-  const downloadReport = (r: TeacherReport) => {
-    const lines = [
-      `IBCircle — Teacher Report`,
-      `Generated: ${new Date().toLocaleString()}`,
-      `------------------------------------------------------------`,
-      `Student: ${r.student_name}`,
-      `Subject: ${r.subject}`,
-      `Teacher: ${r.teacher_name ?? "—"}`,
-      `Class date: ${r.class_date}`,
-      `Class time: ${r.class_time}`,
-      `Class length: ${r.class_length_minutes} minutes`,
-      `Class number: ${r.classes_completed ?? "—"}`,
-      `Submitted: ${new Date(r.created_at).toLocaleString()}`,
-      ``,
-      `Topics covered:`,
-      r.topics_covered,
-      ``,
-      `Report:`,
-      r.report_text,
-      ``,
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const safeName = r.student_name.replace(/[^a-z0-9가-힣]+/gi, "_");
-    a.download = `report_${safeName}_${r.class_date}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const openReportPage = (r: TeacherReport) => {
+    navigate(`/admin/logs/${r.id}`);
   };
 
   const deleteReport = async (r: TeacherReport) => {
