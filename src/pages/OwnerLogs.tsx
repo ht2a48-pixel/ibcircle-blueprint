@@ -256,6 +256,14 @@ const OwnerLogs = memo(() => {
             <Button variant="outline" size="sm" onClick={() => token && load(token)} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
             </Button>
+            <Button
+              variant={selectMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+            >
+              {selectMode ? <X className="w-4 h-4 mr-2" /> : <CheckSquare className="w-4 h-4 mr-2" />}
+              {selectMode ? "Exit select" : "Select"}
+            </Button>
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
@@ -265,6 +273,45 @@ const OwnerLogs = memo(() => {
         <p className="text-muted-foreground text-sm mb-6">
           {reports.length} report{reports.length === 1 ? "" : "s"} total.
         </p>
+
+        {selectMode && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 p-3 rounded-md border bg-muted/40">
+            <div className="text-sm">
+              <strong>{selectedIds.size}</strong> selected
+              {bulkProgress && (
+                <span className="text-muted-foreground ml-2">
+                  · exporting {bulkProgress.done}/{bulkProgress.total}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => selectAllVisible(reports.map((r) => r.id))}
+                disabled={!!bulkProgress}
+              >
+                <Square className="w-4 h-4 mr-2" /> Select all
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSelection}
+                disabled={!!bulkProgress || selectedIds.size === 0}
+              >
+                Clear
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleBulkDownload}
+                disabled={!!bulkProgress || selectedIds.size === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {bulkProgress ? "Exporting…" : `Download ${selectedIds.size || ""}`.trim()}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
