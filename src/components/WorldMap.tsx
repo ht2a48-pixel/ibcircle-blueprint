@@ -77,6 +77,10 @@ const CountryPin = memo(({
   };
   const showNumber = sizeKey === 'lg' || sizeKey === 'md';
 
+  // Shared easing for every animated property on the pin
+  const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const haloSize = sizeClasses[sizeKey].split(' ').slice(0, 4).join(' ');
+
   return (
     <div
       className="absolute"
@@ -84,7 +88,7 @@ const CountryPin = memo(({
         left: `${country.x}%`,
         top: `${country.y}%`,
         transform: 'translate(-50%, -50%)',
-        zIndex: isHovered ? 30 : 10,
+        zIndex: isHovered ? 30 : isDimmed ? 5 : 10,
         willChange: 'transform, opacity',
       }}
       onMouseEnter={onHover}
@@ -92,31 +96,61 @@ const CountryPin = memo(({
       onTouchStart={(e) => { e.stopPropagation(); onHover(); }}
       onTouchEnd={(e) => { e.stopPropagation(); setTimeout(onLeave, 1800); }}
     >
-      {/* Soft halo ring (pure CSS, GPU accelerated) */}
+      {/* Idle pulsing halo — fades out on hover or when dimmed */}
       <span
         aria-hidden
-        className={`absolute inset-0 rounded-full bg-primary/25 transition-all duration-300 ease-out ${
-          isHovered ? 'scale-[2.4] opacity-0' : 'scale-100 opacity-100 animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite]'
-        } ${sizeClasses[sizeKey].split(' ').slice(0, 4).join(' ')}`}
+        className={`absolute inset-0 rounded-full bg-primary/25 ${haloSize} ${
+          !isHovered && !isDimmed ? 'animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite]' : ''
+        }`}
+        style={{
+          opacity: isHovered || isDimmed ? 0 : 1,
+          transition: `opacity 320ms ${EASE}`,
+        }}
       />
+
+      {/* Hover halo — expands smoothly outward on hover */}
+      <span
+        aria-hidden
+        className={`absolute inset-0 rounded-full bg-primary/30 ${haloSize}`}
+        style={{
+          transform: isHovered ? 'scale(2.2)' : 'scale(1)',
+          opacity: isHovered ? 0 : 0.6,
+          transition: `transform 420ms ${EASE}, opacity 420ms ${EASE}`,
+          transformOrigin: 'center',
+        }}
+      />
+
       {/* Pin */}
       <button
         type="button"
         aria-label={`${country.name}, ${country.students} students`}
-        className={`relative ${sizeClasses[sizeKey]} rounded-full bg-primary text-primary-foreground border-2 border-white shadow-[0_2px_8px_rgba(15,23,42,0.25)] flex items-center justify-center font-semibold transition-[transform,opacity,box-shadow] duration-200 ease-out ${
-          isHovered ? 'scale-125 shadow-[0_4px_14px_rgba(15,23,42,0.35)]' : 'scale-100'
-        } ${isDimmed ? 'opacity-25' : 'opacity-100'}`}
+        className={`relative ${sizeClasses[sizeKey]} rounded-full bg-primary text-primary-foreground border-2 border-white flex items-center justify-center font-semibold`}
+        style={{
+          opacity: isDimmed ? 0.2 : 1,
+          transform: isHovered ? 'scale(1.28)' : 'scale(1)',
+          boxShadow: isHovered
+            ? '0 6px 18px rgba(15, 23, 42, 0.35)'
+            : '0 2px 8px rgba(15, 23, 42, 0.25)',
+          transition: `transform 280ms ${EASE}, opacity 320ms ${EASE}, box-shadow 280ms ${EASE}`,
+          transformOrigin: 'center',
+          willChange: 'transform, opacity',
+        }}
       >
         {showNumber && <span className="leading-none tabular-nums">{country.students}</span>}
       </button>
 
-      {/* Tooltip */}
+      {/* Tooltip — same easing & duration as pin */}
       <div
         role="tooltip"
-        className={`pointer-events-none absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground/95 backdrop-blur px-2.5 py-1.5 shadow-xl transition-all duration-150 ease-out ${
-          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
-        }`}
-        style={{ zIndex: 40 }}
+        className="pointer-events-none absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground/95 backdrop-blur px-2.5 py-1.5 shadow-xl"
+        style={{
+          zIndex: 40,
+          opacity: isHovered ? 1 : 0,
+          transform: `translate(-50%, ${isHovered ? '0px' : '6px'}) scale(${isHovered ? 1 : 0.96})`,
+          transition: `opacity 220ms ${EASE}, transform 280ms ${EASE}`,
+          transformOrigin: 'center bottom',
+          willChange: 'transform, opacity',
+        }}
       >
         <div className="text-[11px] font-semibold text-background tracking-tight">{country.name}</div>
         <div className="text-[10px] text-background/70 tabular-nums">{country.students} students</div>
