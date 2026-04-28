@@ -76,47 +76,15 @@ const OwnerReportView = memo(() => {
     window.print();
   }, []);
 
-  const handleDownloadHtml = useCallback(() => {
+  const handleDownloadHtml = useCallback(async () => {
     if (!report) return;
-    const node = document.getElementById("report-document");
-    if (!node) return;
-    const safeName = report.student_name.replace(/[^a-z0-9가-힣]+/gi, "_");
-    const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>IBCircle Report — ${report.student_name} — ${report.class_date}</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  @page { size: Letter; margin: 0; }
-  body { margin: 0; background: #eef0f5; font-family: 'Times New Roman', 'Noto Serif KR', Georgia, serif; }
-  .report-document { background: #fff; margin: 24px auto; }
-  @media print {
-    body { background: #fff; }
-    .report-document { box-shadow: none !important; margin: 0 auto; }
-    .no-print { display: none !important; }
-  }
-</style>
-</head>
-<body>
-<div class="no-print" style="text-align:center; padding:16px;">
-  <button onclick="window.print()" style="padding:8px 16px; font-family:system-ui; cursor:pointer; border:1px solid #0f1f3d; background:#0f1f3d; color:#fff; border-radius:4px;">
-    Print / Save as PDF
-  </button>
-</div>
-${node.outerHTML}
-</body>
-</html>`;
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `IBCircle_Report_${safeName}_${report.class_date}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success("Report downloaded. Open it and use Print → Save as PDF for highest quality.");
+    try {
+      await downloadReportHtml(report);
+      toast.success("Report downloaded. Open it and use Print → Save as PDF for highest quality.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Download failed");
+    }
   }, [report]);
 
   const handleDelete = useCallback(async () => {
