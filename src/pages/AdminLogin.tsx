@@ -15,12 +15,11 @@ const AdminLogin = () => {
   // Prefetch next-step admin route chunks in the background while the user
   // types their passcode, so navigation after submit is instant.
   useEffect(() => {
-    const idle = (cb: () => void) =>
-      typeof window !== "undefined" && "requestIdleCallback" in window
-        ? (window as Window & { requestIdleCallback: (cb: () => void) => number })
-            .requestIdleCallback(cb)
-        : window.setTimeout(cb, 200);
-    idle(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+    };
+    const schedule = w.requestIdleCallback ?? ((cb: () => void) => w.setTimeout(cb, 200));
+    schedule(() => {
       void import("./AdminHub");
       void import("./TeacherReportForm");
     });
