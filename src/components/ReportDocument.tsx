@@ -88,6 +88,7 @@ const ReportDocument = memo(({ report }: Props) => {
   const [checksum, setChecksum] = useState<string>("");
   const exportedAt = new Date().toLocaleString();
   const submittedAt = new Date(r.created_at).toLocaleString();
+  const progress = computeProgress(r.class_length_minutes, r.classes_completed);
 
   useEffect(() => {
     let cancelled = false;
@@ -177,6 +178,79 @@ const ReportDocument = memo(({ report }: Props) => {
           />
         )}
       </section>
+
+      {progress && (
+        <section
+          className="mb-8 p-5"
+          style={{ background: "#fff", border: "1px solid #e5e9f2", borderRadius: 6 }}
+        >
+          <div className="flex items-baseline justify-between gap-3 mb-3">
+            <h2
+              className="text-base font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "#0f1f3d" }}
+            >
+              Program Progress
+            </h2>
+            <span className="text-xs text-slate-500">진도 현황 · 12h 목표</span>
+          </div>
+
+          <div className="flex items-end justify-between gap-4 mb-2">
+            <div className="text-sm text-slate-700">
+              <strong className="text-slate-900">{formatMinutes(progress.completedMinutes)}</strong>{" "}
+              completed of <strong className="text-slate-900">{formatMinutes(progress.plannedMinutes)}</strong>
+            </div>
+            <div className="text-sm font-medium" style={{ color: "#0f1f3d" }}>
+              {progress.percent}%
+            </div>
+          </div>
+
+          <div
+            className="w-full overflow-hidden"
+            style={{ height: 10, background: "#e5e9f2", borderRadius: 999 }}
+            role="progressbar"
+            aria-valuenow={progress.percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div
+              style={{
+                width: `${progress.percent}%`,
+                height: "100%",
+                background: "#0f1f3d",
+                borderRadius: 999,
+                transition: "width 400ms ease",
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Classes completed
+              </div>
+              <div className="font-medium text-slate-900">
+                {progress.classesCompleted} / {progress.plannedClasses}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Classes remaining
+              </div>
+              <div className="font-medium text-slate-900">
+                {progress.classesRemaining}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+                Time remaining
+              </div>
+              <div className="font-medium text-slate-900">
+                {formatMinutes(progress.remainingMinutes)}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Section title="Topics Covered" subtitle="학습 내용">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
