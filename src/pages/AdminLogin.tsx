@@ -37,7 +37,7 @@ const AdminLogin = memo(() => {
         });
         sessionStorage.setItem("adminToken", tokenData);
         toast.success("Access granted");
-        navigate("/admin/reports");
+        navigate("/admin/hub");
       } else {
         toast.error("Invalid passcode");
       }
