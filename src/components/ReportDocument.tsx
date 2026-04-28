@@ -32,6 +32,16 @@ function formatDateLong(d: string) {
   });
 }
 
+export function formatTotalClassTime(lengthMinutes: number, classes: number): string {
+  const total = Math.max(0, Math.round(lengthMinutes * classes));
+  if (total === 0) return "0 minutes";
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  if (hours === 0) return `${minutes} minutes`;
+  if (minutes === 0) return `${hours} h (${total} min)`;
+  return `${hours} h ${minutes} min (${total} min)`;
+}
+
 const ReportDocument = memo(({ report }: Props) => {
   const r = report;
   const [checksum, setChecksum] = useState<string>("");
@@ -114,10 +124,17 @@ const ReportDocument = memo(({ report }: Props) => {
           }
         />
         <Meta label="Subject" value={r.subject} />
-        <Meta
-          label="Submitted"
-          value={new Date(r.created_at).toLocaleString()}
-        />
+        {r.classes_completed !== null && r.classes_completed !== undefined && r.classes_completed > 0 ? (
+          <Meta
+            label="Total class time"
+            value={formatTotalClassTime(r.class_length_minutes, r.classes_completed)}
+          />
+        ) : (
+          <Meta
+            label="Submitted"
+            value={new Date(r.created_at).toLocaleString()}
+          />
+        )}
       </section>
 
       <Section title="Topics Covered" subtitle="학습 내용">

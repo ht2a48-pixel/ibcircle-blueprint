@@ -1,4 +1,5 @@
 import type { ReportDocumentData } from "@/components/ReportDocument";
+import { formatTotalClassTime } from "@/components/ReportDocument";
 
 /** Stable canonical string used for hashing — order matters and must not change. */
 export function canonicalReportPayload(r: ReportDocumentData): string {
@@ -170,7 +171,11 @@ export function buildReportHtml(
       r.classes_completed !== null && r.classes_completed !== undefined ? `#${r.classes_completed}` : "—"
     }</div></div>
     <div><div class="meta-label">Subject</div><div class="meta-value">${escapeHtml(r.subject)}</div></div>
-    <div><div class="meta-label">Submitted</div><div class="meta-value">${escapeHtml(submittedAt)}</div></div>
+    ${
+      r.classes_completed !== null && r.classes_completed !== undefined && r.classes_completed > 0
+        ? `<div><div class="meta-label">Total class time</div><div class="meta-value">${escapeHtml(formatTotalClassTime(r.class_length_minutes, r.classes_completed))}</div></div>`
+        : `<div><div class="meta-label">Submitted</div><div class="meta-value">${escapeHtml(submittedAt)}</div></div>`
+    }
   </section>
 
   <section class="section">
