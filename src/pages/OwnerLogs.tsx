@@ -1,9 +1,38 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, LogOut, RefreshCw, Inbox } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  ArrowLeft,
+  LogOut,
+  RefreshCw,
+  Inbox,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Trash2,
+  CalendarDays,
+  List as ListIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,7 +42,7 @@ interface TeacherReport {
   student_name: string;
   subject: string;
   topics_covered: string;
-  class_date: string;
+  class_date: string; // YYYY-MM-DD
   class_time: string;
   class_length_minutes: number;
   classes_completed: number | null;
@@ -21,11 +50,31 @@ interface TeacherReport {
   created_at: string;
 }
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function ymd(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 const OwnerLogs = memo(() => {
   const navigate = useNavigate();
   const [reports, setReports] = useState<TeacherReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [cursor, setCursor] = useState<Date>(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [openReport, setOpenReport] = useState<TeacherReport | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<TeacherReport | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("ownerToken");
@@ -76,9 +125,100 @@ const OwnerLogs = memo(() => {
     navigate("/admin/owner");
   };
 
+  // Reports grouped by class_date
+  const byDate = useMemo(() => {
+    const map = new Map<string, TeacherReport[]>();
+    for (const r of reports) {
+      const key = r.class_date;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(r);
+    }
+    return map;
+  }, [reports]);
+
+  // Calendar grid construction
+  const calendarCells = useMemo(() => {
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const startWeekday = firstOfMonth.getDay(); // 0 = Sun
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells: Array<{ date: Date | null; key: string }> = [];
+    for (let i = 0; i < startWeekday; i++) cells.push({ date: null, key: `b-${i}` });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      cells.push({ date, key: ymd(date) });
+    }
+    while (cells.length % 7 !== 0) cells.push({ date: null, key: `a-${cells.length}` });
+    return cells;
+  }, [cursor]);
+
+  const goPrevMonth = () => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1));
+  const goNextMonth = () => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1));
+  const goToday = () => {
+    const d = new Date();
+    setCursor(new Date(d.getFullYear(), d.getMonth(), 1));
+    setSelectedDate(ymd(d));
+  };
+
+  const reportsForSelectedDate = selectedDate ? byDate.get(selectedDate) ?? [] : [];
+
+  const downloadReport = (r: TeacherReport) => {
+    const lines = [
+      `IBCircle — Teacher Report`,
+      `Generated: ${new Date().toLocaleString()}`,
+      `------------------------------------------------------------`,
+      `Student: ${r.student_name}`,
+      `Subject: ${r.subject}`,
+      `Teacher: ${r.teacher_name ?? "—"}`,
+      `Class date: ${r.class_date}`,
+      `Class time: ${r.class_time}`,
+      `Class length: ${r.class_length_minutes} minutes`,
+      `Class number: ${r.classes_completed ?? "—"}`,
+      `Submitted: ${new Date(r.created_at).toLocaleString()}`,
+      ``,
+      `Topics covered:`,
+      r.topics_covered,
+      ``,
+      `Report:`,
+      r.report_text,
+      ``,
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const safeName = r.student_name.replace(/[^a-z0-9가-힣]+/gi, "_");
+    a.download = `report_${safeName}_${r.class_date}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const deleteReport = async (r: TeacherReport) => {
+    if (!token) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-admin-passcode", {
+        body: { action: "delete-teacher-report", token, reportId: r.id },
+      });
+      if (error || !data?.success) {
+        toast.error("Failed to delete");
+        return;
+      }
+      toast.success("Report deleted");
+      setReports((prev) => prev.filter((x) => x.id !== r.id));
+      setConfirmDelete(null);
+      if (openReport?.id === r.id) setOpenReport(null);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to delete");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
@@ -86,7 +226,21 @@ const OwnerLogs = memo(() => {
             </Button>
             <h1 className="text-2xl md:text-3xl font-bold">Teacher Reports Log</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={view === "calendar" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("calendar")}
+            >
+              <CalendarDays className="w-4 h-4 mr-2" /> Calendar
+            </Button>
+            <Button
+              variant={view === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("list")}
+            >
+              <ListIcon className="w-4 h-4 mr-2" /> List
+            </Button>
             <Button variant="outline" size="sm" onClick={() => token && load(token)} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
             </Button>
@@ -97,11 +251,131 @@ const OwnerLogs = memo(() => {
         </div>
 
         <p className="text-muted-foreground text-sm mb-6">
-          {reports.length} report{reports.length === 1 ? "" : "s"} total. Showing the most recent 500.
+          {reports.length} report{reports.length === 1 ? "" : "s"} total.
         </p>
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
+        ) : view === "calendar" ? (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={goPrevMonth} aria-label="Previous month">
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <CardTitle className="text-xl min-w-[200px] text-center">
+                    {MONTH_NAMES[cursor.getMonth()]} {cursor.getFullYear()}
+                  </CardTitle>
+                  <Button variant="outline" size="icon" onClick={goNextMonth} aria-label="Next month">
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                <Button variant="ghost" size="sm" onClick={goToday}>Today</Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-1 mb-2 text-xs font-semibold uppercase text-muted-foreground text-center">
+                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                  <div key={d} className="py-1">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {calendarCells.map((cell) => {
+                  if (!cell.date) {
+                    return <div key={cell.key} className="aspect-square rounded-md bg-muted/30" />;
+                  }
+                  const key = ymd(cell.date);
+                  const dayReports = byDate.get(key) ?? [];
+                  const isToday = key === ymd(new Date());
+                  const isSelected = key === selectedDate;
+                  const hasReports = dayReports.length > 0;
+                  return (
+                    <button
+                      key={cell.key}
+                      onClick={() => setSelectedDate(key)}
+                      className={`aspect-square rounded-md border p-1 md:p-2 text-left transition-colors flex flex-col overflow-hidden ${
+                        isSelected
+                          ? "border-primary bg-primary/10"
+                          : hasReports
+                          ? "border-primary/40 bg-primary/5 hover:bg-primary/10"
+                          : "border-border hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className={`text-xs md:text-sm font-medium ${isToday ? "text-primary" : ""}`}>
+                        {cell.date.getDate()}
+                      </div>
+                      <div className="flex-1 mt-1 space-y-0.5 overflow-hidden">
+                        {dayReports.slice(0, 2).map((r) => (
+                          <div
+                            key={r.id}
+                            className="text-[10px] md:text-xs truncate bg-primary text-primary-foreground rounded px-1"
+                            title={`${r.student_name} · ${r.subject}`}
+                          >
+                            {r.student_name}
+                          </div>
+                        ))}
+                        {dayReports.length > 2 && (
+                          <div className="text-[10px] text-muted-foreground">
+                            +{dayReports.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedDate && (
+                <div className="mt-6 border-t pt-4">
+                  <h3 className="text-sm font-semibold mb-3">
+                    Reports on {selectedDate}
+                  </h3>
+                  {reportsForSelectedDate.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No reports for this date.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {reportsForSelectedDate.map((r) => (
+                        <div
+                          key={r.id}
+                          className="flex items-center justify-between gap-2 p-3 rounded-md border hover:bg-muted/40 cursor-pointer"
+                          onClick={() => setOpenReport(r)}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {r.student_name} <span className="text-muted-foreground font-normal">· {r.subject}</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                              {r.teacher_name ? ` · ${r.teacher_name}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => { e.stopPropagation(); downloadReport(r); }}
+                              aria-label="Download"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => { e.stopPropagation(); setConfirmDelete(r); }}
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         ) : reports.length === 0 ? (
           <Card>
             <CardContent className="py-12 flex flex-col items-center text-center">
@@ -125,9 +399,17 @@ const OwnerLogs = memo(() => {
                         {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
                       </CardDescription>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      Submitted {new Date(r.created_at).toLocaleString()}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        Submitted {new Date(r.created_at).toLocaleString()}
+                      </Badge>
+                      <Button variant="ghost" size="icon" onClick={() => downloadReport(r)} aria-label="Download">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setConfirmDelete(r)} aria-label="Delete">
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -145,6 +427,74 @@ const OwnerLogs = memo(() => {
           </div>
         )}
       </div>
+
+      {/* Report detail dialog (from calendar) */}
+      <Dialog open={!!openReport} onOpenChange={(o) => !o && setOpenReport(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {openReport && (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  {openReport.student_name} · <span className="text-muted-foreground font-normal">{openReport.subject}</span>
+                </DialogTitle>
+                <DialogDescription>
+                  {openReport.class_date} at {openReport.class_time.slice(0, 5)} · {openReport.class_length_minutes} min
+                  {openReport.classes_completed !== null && openReport.classes_completed !== undefined ? ` · Class #${openReport.classes_completed}` : ""}
+                  {openReport.teacher_name ? ` · Teacher: ${openReport.teacher_name}` : ""}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Topics covered</p>
+                  <p className="text-sm whitespace-pre-wrap">{openReport.topics_covered}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Report</p>
+                  <p className="text-sm whitespace-pre-wrap">{openReport.report_text}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Submitted {new Date(openReport.created_at).toLocaleString()}
+                </p>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => downloadReport(openReport)}>
+                  <Download className="w-4 h-4 mr-2" /> Download
+                </Button>
+                <Button variant="destructive" onClick={() => setConfirmDelete(openReport)}>
+                  <Trash2 className="w-4 h-4 mr-2" /> Delete
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete && (
+                <>
+                  This will permanently delete the report for{" "}
+                  <strong>{confirmDelete.student_name}</strong> on {confirmDelete.class_date}.
+                  This action cannot be undone.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmDelete && deleteReport(confirmDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 });

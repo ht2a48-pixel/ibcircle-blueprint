@@ -235,6 +235,31 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "delete-teacher-report") {
+      const auth = await verifyToken(token ?? "", ADMIN_TOKEN_SECRET, "owner");
+      if (!auth.valid) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { reportId } = body;
+      if (!reportId || typeof reportId !== "string" || reportId.length > 100) {
+        return new Response(JSON.stringify({ error: "Invalid report id" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { error: delError } = await supabase.from("teacher_reports").delete().eq("id", reportId);
+      if (delError) {
+        console.error("Delete error:", delError);
+        return new Response(JSON.stringify({ error: "Failed to delete" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ success: true }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
