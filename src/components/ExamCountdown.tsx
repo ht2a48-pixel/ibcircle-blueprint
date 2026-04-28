@@ -42,27 +42,33 @@ const RollingNumber = memo(({ value, className }: { value: string; className?: s
 });
 RollingNumber.displayName = 'RollingNumber';
 
+const EXAM_START_MONTH = 3; // April (0-indexed)
+const EXAM_START_DAY = 24;
+const EXAM_END_MONTH = 4; // May
+const EXAM_END_DAY = 20;
+
 const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; targetYear?: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Get exam date for specific year or next upcoming exam
   const getExamDate = () => {
     if (targetYear) {
-      return new Date(`${targetYear}-04-24T09:00:00`);
+      return new Date(targetYear, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
     }
     const now = new Date();
     const currentYear = now.getFullYear();
-    const examThisYear = new Date(`${currentYear}-04-24T09:00:00`);
-    
+    const examThisYear = new Date(currentYear, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
+
     // If this year's exam has passed, target next year
     if (now > examThisYear) {
-      return new Date(`${currentYear + 1}-04-24T09:00:00`);
+      return new Date(currentYear + 1, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
     }
     return examThisYear;
   };
-  
+
   const examDate = getExamDate();
   const examYear = examDate.getFullYear();
+  const examEndDate = new Date(examYear, EXAM_END_MONTH, EXAM_END_DAY, 23, 59, 59);
 
   const calculateTimeLeft = (targetDate: Date): TimeLeft => {
     const now = new Date();
