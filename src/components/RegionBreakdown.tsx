@@ -69,8 +69,8 @@ const RegionCard = memo(({ data, expanded, onToggle }: {
 
   return (
     <div
-      className={`border bg-background overflow-hidden transition-colors duration-200 ${
-        expanded ? 'border-primary/70' : 'border-border hover:border-primary/40'
+      className={`bg-background overflow-hidden transition-colors duration-200 ${
+        expanded ? 'ring-1 ring-primary/70 relative z-10' : ''
       }`}
     >
       <button
