@@ -1,7 +1,5 @@
 import { memo } from 'react';
 import { Helmet } from 'react-helmet-async';
-// Load Korean fonts only when the public (Korean-content) homepage renders
-import '@/styles/korean-fonts';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Programs from '@/components/Programs';
