@@ -24,9 +24,14 @@ import {
   Trash2,
   CalendarDays,
   List as ListIcon,
+  CheckSquare,
+  Square,
+  X,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadReportsHtmlBulk } from "@/lib/reportExport";
 
 interface TeacherReport {
   id: string;
@@ -66,6 +71,51 @@ const OwnerLogs = memo(() => {
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<TeacherReport | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  };
+  const selectAllVisible = (ids: string[]) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((i) => next.add(i));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkDownload = async () => {
+    const chosen = reports.filter((r) => selectedIds.has(r.id));
+    if (chosen.length === 0) {
+      toast.error("Select at least one report");
+      return;
+    }
+    setBulkProgress({ done: 0, total: chosen.length });
+    try {
+      await downloadReportsHtmlBulk(chosen, (done, total) =>
+        setBulkProgress({ done, total })
+      );
+      toast.success(
+        `Exported ${chosen.length} report${chosen.length === 1 ? "" : "s"}. Open each file and use Print → Save as PDF for highest quality.`
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error("Bulk export failed");
+    }
+    setBulkProgress(null);
+  };
 
   useEffect(() => {
     const raw = sessionStorage.getItem("ownerToken");
