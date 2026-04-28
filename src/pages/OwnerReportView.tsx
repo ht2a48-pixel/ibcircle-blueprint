@@ -15,6 +15,7 @@ import { ArrowLeft, Download, Printer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReportDocument, { ReportDocumentData } from "@/components/ReportDocument";
+import { downloadReportHtml } from "@/lib/reportExport";
 
 const OwnerReportView = memo(() => {
   const navigate = useNavigate();
