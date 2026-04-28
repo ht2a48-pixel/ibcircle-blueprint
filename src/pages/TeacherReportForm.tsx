@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -33,11 +33,16 @@ const initial: FormState = {
   report_text: "",
 };
 
+const DRAFT_KEY = "teacherReportDraft:v1";
+
 const TeacherReportForm = memo(() => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [submitting, setSubmitting] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("adminToken");
@@ -58,6 +63,56 @@ const TeacherReportForm = memo(() => {
       navigate("/admin");
     }
   }, [navigate]);
+
+  // Load saved draft once on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && parsed.form) {
+          setForm({ ...initial, ...parsed.form });
+          setDraftSavedAt(parsed.savedAt ?? null);
+          setDraftStatus("saved");
+        }
+      }
+    } catch {
+      // ignore corrupt draft
+    }
+    setHydrated(true);
+  }, []);
+
+  // Autosave (debounced) whenever the form changes
+  useEffect(() => {
+    if (!hydrated) return;
+    const isEmpty =
+      !form.teacher_name && !form.student_name && !form.subject &&
+      !form.class_date && !form.class_time && !form.classes_completed &&
+      !form.topics_covered && !form.report_text &&
+      form.class_length_minutes === initial.class_length_minutes;
+    if (isEmpty) return;
+
+    setDraftStatus("saving");
+    const t = setTimeout(() => {
+      try {
+        const savedAt = Date.now();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, savedAt }));
+        setDraftSavedAt(savedAt);
+        setDraftStatus("saved");
+      } catch {
+        setDraftStatus("idle");
+      }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [form, hydrated]);
+
+  const discardDraft = useCallback(() => {
+    localStorage.removeItem(DRAFT_KEY);
+    setForm(initial);
+    setDraftSavedAt(null);
+    setDraftStatus("idle");
+    toast.success("Draft discarded");
+  }, []);
 
   const update = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -104,7 +159,10 @@ const TeacherReportForm = memo(() => {
       }
 
       toast.success("Report submitted successfully");
+      localStorage.removeItem(DRAFT_KEY);
       setForm(initial);
+      setDraftSavedAt(null);
+      setDraftStatus("idle");
     } catch (err) {
       console.error(err);
       toast.error("Submission error");
@@ -125,6 +183,23 @@ const TeacherReportForm = memo(() => {
             <CardDescription>
               All fields marked with * are required. Your submission will be saved and visible to the owner only.
             </CardDescription>
+            <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Save className="w-3.5 h-3.5" />
+                {draftStatus === "saving" && <span>Saving draft…</span>}
+                {draftStatus === "saved" && draftSavedAt && (
+                  <span>
+                    Draft saved · {new Date(draftSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
+                {draftStatus === "idle" && <span>Drafts auto-save to this browser</span>}
+              </div>
+              {draftSavedAt && (
+                <Button type="button" variant="ghost" size="sm" onClick={discardDraft} className="h-7 text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-3.5 h-3.5 mr-1" /> Discard draft
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
