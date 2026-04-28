@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
+import { reportChecksum } from "@/lib/reportExport";
 
 export interface ReportDocumentData {
   id: string;
@@ -33,6 +34,20 @@ function formatDateLong(d: string) {
 
 const ReportDocument = memo(({ report }: Props) => {
   const r = report;
+  const [checksum, setChecksum] = useState<string>("");
+  const exportedAt = new Date().toLocaleString();
+  const submittedAt = new Date(r.created_at).toLocaleString();
+
+  useEffect(() => {
+    let cancelled = false;
+    reportChecksum(r).then((h) => {
+      if (!cancelled) setChecksum(h);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [r]);
+
   return (
     <article
       id="report-document"
@@ -118,15 +133,32 @@ const ReportDocument = memo(({ report }: Props) => {
       </Section>
 
       <footer
-        className="mt-12 pt-5 text-xs text-slate-500 flex items-center justify-between"
+        className="mt-12 pt-5 text-xs text-slate-500 space-y-1"
         style={{ borderTop: "1px solid #e5e9f2" }}
       >
-        <span>IBCircle · Confidential class report</span>
-        <span>Report ID: {r.id.slice(0, 8)}</span>
+        <FooterRow label="Instructor" value={r.teacher_name ?? "—"} />
+        <FooterRow label="Submitted" value={submittedAt} />
+        <FooterRow label="Exported" value={exportedAt} />
+        <FooterRow label="Report ID" value={r.id} mono />
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.12em] text-slate-400 mt-2 mb-1">
+            SHA-256 Checksum
+          </div>
+          <div className="font-mono text-[10px] text-slate-600 break-all">
+            {checksum || "computing…"}
+          </div>
+        </div>
       </footer>
     </article>
   );
 });
+
+const FooterRow = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => (
+  <div className="flex justify-between gap-4">
+    <span className="text-[10px] uppercase tracking-[0.12em] text-slate-400">{label}</span>
+    <span className={mono ? "font-mono text-[11px] text-slate-700" : "text-[11px] text-slate-700"}>{value}</span>
+  </div>
+);
 
 const Meta = ({ label, value }: { label: string; value: string }) => (
   <div>

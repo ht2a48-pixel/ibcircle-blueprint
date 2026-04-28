@@ -24,9 +24,14 @@ import {
   Trash2,
   CalendarDays,
   List as ListIcon,
+  CheckSquare,
+  Square,
+  X,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadReportsHtmlBulk } from "@/lib/reportExport";
 
 interface TeacherReport {
   id: string;
@@ -66,6 +71,51 @@ const OwnerLogs = memo(() => {
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<TeacherReport | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  };
+  const selectAllVisible = (ids: string[]) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((i) => next.add(i));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkDownload = async () => {
+    const chosen = reports.filter((r) => selectedIds.has(r.id));
+    if (chosen.length === 0) {
+      toast.error("Select at least one report");
+      return;
+    }
+    setBulkProgress({ done: 0, total: chosen.length });
+    try {
+      await downloadReportsHtmlBulk(chosen, (done, total) =>
+        setBulkProgress({ done, total })
+      );
+      toast.success(
+        `Exported ${chosen.length} report${chosen.length === 1 ? "" : "s"}. Open each file and use Print → Save as PDF for highest quality.`
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error("Bulk export failed");
+    }
+    setBulkProgress(null);
+  };
 
   useEffect(() => {
     const raw = sessionStorage.getItem("ownerToken");
@@ -206,6 +256,14 @@ const OwnerLogs = memo(() => {
             <Button variant="outline" size="sm" onClick={() => token && load(token)} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
             </Button>
+            <Button
+              variant={selectMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+            >
+              {selectMode ? <X className="w-4 h-4 mr-2" /> : <CheckSquare className="w-4 h-4 mr-2" />}
+              {selectMode ? "Exit select" : "Select"}
+            </Button>
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
@@ -215,6 +273,45 @@ const OwnerLogs = memo(() => {
         <p className="text-muted-foreground text-sm mb-6">
           {reports.length} report{reports.length === 1 ? "" : "s"} total.
         </p>
+
+        {selectMode && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 p-3 rounded-md border bg-muted/40">
+            <div className="text-sm">
+              <strong>{selectedIds.size}</strong> selected
+              {bulkProgress && (
+                <span className="text-muted-foreground ml-2">
+                  · exporting {bulkProgress.done}/{bulkProgress.total}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => selectAllVisible(reports.map((r) => r.id))}
+                disabled={!!bulkProgress}
+              >
+                <Square className="w-4 h-4 mr-2" /> Select all
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSelection}
+                disabled={!!bulkProgress || selectedIds.size === 0}
+              >
+                Clear
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleBulkDownload}
+                disabled={!!bulkProgress || selectedIds.size === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {bulkProgress ? "Exporting…" : `Download ${selectedIds.size || ""}`.trim()}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
@@ -301,16 +398,26 @@ const OwnerLogs = memo(() => {
                         <div
                           key={r.id}
                           className="flex items-center justify-between gap-2 p-3 rounded-md border hover:bg-muted/40 cursor-pointer"
-                          onClick={() => openReportPage(r)}
+                          onClick={() => (selectMode ? toggleSelect(r.id) : openReportPage(r))}
                         >
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {r.student_name} <span className="text-muted-foreground font-normal">· {r.subject}</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
-                              {r.teacher_name ? ` · ${r.teacher_name}` : ""}
-                            </p>
+                          <div className="flex items-center gap-3 min-w-0">
+                            {selectMode && (
+                              <Checkbox
+                                checked={selectedIds.has(r.id)}
+                                onCheckedChange={() => toggleSelect(r.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label="Select report"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {r.student_name} <span className="text-muted-foreground font-normal">· {r.subject}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                                {r.teacher_name ? ` · ${r.teacher_name}` : ""}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <Button
@@ -348,18 +455,35 @@ const OwnerLogs = memo(() => {
         ) : (
           <div className="space-y-4">
             {reports.map((r) => (
-              <Card key={r.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => openReportPage(r)}>
+              <Card
+                key={r.id}
+                className={`cursor-pointer hover:bg-muted/30 transition-colors ${
+                  selectMode && selectedIds.has(r.id) ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => (selectMode ? toggleSelect(r.id) : openReportPage(r))}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {r.student_name} · <span className="text-muted-foreground font-normal">{r.subject}</span>
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {r.class_date} at {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
-                        {r.classes_completed !== null && r.classes_completed !== undefined ? ` · Class #${r.classes_completed}` : ""}
-                        {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
-                      </CardDescription>
+                    <div className="flex items-start gap-3">
+                      {selectMode && (
+                        <Checkbox
+                          className="mt-1"
+                          checked={selectedIds.has(r.id)}
+                          onCheckedChange={() => toggleSelect(r.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="Select report"
+                        />
+                      )}
+                      <div>
+                        <CardTitle className="text-lg">
+                          {r.student_name} · <span className="text-muted-foreground font-normal">{r.subject}</span>
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {r.class_date} at {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                          {r.classes_completed !== null && r.classes_completed !== undefined ? ` · Class #${r.classes_completed}` : ""}
+                          {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
+                        </CardDescription>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Badge variant="secondary" className="text-xs">
