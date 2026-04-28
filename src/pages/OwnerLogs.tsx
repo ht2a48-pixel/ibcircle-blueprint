@@ -398,16 +398,26 @@ const OwnerLogs = memo(() => {
                         <div
                           key={r.id}
                           className="flex items-center justify-between gap-2 p-3 rounded-md border hover:bg-muted/40 cursor-pointer"
-                          onClick={() => openReportPage(r)}
+                          onClick={() => (selectMode ? toggleSelect(r.id) : openReportPage(r))}
                         >
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {r.student_name} <span className="text-muted-foreground font-normal">· {r.subject}</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
-                              {r.teacher_name ? ` · ${r.teacher_name}` : ""}
-                            </p>
+                          <div className="flex items-center gap-3 min-w-0">
+                            {selectMode && (
+                              <Checkbox
+                                checked={selectedIds.has(r.id)}
+                                onCheckedChange={() => toggleSelect(r.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label="Select report"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {r.student_name} <span className="text-muted-foreground font-normal">· {r.subject}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                                {r.teacher_name ? ` · ${r.teacher_name}` : ""}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <Button
