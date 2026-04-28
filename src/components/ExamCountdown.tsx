@@ -42,27 +42,33 @@ const RollingNumber = memo(({ value, className }: { value: string; className?: s
 });
 RollingNumber.displayName = 'RollingNumber';
 
+const EXAM_START_MONTH = 3; // April (0-indexed)
+const EXAM_START_DAY = 24;
+const EXAM_END_MONTH = 4; // May
+const EXAM_END_DAY = 20;
+
 const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; targetYear?: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Get exam date for specific year or next upcoming exam
   const getExamDate = () => {
     if (targetYear) {
-      return new Date(`${targetYear}-04-24T09:00:00`);
+      return new Date(targetYear, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
     }
     const now = new Date();
     const currentYear = now.getFullYear();
-    const examThisYear = new Date(`${currentYear}-04-24T09:00:00`);
-    
+    const examThisYear = new Date(currentYear, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
+
     // If this year's exam has passed, target next year
     if (now > examThisYear) {
-      return new Date(`${currentYear + 1}-04-24T09:00:00`);
+      return new Date(currentYear + 1, EXAM_START_MONTH, EXAM_START_DAY, 9, 0, 0);
     }
     return examThisYear;
   };
-  
+
   const examDate = getExamDate();
   const examYear = examDate.getFullYear();
+  const examEndDate = new Date(examYear, EXAM_END_MONTH, EXAM_END_DAY, 23, 59, 59);
 
   const calculateTimeLeft = (targetDate: Date): TimeLeft => {
     const now = new Date();
@@ -103,6 +109,38 @@ const ExamCountdown = ({ compact = false, targetYear }: { compact?: boolean; tar
 
   const formatTime = (num: number) => String(num).padStart(2, '0');
   const formatLargeNumber = (num: number) => num.toLocaleString();
+
+  // Exam-in-progress phase: between April 24 and May 20 of the target year.
+  const now = new Date();
+  const examInProgress = now >= examDate && now <= examEndDate;
+  const examMonthDay = examDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+  // Good-luck banner (compact) — shown while exams are running
+  if (compact && examInProgress) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 1 }}
+        className="mt-8 bg-primary text-primary-foreground overflow-hidden"
+      >
+        <div className="p-5 md:p-6 text-center sm:text-left flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">
+              {examYear} IB Examination · In Progress
+            </p>
+            <div className="text-xl md:text-2xl font-medium tracking-tight">
+              Good luck with the {examMonthDay} {examYear} IB exams.
+            </div>
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.2em] opacity-60 sm:text-right">
+            Exam window<br />Apr 24 – May 20
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   // Compact version for embedding in other sections
   if (compact) {
