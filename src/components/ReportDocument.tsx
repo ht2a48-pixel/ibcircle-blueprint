@@ -269,14 +269,6 @@ const ReportDocument = memo(({ report }: Props) => {
         style={{ borderTop: "1px solid #e5e9f2" }}
       >
         <FooterRow label="Report ID" value={r.id} mono />
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.12em] text-slate-400 mt-2 mb-1">
-            SHA-256 Checksum
-          </div>
-          <div className="font-mono text-[10px] text-slate-600 break-all">
-            {checksum || "computing…"}
-          </div>
-        </div>
       </footer>
     </article>
   );
