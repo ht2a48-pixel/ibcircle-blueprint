@@ -136,9 +136,6 @@ const ReportDocument = memo(({ report }: Props) => {
         className="mt-12 pt-5 text-xs text-slate-500 space-y-1"
         style={{ borderTop: "1px solid #e5e9f2" }}
       >
-        <FooterRow label="Instructor" value={r.teacher_name ?? "—"} />
-        <FooterRow label="Submitted" value={submittedAt} />
-        <FooterRow label="Exported" value={exportedAt} />
         <FooterRow label="Report ID" value={r.id} mono />
         <div>
           <div className="text-[10px] uppercase tracking-[0.12em] text-slate-400 mt-2 mb-1">
