@@ -168,9 +168,23 @@ const Programs = () => {
               단순한 강의가 아닌, 전략적으로 설계된 학업 파트너십입니다.
             </motion.p>
 
-            {/* Compact Exam Countdowns */}
-            <ExamCountdown compact targetYear={2026} />
-            <ExamCountdown compact targetYear={2027} />
+            {/* Compact Exam Countdowns — auto-rolls forward.
+                Shows the next two upcoming exam years (April 24 = exam start, May 20 = exam end).
+                After May 20 of a given year, that year drops off and the next year appears. */}
+            {(() => {
+              const now = new Date();
+              const year = now.getFullYear();
+              // Exams end May 20. After that, current year's countdown is retired.
+              const examsFinishedThisYear =
+                now > new Date(`${year}-05-20T23:59:59`);
+              const firstYear = examsFinishedThisYear ? year + 1 : year;
+              return (
+                <>
+                  <ExamCountdown compact targetYear={firstYear} />
+                  <ExamCountdown compact targetYear={firstYear + 1} />
+                </>
+              );
+            })()}
           </motion.div>
 
           {/* Right content - IB Programme info */}
