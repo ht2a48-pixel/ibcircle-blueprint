@@ -455,18 +455,35 @@ const OwnerLogs = memo(() => {
         ) : (
           <div className="space-y-4">
             {reports.map((r) => (
-              <Card key={r.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => openReportPage(r)}>
+              <Card
+                key={r.id}
+                className={`cursor-pointer hover:bg-muted/30 transition-colors ${
+                  selectMode && selectedIds.has(r.id) ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => (selectMode ? toggleSelect(r.id) : openReportPage(r))}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {r.student_name} · <span className="text-muted-foreground font-normal">{r.subject}</span>
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {r.class_date} at {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
-                        {r.classes_completed !== null && r.classes_completed !== undefined ? ` · Class #${r.classes_completed}` : ""}
-                        {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
-                      </CardDescription>
+                    <div className="flex items-start gap-3">
+                      {selectMode && (
+                        <Checkbox
+                          className="mt-1"
+                          checked={selectedIds.has(r.id)}
+                          onCheckedChange={() => toggleSelect(r.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="Select report"
+                        />
+                      )}
+                      <div>
+                        <CardTitle className="text-lg">
+                          {r.student_name} · <span className="text-muted-foreground font-normal">{r.subject}</span>
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {r.class_date} at {r.class_time.slice(0, 5)} · {r.class_length_minutes} min
+                          {r.classes_completed !== null && r.classes_completed !== undefined ? ` · Class #${r.classes_completed}` : ""}
+                          {r.teacher_name ? ` · Teacher: ${r.teacher_name}` : ""}
+                        </CardDescription>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Badge variant="secondary" className="text-xs">
