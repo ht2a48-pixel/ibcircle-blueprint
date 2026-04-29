@@ -12,7 +12,7 @@ interface Metric {
 const metrics: Metric[] = [
   { value: 223, label: '졸업생', suffix: '+' },
   { value: 38.2, label: '평균 IB 점수', decimals: 1 },
-  { value: 11, label: '국가 진학', suffix: '' },
+  { value: 20, label: '국가 진학', suffix: '' },
 ];
 
 const AnimatedNumber = ({ 
