@@ -16,6 +16,8 @@ const AdminSavedReports = lazy(() => import("./pages/AdminSavedReports"));
 const OwnerLogin = lazy(() => import("./pages/OwnerLogin"));
 const OwnerLogs = lazy(() => import("./pages/OwnerLogs"));
 const OwnerReportView = lazy(() => import("./pages/OwnerReportView"));
+const OwnerReportEdit = lazy(() => import("./pages/OwnerReportEdit"));
+const OwnerDrafts = lazy(() => import("./pages/OwnerDrafts"));
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
               <Route path="/admin/owner" element={<OwnerLogin />} />
               <Route path="/admin/logs" element={<OwnerLogs />} />
               <Route path="/admin/logs/:id" element={<OwnerReportView />} />
+              <Route path="/admin/logs/:id/edit" element={<OwnerReportEdit />} />
+              <Route path="/admin/drafts" element={<OwnerDrafts />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
