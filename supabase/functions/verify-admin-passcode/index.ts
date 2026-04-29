@@ -235,6 +235,92 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "list-teacher-reports-admin") {
+      // Admin (teacher) token — used by the Saved Reports screen so teachers can adjust schedule fields
+      const auth = await verifyToken(token ?? "", ADMIN_TOKEN_SECRET, "admin");
+      if (!auth.valid) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const { data, error } = await supabase
+        .from("teacher_reports")
+        .select("id, teacher_name, student_name, subject, class_date, class_time, class_length_minutes, classes_completed, created_at")
+        .order("class_date", { ascending: false })
+        .limit(500);
+
+      if (error) {
+        console.error("List (admin) error:", error);
+        return new Response(JSON.stringify({ error: "Failed to load reports" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      return new Response(JSON.stringify({ reports: data ?? [] }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "update-teacher-report-schedule") {
+      // Admin (teacher) token — only schedule fields are editable
+      const auth = await verifyToken(token ?? "", ADMIN_TOKEN_SECRET, "admin");
+      if (!auth.valid) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const { reportId, updates } = body;
+      if (!reportId || typeof reportId !== "string" || reportId.length > 100) {
+        return new Response(JSON.stringify({ error: "Invalid report id" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (!updates || typeof updates !== "object") {
+        return new Response(JSON.stringify({ error: "Missing updates" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const class_date = updates.class_date;
+      const class_time = updates.class_time;
+      const class_length_minutes = Number(updates.class_length_minutes);
+
+      // Validate: YYYY-MM-DD
+      if (typeof class_date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(class_date)) {
+        return new Response(JSON.stringify({ error: "Invalid class_date" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      // Validate: HH:MM or HH:MM:SS
+      if (typeof class_time !== "string" || !/^\d{2}:\d{2}(:\d{2})?$/.test(class_time)) {
+        return new Response(JSON.stringify({ error: "Invalid class_time" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (!Number.isFinite(class_length_minutes) || class_length_minutes <= 0 || class_length_minutes > 600) {
+        return new Response(JSON.stringify({ error: "Invalid class_length_minutes" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const { error: updError } = await supabase
+        .from("teacher_reports")
+        .update({ class_date, class_time, class_length_minutes })
+        .eq("id", reportId);
+
+      if (updError) {
+        console.error("Update schedule error:", updError);
+        return new Response(JSON.stringify({ error: "Failed to update report" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      return new Response(JSON.stringify({ success: true }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (action === "delete-teacher-report") {
       const auth = await verifyToken(token ?? "", ADMIN_TOKEN_SECRET, "owner");
       if (!auth.valid) {
