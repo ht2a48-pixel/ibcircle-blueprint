@@ -21,6 +21,7 @@ const TeacherReportForm = memo(() => {
   const [submitting, setSubmitting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [draftCount, setDraftCount] = useState<number>(0);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("adminToken");
@@ -44,17 +45,33 @@ const TeacherReportForm = memo(() => {
 
   // Load a draft if ?draft=<id> is present
   useEffect(() => {
-    if (!draftIdParam) return;
-    const d = getDraft(draftIdParam);
-    if (d) {
-      setForm({ ...initialFormState, ...d.form });
-      setDraftId(d.id);
-      setDraftSavedAt(d.savedAt);
-    } else {
-      toast.error("Draft not found");
-      setParams({}, { replace: true });
-    }
-  }, [draftIdParam, setParams]);
+    if (!draftIdParam || !token) return;
+    let cancelled = false;
+    (async () => {
+      const d = await getDraft(draftIdParam);
+      if (cancelled) return;
+      if (d) {
+        setForm({ ...initialFormState, ...d.form });
+        setDraftId(d.id);
+        setDraftSavedAt(d.savedAt);
+      } else {
+        toast.error("Draft not found");
+        setParams({}, { replace: true });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [draftIdParam, setParams, token]);
+
+  // Refresh the count of drafts (for the "Saved drafts" button)
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    (async () => {
+      const all = await listDrafts();
+      if (!cancelled) setDraftCount(all.length);
+    })();
+    return () => { cancelled = true; };
+  }, [token, draftId, draftSavedAt]);
 
   const update = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -65,14 +82,14 @@ const TeacherReportForm = memo(() => {
     return subj ? `${name} · ${subj}` : name;
   }, [form.student_name, form.subject]);
 
-  const handleSaveDraft = useCallback(() => {
+  const handleSaveDraft = useCallback(async () => {
     if (!form.student_name.trim() && !form.subject.trim() && !form.report_text.trim()) {
       toast.error("Add a student name, subject, or report content first");
       return;
     }
     setSaving(true);
     try {
-      const saved = saveDraft({ id: draftId, form, label: draftLabel });
+      const saved = await saveDraft({ id: draftId, form, label: draftLabel });
       setDraftId(saved.id);
       setDraftSavedAt(saved.savedAt);
       toast.success("Draft saved");
@@ -125,7 +142,7 @@ const TeacherReportForm = memo(() => {
       }
 
       toast.success("Report submitted successfully");
-      if (draftId) deleteDraft(draftId);
+      if (draftId) await deleteDraft(draftId);
       setForm(initialFormState);
       setDraftId(null);
       setDraftSavedAt(null);
@@ -136,8 +153,6 @@ const TeacherReportForm = memo(() => {
     }
     setSubmitting(false);
   }, [form, token, draftId, setParams]);
-
-  const draftCount = listDrafts().length;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -157,7 +172,7 @@ const TeacherReportForm = memo(() => {
           <CardHeader>
             <CardTitle>{draftId ? "Edit Draft" : "Write a Class Report"}</CardTitle>
             <CardDescription>
-              All fields marked with * are required. Use "Save draft" to keep a work-in-progress in this browser; submit when finished.
+              All fields marked with * are required. Use "Save draft" to keep a work-in-progress; submit when finished.
             </CardDescription>
             {draftSavedAt && (
               <div className="mt-2 text-xs text-muted-foreground">
