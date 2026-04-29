@@ -71,9 +71,9 @@ const AdminHub = memo(() => {
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
                 <FolderClock className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Saved Reports</CardTitle>
+              <CardTitle>Saved Drafts</CardTitle>
               <CardDescription>
-                Review previously submitted reports and adjust the class date, time, or length if a schedule changed.
+                Resume a report you started but haven't submitted yet. Drafts are kept in this browser.
               </CardDescription>
             </CardHeader>
             <CardContent>
