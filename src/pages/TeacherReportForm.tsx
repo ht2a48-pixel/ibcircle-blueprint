@@ -1,48 +1,26 @@
-import { useEffect, useState, useCallback, memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback, memo, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Send, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Save, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-interface FormState {
-  teacher_name: string;
-  student_name: string;
-  subject: string;
-  class_date: string;
-  class_time: string;
-  class_length_minutes: string;
-  classes_completed: string;
-  topics_covered: string;
-  report_text: string;
-}
-
-const initial: FormState = {
-  teacher_name: "",
-  student_name: "",
-  subject: "",
-  class_date: "",
-  class_time: "",
-  class_length_minutes: "60",
-  classes_completed: "",
-  topics_covered: "",
-  report_text: "",
-};
-
-const DRAFT_KEY = "teacherReportDraft:v1";
+import { listDrafts, saveDraft, getDraft, deleteDraft, type FormState, initialFormState } from "@/lib/reportDrafts";
 
 const TeacherReportForm = memo(() => {
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormState>(initial);
-  const [submitting, setSubmitting] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [params, setParams] = useSearchParams();
+  const draftIdParam = params.get("draft");
+
+  const [form, setForm] = useState<FormState>(initialFormState);
+  const [draftId, setDraftId] = useState<string | null>(null);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("adminToken");
@@ -64,58 +42,46 @@ const TeacherReportForm = memo(() => {
     }
   }, [navigate]);
 
-  // Load saved draft once on mount
+  // Load a draft if ?draft=<id> is present
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object" && parsed.form) {
-          setForm({ ...initial, ...parsed.form });
-          setDraftSavedAt(parsed.savedAt ?? null);
-          setDraftStatus("saved");
-        }
-      }
-    } catch {
-      // ignore corrupt draft
+    if (!draftIdParam) return;
+    const d = getDraft(draftIdParam);
+    if (d) {
+      setForm({ ...initialFormState, ...d.form });
+      setDraftId(d.id);
+      setDraftSavedAt(d.savedAt);
+    } else {
+      toast.error("Draft not found");
+      setParams({}, { replace: true });
     }
-    setHydrated(true);
-  }, []);
-
-  // Autosave (debounced) whenever the form changes
-  useEffect(() => {
-    if (!hydrated) return;
-    const isEmpty =
-      !form.teacher_name && !form.student_name && !form.subject &&
-      !form.class_date && !form.class_time && !form.classes_completed &&
-      !form.topics_covered && !form.report_text &&
-      form.class_length_minutes === initial.class_length_minutes;
-    if (isEmpty) return;
-
-    setDraftStatus("saving");
-    const t = setTimeout(() => {
-      try {
-        const savedAt = Date.now();
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, savedAt }));
-        setDraftSavedAt(savedAt);
-        setDraftStatus("saved");
-      } catch {
-        setDraftStatus("idle");
-      }
-    }, 600);
-    return () => clearTimeout(t);
-  }, [form, hydrated]);
-
-  const discardDraft = useCallback(() => {
-    localStorage.removeItem(DRAFT_KEY);
-    setForm(initial);
-    setDraftSavedAt(null);
-    setDraftStatus("idle");
-    toast.success("Draft discarded");
-  }, []);
+  }, [draftIdParam, setParams]);
 
   const update = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const draftLabel = useMemo(() => {
+    const name = form.student_name.trim() || "Untitled";
+    const subj = form.subject.trim();
+    return subj ? `${name} · ${subj}` : name;
+  }, [form.student_name, form.subject]);
+
+  const handleSaveDraft = useCallback(() => {
+    if (!form.student_name.trim() && !form.subject.trim() && !form.report_text.trim()) {
+      toast.error("Add a student name, subject, or report content first");
+      return;
+    }
+    setSaving(true);
+    try {
+      const saved = saveDraft({ id: draftId, form, label: draftLabel });
+      setDraftId(saved.id);
+      setDraftSavedAt(saved.savedAt);
+      toast.success("Draft saved");
+    } catch {
+      toast.error("Failed to save draft");
+    } finally {
+      setSaving(false);
+    }
+  }, [draftId, form, draftLabel]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,47 +125,45 @@ const TeacherReportForm = memo(() => {
       }
 
       toast.success("Report submitted successfully");
-      localStorage.removeItem(DRAFT_KEY);
-      setForm(initial);
+      if (draftId) deleteDraft(draftId);
+      setForm(initialFormState);
+      setDraftId(null);
       setDraftSavedAt(null);
-      setDraftStatus("idle");
+      setParams({}, { replace: true });
     } catch (err) {
       console.error(err);
       toast.error("Submission error");
     }
     setSubmitting(false);
-  }, [form, token]);
+  }, [form, token, draftId, setParams]);
+
+  const draftCount = listDrafts().length;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
-        <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate("/admin/hub")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
-        </Button>
+        <div className="flex items-center justify-between mb-4 gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/hub")}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          </Button>
+          {draftCount > 0 && (
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/saved")}>
+              <FolderOpen className="w-4 h-4 mr-2" /> Saved drafts ({draftCount})
+            </Button>
+          )}
+        </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Write a Class Report</CardTitle>
+            <CardTitle>{draftId ? "Edit Draft" : "Write a Class Report"}</CardTitle>
             <CardDescription>
-              All fields marked with * are required. Your submission will be saved and visible to the owner only.
+              All fields marked with * are required. Use "Save draft" to keep a work-in-progress in this browser; submit when finished.
             </CardDescription>
-            <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Save className="w-3.5 h-3.5" />
-                {draftStatus === "saving" && <span>Saving draft…</span>}
-                {draftStatus === "saved" && draftSavedAt && (
-                  <span>
-                    Draft saved · {new Date(draftSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                )}
-                {draftStatus === "idle" && <span>Drafts auto-save to this browser</span>}
+            {draftSavedAt && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                Draft saved · {new Date(draftSavedAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
               </div>
-              {draftSavedAt && (
-                <Button type="button" variant="ghost" size="sm" onClick={discardDraft} className="h-7 text-muted-foreground hover:text-destructive">
-                  <Trash2 className="w-3.5 h-3.5 mr-1" /> Discard draft
-                </Button>
-              )}
-            </div>
+            )}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -287,10 +251,16 @@ const TeacherReportForm = memo(() => {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={submitting}>
-                <Send className="w-4 h-4 mr-2" />
-                {submitting ? "Submitting..." : "Submit report"}
-              </Button>
+              <div className="grid gap-2 md:grid-cols-2">
+                <Button type="button" variant="outline" onClick={handleSaveDraft} disabled={saving}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {saving ? "Saving…" : draftId ? "Update draft" : "Save draft"}
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  <Send className="w-4 h-4 mr-2" />
+                  {submitting ? "Submitting..." : "Submit report"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
