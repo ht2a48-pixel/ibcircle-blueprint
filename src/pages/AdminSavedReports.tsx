@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FilePen, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, FilePen, Trash2, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { listDrafts, deleteDraft, type Draft } from "@/lib/reportDrafts";
 
 const AdminSavedReports = () => {
   const navigate = useNavigate();
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Auth gate
   useEffect(() => {
@@ -29,15 +30,23 @@ const AdminSavedReports = () => {
     }
   }, [navigate]);
 
-  const refresh = useCallback(() => setDrafts(listDrafts()), []);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const list = await listDrafts();
+      setDrafts(list);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const handleDelete = (id: string) => {
-    deleteDraft(id);
-    refresh();
+  const handleDelete = async (id: string) => {
+    await deleteDraft(id);
+    await refresh();
     toast.success("Draft deleted");
   };
 
@@ -48,10 +57,13 @@ const AdminSavedReports = () => {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Saved Drafts</h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Unfinished reports stored in this browser. Resume to continue editing or submit.
+              Unfinished reports shared across teachers. Resume to continue editing or submit.
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
+            </Button>
             <Button size="sm" onClick={() => navigate("/admin/write")}>
               <Plus className="w-4 h-4 mr-2" /> New report
             </Button>
@@ -61,7 +73,9 @@ const AdminSavedReports = () => {
           </div>
         </div>
 
-        {drafts.length === 0 ? (
+        {loading ? (
+          <p className="text-muted-foreground">Loading…</p>
+        ) : drafts.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               No drafts saved. Start a new report and click "Save draft" to keep your work.

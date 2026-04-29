@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Download, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Printer, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReportDocument, { ReportDocumentData } from "@/components/ReportDocument";
@@ -119,6 +119,14 @@ const OwnerReportView = memo(() => {
             </Button>
             <Button size="sm" onClick={handleDownloadHtml} disabled={!report}>
               <Download className="w-4 h-4 mr-2" /> Download
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => report && navigate(`/admin/logs/${report.id}/edit`)}
+              disabled={!report}
+            >
+              <Pencil className="w-4 h-4 mr-2" /> Edit
             </Button>
             <Button
               variant="destructive"

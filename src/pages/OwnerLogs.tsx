@@ -27,6 +27,7 @@ import {
   CheckSquare,
   Square,
   X,
+  FolderClock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -252,6 +253,9 @@ const OwnerLogs = memo(() => {
               onClick={() => setView("list")}
             >
               <ListIcon className="w-4 h-4 mr-2" /> List
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/drafts")}>
+              <FolderClock className="w-4 h-4 mr-2" /> Drafts
             </Button>
             <Button variant="outline" size="sm" onClick={() => token && load(token)} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
