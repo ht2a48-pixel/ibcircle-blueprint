@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      teacher_report_drafts: {
+        Row: {
+          class_date: string | null
+          class_length_minutes: number | null
+          class_time: string | null
+          classes_completed: number | null
+          created_at: string
+          id: string
+          label: string | null
+          report_text: string | null
+          student_name: string | null
+          subject: string | null
+          teacher_name: string | null
+          topics_covered: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_date?: string | null
+          class_length_minutes?: number | null
+          class_time?: string | null
+          classes_completed?: number | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          report_text?: string | null
+          student_name?: string | null
+          subject?: string | null
+          teacher_name?: string | null
+          topics_covered?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_date?: string | null
+          class_length_minutes?: number | null
+          class_time?: string | null
+          classes_completed?: number | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          report_text?: string | null
+          student_name?: string | null
+          subject?: string | null
+          teacher_name?: string | null
+          topics_covered?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       teacher_reports: {
         Row: {
           class_date: string
