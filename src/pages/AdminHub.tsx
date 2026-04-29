@@ -2,7 +2,7 @@ import { useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PencilLine, LogOut, Home, Shield } from "lucide-react";
+import { PencilLine, LogOut, Home, Shield, FolderClock } from "lucide-react";
 
 const AdminHub = memo(() => {
   const navigate = useNavigate();
@@ -63,6 +63,21 @@ const AdminHub = memo(() => {
             </CardHeader>
             <CardContent>
               <Button className="w-full">Open form</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => navigate("/admin/saved")}>
+            <CardHeader>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                <FolderClock className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Saved Reports</CardTitle>
+              <CardDescription>
+                Review previously submitted reports and adjust the class date, time, or length if a schedule changed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">Open list</Button>
             </CardContent>
           </Card>
 

@@ -12,6 +12,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminHub = lazy(() => import("./pages/AdminHub"));
 const TeacherReportForm = lazy(() => import("./pages/TeacherReportForm"));
+const AdminSavedReports = lazy(() => import("./pages/AdminSavedReports"));
 const OwnerLogin = lazy(() => import("./pages/OwnerLogin"));
 const OwnerLogs = lazy(() => import("./pages/OwnerLogs"));
 const OwnerReportView = lazy(() => import("./pages/OwnerReportView"));
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/hub" element={<AdminHub />} />
               <Route path="/admin/write" element={<TeacherReportForm />} />
+              <Route path="/admin/saved" element={<AdminSavedReports />} />
               <Route path="/admin/owner" element={<OwnerLogin />} />
               <Route path="/admin/logs" element={<OwnerLogs />} />
               <Route path="/admin/logs/:id" element={<OwnerReportView />} />
