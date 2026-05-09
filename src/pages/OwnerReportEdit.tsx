@@ -234,16 +234,42 @@ const OwnerReportEdit = memo(() => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="classes_completed">Classes completed</Label>
-                  <Input
-                    id="classes_completed"
-                    type="number"
-                    min={0}
-                    max={10000}
-                    value={form.classes_completed}
-                    onChange={update("classes_completed")}
-                  />
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="classes_completed">Classes completed</Label>
+                    <Input
+                      id="classes_completed"
+                      type="number"
+                      min={0}
+                      max={10000}
+                      value={form.classes_completed}
+                      onChange={update("classes_completed")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="planned_total_classes">Total classes (out of)</Label>
+                    <Input
+                      id="planned_total_classes"
+                      type="number"
+                      min={0}
+                      max={10000}
+                      placeholder="auto"
+                      value={form.planned_total_classes}
+                      onChange={update("planned_total_classes")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="planned_total_minutes">Total program minutes</Label>
+                    <Input
+                      id="planned_total_minutes"
+                      type="number"
+                      min={0}
+                      max={100000}
+                      placeholder="720 (12h default)"
+                      value={form.planned_total_minutes}
+                      onChange={update("planned_total_minutes")}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
