@@ -260,6 +260,19 @@ serve(async (req) => {
         classes_completed = n;
       }
 
+      const parseOptionalInt = (v: unknown, max: number): number | null | "invalid" => {
+        if (v === null || v === undefined || v === "") return null;
+        const n = Number(v);
+        if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > max) return "invalid";
+        return n;
+      };
+      const planned_total_minutes = parseOptionalInt(report.planned_total_minutes, 100000);
+      const planned_total_classes = parseOptionalInt(report.planned_total_classes, 10000);
+      if (planned_total_minutes === "invalid" || planned_total_classes === "invalid") {
+        return new Response(JSON.stringify({ error: "Invalid planned totals" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       if (!isNonEmptyString(report.student_name, 200) ||
           !isNonEmptyString(report.subject, 100) ||
           !isNonEmptyString(report.topics_covered, 2000) ||
@@ -284,6 +297,8 @@ serve(async (req) => {
         class_time: report.class_time,
         class_length_minutes,
         classes_completed,
+        planned_total_minutes,
+        planned_total_classes,
         topics_covered: report.topics_covered.trim(),
         report_text: report.report_text.trim(),
       }).eq("id", reportId);
