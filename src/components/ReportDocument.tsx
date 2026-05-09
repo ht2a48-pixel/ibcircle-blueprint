@@ -11,6 +11,8 @@ export interface ReportDocumentData {
   class_time: string;
   class_length_minutes: number;
   classes_completed: number | null;
+  planned_total_minutes?: number | null;
+  planned_total_classes?: number | null;
   report_text: string;
   created_at: string;
 }
