@@ -95,6 +95,14 @@ const OwnerReportEdit = memo(() => {
             found.classes_completed !== null && found.classes_completed !== undefined
               ? String(found.classes_completed)
               : "",
+          planned_total_minutes:
+            found.planned_total_minutes !== null && found.planned_total_minutes !== undefined
+              ? String(found.planned_total_minutes)
+              : "",
+          planned_total_classes:
+            found.planned_total_classes !== null && found.planned_total_classes !== undefined
+              ? String(found.planned_total_classes)
+              : "",
           topics_covered: (found.topics_covered as string) ?? "",
           report_text: (found.report_text as string) ?? "",
         });
