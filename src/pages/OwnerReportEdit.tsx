@@ -124,10 +124,16 @@ const OwnerReportEdit = memo(() => {
     const lengthNum = Number(form.class_length_minutes);
     const completedRaw = form.classes_completed.trim();
     const completedNum = completedRaw === "" ? null : Number(completedRaw);
+    const plannedMinRaw = form.planned_total_minutes.trim();
+    const plannedMinNum = plannedMinRaw === "" ? null : Number(plannedMinRaw);
+    const plannedClsRaw = form.planned_total_classes.trim();
+    const plannedClsNum = plannedClsRaw === "" ? null : Number(plannedClsRaw);
     if (!form.student_name.trim() || !form.subject.trim() || !form.topics_covered.trim() ||
         !form.report_text.trim() || !form.class_date || !form.class_time ||
         !Number.isFinite(lengthNum) || lengthNum <= 0 || lengthNum > 600 ||
-        (completedNum !== null && (!Number.isFinite(completedNum) || completedNum < 0 || completedNum > 10000))) {
+        (completedNum !== null && (!Number.isFinite(completedNum) || completedNum < 0 || completedNum > 10000)) ||
+        (plannedMinNum !== null && (!Number.isFinite(plannedMinNum) || plannedMinNum < 0 || plannedMinNum > 100000)) ||
+        (plannedClsNum !== null && (!Number.isFinite(plannedClsNum) || plannedClsNum < 0 || plannedClsNum > 10000))) {
       toast.error("Please fill in all required fields correctly.");
       return;
     }
@@ -147,6 +153,8 @@ const OwnerReportEdit = memo(() => {
             class_time: form.class_time,
             class_length_minutes: lengthNum,
             classes_completed: completedNum,
+            planned_total_minutes: plannedMinNum,
+            planned_total_classes: plannedClsNum,
             topics_covered: form.topics_covered.trim(),
             report_text: form.report_text.trim(),
           },
