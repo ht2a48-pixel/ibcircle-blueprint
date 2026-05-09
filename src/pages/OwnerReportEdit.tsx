@@ -17,6 +17,8 @@ interface FormState {
   class_time: string;
   class_length_minutes: string;
   classes_completed: string;
+  planned_total_minutes: string;
+  planned_total_classes: string;
   topics_covered: string;
   report_text: string;
 }
@@ -29,6 +31,8 @@ const empty: FormState = {
   class_time: "",
   class_length_minutes: "60",
   classes_completed: "",
+  planned_total_minutes: "",
+  planned_total_classes: "",
   topics_covered: "",
   report_text: "",
 };
