@@ -11,6 +11,8 @@ export interface ReportDocumentData {
   class_time: string;
   class_length_minutes: number;
   classes_completed: number | null;
+  planned_total_minutes?: number | null;
+  planned_total_classes?: number | null;
   report_text: string;
   created_at: string;
 }
@@ -64,11 +66,15 @@ export function computeProgress(
   classLengthMinutes: number,
   classesCompleted: number | null,
   plannedTotalMinutes: number = PLANNED_TOTAL_MINUTES,
+  plannedTotalClasses?: number | null,
 ): ProgressSnapshot | null {
   if (!classLengthMinutes || classLengthMinutes <= 0) return null;
   const done = Math.max(0, classesCompleted ?? 0);
   const completedMinutes = done * classLengthMinutes;
-  const plannedClasses = Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
+  const plannedClasses =
+    plannedTotalClasses && plannedTotalClasses > 0
+      ? Math.round(plannedTotalClasses)
+      : Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
   const cappedDone = Math.min(done, plannedClasses);
   const remainingMinutes = Math.max(0, plannedTotalMinutes - completedMinutes);
   const percent = Math.min(100, Math.round((completedMinutes / plannedTotalMinutes) * 100));
@@ -88,7 +94,8 @@ const ReportDocument = memo(({ report }: Props) => {
   const [checksum, setChecksum] = useState<string>("");
   const exportedAt = new Date().toLocaleString();
   const submittedAt = new Date(r.created_at).toLocaleString();
-  const progress = computeProgress(r.class_length_minutes, r.classes_completed);
+  const plannedMinutes = r.planned_total_minutes && r.planned_total_minutes > 0 ? r.planned_total_minutes : PLANNED_TOTAL_MINUTES;
+  const progress = computeProgress(r.class_length_minutes, r.classes_completed, plannedMinutes, r.planned_total_classes);
 
   useEffect(() => {
     let cancelled = false;

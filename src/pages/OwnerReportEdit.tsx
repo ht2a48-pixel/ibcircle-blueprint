@@ -17,6 +17,8 @@ interface FormState {
   class_time: string;
   class_length_minutes: string;
   classes_completed: string;
+  planned_total_minutes: string;
+  planned_total_classes: string;
   topics_covered: string;
   report_text: string;
 }
@@ -29,6 +31,8 @@ const empty: FormState = {
   class_time: "",
   class_length_minutes: "60",
   classes_completed: "",
+  planned_total_minutes: "",
+  planned_total_classes: "",
   topics_covered: "",
   report_text: "",
 };
@@ -91,6 +95,14 @@ const OwnerReportEdit = memo(() => {
             found.classes_completed !== null && found.classes_completed !== undefined
               ? String(found.classes_completed)
               : "",
+          planned_total_minutes:
+            found.planned_total_minutes !== null && found.planned_total_minutes !== undefined
+              ? String(found.planned_total_minutes)
+              : "",
+          planned_total_classes:
+            found.planned_total_classes !== null && found.planned_total_classes !== undefined
+              ? String(found.planned_total_classes)
+              : "",
           topics_covered: (found.topics_covered as string) ?? "",
           report_text: (found.report_text as string) ?? "",
         });
@@ -112,10 +124,16 @@ const OwnerReportEdit = memo(() => {
     const lengthNum = Number(form.class_length_minutes);
     const completedRaw = form.classes_completed.trim();
     const completedNum = completedRaw === "" ? null : Number(completedRaw);
+    const plannedMinRaw = form.planned_total_minutes.trim();
+    const plannedMinNum = plannedMinRaw === "" ? null : Number(plannedMinRaw);
+    const plannedClsRaw = form.planned_total_classes.trim();
+    const plannedClsNum = plannedClsRaw === "" ? null : Number(plannedClsRaw);
     if (!form.student_name.trim() || !form.subject.trim() || !form.topics_covered.trim() ||
         !form.report_text.trim() || !form.class_date || !form.class_time ||
         !Number.isFinite(lengthNum) || lengthNum <= 0 || lengthNum > 600 ||
-        (completedNum !== null && (!Number.isFinite(completedNum) || completedNum < 0 || completedNum > 10000))) {
+        (completedNum !== null && (!Number.isFinite(completedNum) || completedNum < 0 || completedNum > 10000)) ||
+        (plannedMinNum !== null && (!Number.isFinite(plannedMinNum) || plannedMinNum < 0 || plannedMinNum > 100000)) ||
+        (plannedClsNum !== null && (!Number.isFinite(plannedClsNum) || plannedClsNum < 0 || plannedClsNum > 10000))) {
       toast.error("Please fill in all required fields correctly.");
       return;
     }
@@ -135,6 +153,8 @@ const OwnerReportEdit = memo(() => {
             class_time: form.class_time,
             class_length_minutes: lengthNum,
             classes_completed: completedNum,
+            planned_total_minutes: plannedMinNum,
+            planned_total_classes: plannedClsNum,
             topics_covered: form.topics_covered.trim(),
             report_text: form.report_text.trim(),
           },
@@ -214,16 +234,42 @@ const OwnerReportEdit = memo(() => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="classes_completed">Classes completed</Label>
-                  <Input
-                    id="classes_completed"
-                    type="number"
-                    min={0}
-                    max={10000}
-                    value={form.classes_completed}
-                    onChange={update("classes_completed")}
-                  />
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="classes_completed">Classes completed</Label>
+                    <Input
+                      id="classes_completed"
+                      type="number"
+                      min={0}
+                      max={10000}
+                      value={form.classes_completed}
+                      onChange={update("classes_completed")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="planned_total_classes">Total classes (out of)</Label>
+                    <Input
+                      id="planned_total_classes"
+                      type="number"
+                      min={0}
+                      max={10000}
+                      placeholder="auto"
+                      value={form.planned_total_classes}
+                      onChange={update("planned_total_classes")}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="planned_total_minutes">Total program minutes</Label>
+                    <Input
+                      id="planned_total_minutes"
+                      type="number"
+                      min={0}
+                      max={100000}
+                      placeholder="720 (12h default)"
+                      value={form.planned_total_minutes}
+                      onChange={update("planned_total_minutes")}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
