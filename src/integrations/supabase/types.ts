@@ -70,6 +70,8 @@ export type Database = {
           classes_completed: number | null
           created_at: string
           id: string
+          planned_total_classes: number | null
+          planned_total_minutes: number | null
           report_text: string
           student_name: string
           subject: string
@@ -83,6 +85,8 @@ export type Database = {
           classes_completed?: number | null
           created_at?: string
           id?: string
+          planned_total_classes?: number | null
+          planned_total_minutes?: number | null
           report_text: string
           student_name: string
           subject: string
@@ -96,6 +100,8 @@ export type Database = {
           classes_completed?: number | null
           created_at?: string
           id?: string
+          planned_total_classes?: number | null
+          planned_total_minutes?: number | null
           report_text?: string
           student_name?: string
           subject?: string
