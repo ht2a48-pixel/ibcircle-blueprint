@@ -66,11 +66,15 @@ export function computeProgress(
   classLengthMinutes: number,
   classesCompleted: number | null,
   plannedTotalMinutes: number = PLANNED_TOTAL_MINUTES,
+  plannedTotalClasses?: number | null,
 ): ProgressSnapshot | null {
   if (!classLengthMinutes || classLengthMinutes <= 0) return null;
   const done = Math.max(0, classesCompleted ?? 0);
   const completedMinutes = done * classLengthMinutes;
-  const plannedClasses = Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
+  const plannedClasses =
+    plannedTotalClasses && plannedTotalClasses > 0
+      ? Math.round(plannedTotalClasses)
+      : Math.max(1, Math.round(plannedTotalMinutes / classLengthMinutes));
   const cappedDone = Math.min(done, plannedClasses);
   const remainingMinutes = Math.max(0, plannedTotalMinutes - completedMinutes);
   const percent = Math.min(100, Math.round((completedMinutes / plannedTotalMinutes) * 100));
