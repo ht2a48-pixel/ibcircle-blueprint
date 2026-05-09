@@ -94,7 +94,8 @@ const ReportDocument = memo(({ report }: Props) => {
   const [checksum, setChecksum] = useState<string>("");
   const exportedAt = new Date().toLocaleString();
   const submittedAt = new Date(r.created_at).toLocaleString();
-  const progress = computeProgress(r.class_length_minutes, r.classes_completed);
+  const plannedMinutes = r.planned_total_minutes && r.planned_total_minutes > 0 ? r.planned_total_minutes : PLANNED_TOTAL_MINUTES;
+  const progress = computeProgress(r.class_length_minutes, r.classes_completed, plannedMinutes, r.planned_total_classes);
 
   useEffect(() => {
     let cancelled = false;
